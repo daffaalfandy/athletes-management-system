@@ -58,10 +58,12 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Follow ALL rules exactly as documented; they are optimized for your context window.
 - When in doubt, prefer the more restrictive architectural boundary.
 - Update this file if new persistent patterns emerge during implementation.
+- **MANDATORY SYNC:** Any change to architecture, tech stack, or patterns MUST be updated in this file and `architecture.md` immediately.
 
 **For Humans:**
 - Keep this file lean and focused on agent-facing "gotchas."
 - Update whenever the core technology stack or IPC bridge pattern changes.
+- Review quarterly for outdated rules.
 - Remove rules that become redundant or "common sense" as the codebase matures.
 
 Last Updated: 2025-12-30
