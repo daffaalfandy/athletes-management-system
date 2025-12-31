@@ -44,6 +44,7 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
         handleSubmit,
         reset,
         getValues,
+        watch,
         formState: { errors },
     } = useForm({
         resolver: zodResolver(AthleteSchema),
@@ -53,8 +54,35 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
             gender: 'male' as const,
             weight: 0,
             rank: Rank.White,
+            birth_place: '',
+            region: '',
+            address: '',
+            phone: '',
+            email: '',
+            parent_guardian: '',
+            parent_phone: '',
         },
     });
+
+    // Watch birthDate for reactive minor detection
+    const birthDate = watch('birthDate');
+    const isMinor = useMemo(() => {
+        if (!birthDate) return false;
+
+        const today = new Date();
+        const birth = new Date(birthDate);
+        let age = today.getFullYear() - birth.getFullYear();
+
+        // Adjust age if birthday hasn't occurred yet this year
+        const monthDiff = today.getMonth() - birth.getMonth();
+        const dayDiff = today.getDate() - birth.getDate();
+
+        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+            age--;
+        }
+
+        return age < 18;
+    }, [birthDate]);
 
     useEffect(() => {
         if (initialData?.id && activeTab === 'history') {
@@ -317,6 +345,45 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                                 <div className="grid grid-cols-2 gap-4">
                                     {renderField('weight', 'Weight (kg)', 'number')}
                                     {renderField('rank', 'Current Rank', 'text', Object.values(Rank).map(r => ({ value: r, label: r })))}
+                                </div>
+
+                                {/* Detailed Information Section */}
+                                <div className="space-y-4 pt-6 border-t border-slate-200">
+                                    <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider pb-2">
+                                        Detailed Information
+                                        {!initialData && (
+                                            <span className="ml-2 text-[10px] font-normal text-slate-400 normal-case tracking-normal">
+                                                (Recommended for tournament registration)
+                                            </span>
+                                        )}
+                                    </h4>
+
+                                    <div className={initialData ? "grid grid-cols-1 gap-4" : "space-y-4"}>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {renderField('birth_place', 'Birth Place', 'text')}
+                                            {renderField('region', 'Region/Province', 'text')}
+                                        </div>
+
+                                        {renderField('address', 'Address', 'text')}
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {renderField('phone', 'Phone Number', 'tel')}
+                                            {renderField('email', 'Email', 'email')}
+                                        </div>
+
+                                        {/* Parent/Guardian Info - Show for athletes under 18 */}
+                                        {isMinor && (
+                                            <>
+                                                <h5 className="text-xs font-bold text-slate-600 uppercase tracking-wider mt-4 pt-4 border-t border-slate-100">
+                                                    Parent/Guardian Information
+                                                </h5>
+                                                <div className={initialData ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4"}>
+                                                    {renderField('parent_guardian', 'Parent/Guardian Name', 'text')}
+                                                    {renderField('parent_phone', 'Parent/Guardian Phone', 'tel')}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 

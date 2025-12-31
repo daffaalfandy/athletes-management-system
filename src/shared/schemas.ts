@@ -8,6 +8,15 @@ export const AthleteSchema = z.object({
     weight: z.number().positive(),
     rank: z.string().min(1, 'Rank is required'),
     clubId: z.number().nullable().optional(), // Linked to Clubs table (Story 1.5)
+
+    // Detailed information fields for tournament registration
+    birth_place: z.string().min(2, 'Birth place must be at least 2 characters').max(100, 'Birth place is too long').optional().or(z.literal('')),
+    region: z.string().min(2, 'Region must be at least 2 characters').max(100, 'Region is too long').optional().or(z.literal('')),
+    address: z.string().max(500, 'Address is too long').optional().or(z.literal('')),
+    phone: z.string().regex(/^[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').optional().or(z.literal('')),
+    email: z.string().trim().email('Invalid email format').max(255, 'Email is too long').optional().or(z.literal('')),
+    parent_guardian: z.string().max(200, 'Name is too long').optional().or(z.literal('')),
+    parent_phone: z.string().regex(/^[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').optional().or(z.literal('')),
 });
 
 export type Athlete = z.infer<typeof AthleteSchema>;

@@ -24,6 +24,9 @@ epics:
       - id: "E1.S6"
         title: "Application Update Mechanism"
         status: "done"
+      - id: "E1.S7"
+        title: "Detailed Athlete Information"
+        status: "done"
 
   - id: "E2"
     title: "Athlete Management (CRUD & List)"
@@ -52,7 +55,7 @@ epics:
         status: "done"
       - id: "E3.S2"
         title: "Dynamic Age Category Calculation"
-        status: "to_do"
+        status: "done"
       - id: "E3.S3"
         title: "Rank Order Configuration"
         status: "to_do"

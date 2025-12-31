@@ -14,12 +14,24 @@ export const initialSchemaMigration: Migration = {
             weight REAL NOT NULL,
             rank TEXT NOT NULL,
             clubId INTEGER,
+            
+            -- Detailed information fields for tournament registration
+            birth_place TEXT,
+            region TEXT,
+            address TEXT,
+            phone TEXT,
+            email TEXT,
+            parent_guardian TEXT,
+            parent_phone TEXT,
+            
             createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
             updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
             CONSTRAINT uq_athlete_name_dob UNIQUE (name, birthDate)
           );
     
           CREATE INDEX IF NOT EXISTS idx_athletes_name ON athletes(name);
+          CREATE INDEX IF NOT EXISTS idx_athletes_birth_place ON athletes(birth_place);
+          CREATE INDEX IF NOT EXISTS idx_athletes_region ON athletes(region);
         `);
 
         // Promotions and Medals Tables

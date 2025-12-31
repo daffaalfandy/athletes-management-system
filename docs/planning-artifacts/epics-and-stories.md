@@ -49,6 +49,23 @@ This document outlines the epics and user stories for the Athletes Management Sy
 - [x] Installer updates the binary but preserves the SQLite database (local implementation).
 - [x] Logic to ensure database schema migrations run on startup if version changes.
 
+### Story E1.S7: Detailed Athlete Information
+**As a coach,** I want to record detailed athlete information (birth place, region, location, etc.) so that I have complete registration data for official tournaments.
+**Acceptance Criteria:**
+- [x] Database schema extended with additional fields:
+  - `birth_place` (TEXT) - City/town where athlete was born
+  - `region` (TEXT) - Province/state/region
+  - `address` (TEXT) - Current residential address
+  - `phone` (TEXT) - Contact phone number
+  - `email` (TEXT) - Email address (optional)
+  - `parent_guardian` (TEXT) - Parent/guardian name for minors
+  - `parent_phone` (TEXT) - Parent/guardian contact
+- [x] Migration 001 modified to include new columns in athletes table (dev phase - no separate migration needed)
+- [x] Frontend form updated with new fields in Profile tab
+- [x] All fields optional except birth_place and region (required for tournament registration)
+- [x] Validation for phone and email formats
+- [x] Athlete list view remains unchanged (detailed info only in detail modal)
+
 ---
 
 ## Epic 2: Athlete Management (CRUD & List)

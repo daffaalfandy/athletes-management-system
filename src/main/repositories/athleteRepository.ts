@@ -7,10 +7,20 @@ export const athleteRepository = {
   create: (athlete: Athlete): Athlete => {
     const db = getDatabase();
     const stmt = db.prepare(`
-      INSERT INTO athletes (name, birthDate, gender, weight, rank, clubId)
-      VALUES (@name, @birthDate, @gender, @weight, @rank, @clubId)
+      INSERT INTO athletes (name, birthDate, gender, weight, rank, clubId, birth_place, region, address, phone, email, parent_guardian, parent_phone)
+      VALUES (@name, @birthDate, @gender, @weight, @rank, @clubId, @birth_place, @region, @address, @phone, @email, @parent_guardian, @parent_phone)
     `);
-    const safeAthlete = { ...athlete, clubId: athlete.clubId ?? null };
+    const safeAthlete = {
+      ...athlete,
+      clubId: athlete.clubId ?? null,
+      birth_place: athlete.birth_place || '',
+      region: athlete.region || '',
+      address: athlete.address || '',
+      phone: athlete.phone || '',
+      email: athlete.email || '',
+      parent_guardian: athlete.parent_guardian || '',
+      parent_phone: athlete.parent_phone || '',
+    };
     const info = stmt.run(safeAthlete);
     return { ...athlete, id: Number(info.lastInsertRowid) };
   },
@@ -31,10 +41,27 @@ export const athleteRepository = {
           weight = @weight,
           rank = @rank,
           clubId = @clubId,
+          birth_place = @birth_place,
+          region = @region,
+          address = @address,
+          phone = @phone,
+          email = @email,
+          parent_guardian = @parent_guardian,
+          parent_phone = @parent_phone,
           updatedAt = CURRENT_TIMESTAMP
       WHERE id = @id
     `);
-    const safeAthlete = { ...athlete, clubId: athlete.clubId ?? null };
+    const safeAthlete = {
+      ...athlete,
+      clubId: athlete.clubId ?? null,
+      birth_place: athlete.birth_place || '',
+      region: athlete.region || '',
+      address: athlete.address || '',
+      phone: athlete.phone || '',
+      email: athlete.email || '',
+      parent_guardian: athlete.parent_guardian || '',
+      parent_phone: athlete.parent_phone || '',
+    };
     const info = stmt.run(safeAthlete);
     return info.changes > 0;
   },
