@@ -16,6 +16,10 @@ export interface IElectronAPI {
         addMedal: (data: unknown) => Promise<Medal>;
         getMedals: (athleteId: number) => Promise<Medal[]>;
     };
+    system: {
+        backupDatabase: () => Promise<{ success: boolean; data?: string; error?: string }>;
+        restoreDatabase: () => Promise<{ success: boolean; error?: string }>;
+    };
 }
 
 declare global {

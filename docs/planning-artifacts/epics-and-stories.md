@@ -8,40 +8,46 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E1.S1: Project Initialization & Electron Shell
 **As a developer,** I want to initialize the project using the Electron Forge Vite + TypeScript template so that I have a modern, type-safe development environment.
 **Acceptance Criteria:**
-- [ ] Project initialized with `npx create-electron-app@latest . --template=vite-typescript`.
-- [ ] Folder structure matches the Architecture Decision Document.
-- [ ] `npm run start` launches a basic Electron window.
-- [ ] TypeScript is configured with strict mode.
+- [x] Project initialized with `npx create-electron-app@latest . --template=vite-typescript`.
+- [x] Folder structure matches the Architecture Decision Document.
+- [x] `npm run start` launches a basic Electron window.
+- [x] TypeScript is configured with strict mode.
 
 ### Story E1.S2: SQLite Persistence Layer Setup
 **As a system,** I want to establish a robust SQLite connection with Write-Ahead Logging (WAL) enabled so that data is durable and operations are fast.
 **Acceptance Criteria:**
-- [ ] `better-sqlite3` is installed and configured in the main process.
-- [ ] Database connection established with WAL mode enabled.
-- [ ] Base schema (athletes, rulesets, etc.) is defined and applied on startup.
-- [ ] Repository pattern implemented for base database operations.
+- [x] `better-sqlite3` is installed and configured in the main process.
+- [x] Database connection established with WAL mode enabled.
+- [x] Base schema (athletes, rulesets, etc.) is defined and applied on startup.
+- [x] Repository pattern implemented for base database operations.
 
 ### Story E1.S3: IPC Bridge & Service Layer
 **As a developer,** I want a typed IPC bridge between the main and renderer processes so that UI-system communication is secure and predictable.
 **Acceptance Criteria:**
-- [ ] Preload script defines typed IPC handlers.
-- [ ] Renderer process has a `useService` hook to call main process methods.
-- [ ] IPC response wrapper `{ success, data, error }` is implemented.
-
-### Story E1.S5: Database Backup & Snapshot
-**As a coach,** I want to manually trigger a database backup to a USB drive so that I can keep my data safe and portable.
-**Acceptance Criteria:**
-- [ ] Export button in Settings/Admin area.
-- [ ] File dialog to select destination.
-- [ ] Copies the SQLite file to the destination with a timestamped name.
-
+- [x] Preload script defines typed IPC handlers.
+- [x] Renderer process has a `useService` hook to call main process methods.
+- [x] IPC response wrapper `{ success, data, error }` is implemented.
 
 ### Story E1.S4: Global State & UI Framework Setup
 **As a developer,** I want to set up Zustand and Tailwind CSS in the renderer process so that I can build a responsive, state-driven UI.
 **Acceptance Criteria:**
-- [ ] Zustand installed and basic store structure created.
-- [ ] Tailwind CSS configured with the custom color system from the UX spec (Midnight Hybrid).
-- [ ] Base layout (Sidebar + Content Area) implemented.
+- [x] Zustand installed and basic store structure created.
+- [x] Tailwind CSS configured with the custom color system from the UX spec (Midnight Hybrid).
+- [x] Base layout (Sidebar + Content Area) implemented.
+
+### Story E1.S5: Database Backup & Snapshot
+**As a coach,** I want to manually trigger a database backup to a USB drive so that I can keep my data safe and portable.
+**Acceptance Criteria:**
+- [x] Export button in Settings/Admin area.
+- [x] File dialog to select destination.
+- [x] Copies the SQLite file to the destination with a timestamped name.
+- [x] Import/Restore capability (overwrites existing data) with confirmation warning.
+
+### Story E1.S6: Application Update Mechanism
+**As a coach,** I want to update the application by simply running a new installer so that I can get features without internet auto-updates.
+**Acceptance Criteria:**
+- [ ] Installer updates the binary but preserves the SQLite database (local implementation).
+- [ ] Logic to ensure database schema migrations run on startup if version changes.
 
 ---
 
@@ -51,26 +57,33 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E2.S1: Athlete Profile Creation
 **As a coach,** I want to create new athlete profiles with mandatory fields so that I can begin building my athlete pool.
 **Acceptance Criteria:**
-- [ ] Form for Name, Birth Date (Calendar), Gender, Weight, and Rank.
-- [ ] Zod validation for all inputs.
-- [ ] Success/Error feedback upon submission.
-- [ ] Persistence to SQLite (TEXT ISO format).
+- [x] Form for Name, Birth Date (Calendar), Gender, Weight, and Rank.
+- [x] Zod validation for all inputs.
+- [x] Success/Error feedback upon submission.
+- [x] Persistence to SQLite (TEXT ISO format).
 
 ### Story E2.S2: High-Density Athlete List
 **As a coach,** I want a fast, "clinical" list view of all athletes so that I can scan my entire pool efficiently.
 **Acceptance Criteria:**
-- [ ] High-density grid implementation (Tailwind).
-- [ ] Athlete names, birth years (derived), and weight categories displayed clearly.
-- [ ] Visual belt color indicators (vector-style or stylized badges).
-- [ ] Profile picture/Initial avatar integration.
-- [ ] Search/Filter by name (client-side or fast SQL).
+- [x] High-density grid implementation (Tailwind).
+- [x] Athlete names, birth years (derived), and weight categories displayed clearly.
+- [x] Visual belt color indicators (vector-style or stylized badges).
+- [x] Profile picture/Initial avatar integration.
+- [x] Search/Filter by name (client-side or fast SQL).
 
-### Story E3.S3: Athlete Profile Editing & Deletion
+### Story E2.S3: Athlete Profile Editing & Deletion
 **As a coach,** I want to update or remove athlete records so that my database stays current.
 **Acceptance Criteria:**
-- [ ] "Edit" mode for existing athlete profiles.
-- [ ] Delete confirmation to prevent accidental data loss.
-- [ ] Changes reflected instantly in the list (Zustand/SQLite sync).
+- [x] "Edit" mode for existing athlete profiles.
+- [x] Delete confirmation to prevent accidental data loss.
+- [x] Changes reflected instantly in the list (Zustand/SQLite sync).
+
+### Story E2.S4: Rank & Medal History
+**As a coach,** I want to record promotion dates and medal wins so that I can track athlete progression.
+**Acceptance Criteria:**
+- [ ] History log for "Rank Promotion" events with dates.
+- [ ] Ability to add "Medal/Achievement" records.
+- [ ] Current rank updates automatically based on latest promotion.
 
 ---
 
@@ -90,6 +103,12 @@ This document outlines the epics and user stories for the Athletes Management Sy
 - [ ] Utility function in `common/judo/` for calculation.
 - [ ] Athlete list displays the calculated category (e.g., "U-18").
 - [ ] Updates instantly when the ruleset or athlete birth year changes.
+
+### Story E3.S3: Rank Order Configuration
+**As a technical sensei,** I want to define the order of belt ranks so that the system knows how to sort athletes by seniority.
+**Acceptance Criteria:**
+- [ ] Configuration UI to reorder ranks (e.g., White < Yellow).
+- [ ] Sorting logic in Athlete List respects this hierarchy.
 
 ---
 
@@ -137,6 +156,12 @@ This document outlines the epics and user stories for the Athletes Management Sy
 - [ ] "Roster View" to see selected athletes.
 - [ ] Summary stats (Count of athletes selected).
 
+### Story E5.S3: Eligibility Conflict Detection
+**As a system,** I want to flag athletes who do not meet the weight/age criteria for their assigned slot so that I avoid registration rejection.
+**Acceptance Criteria:**
+- [ ] Visual warning (Red Badge) if athlete weight/age mismatches the category.
+- [ ] Warning persists until resolved.
+
 ---
 
 ## Epic 6: Export Factory (Excel & PDF)
@@ -159,6 +184,12 @@ This document outlines the epics and user stories for the Athletes Management Sy
 **Acceptance Criteria:**
 - [ ] One-click CSV export from the athlete list.
 - [ ] All athlete fields included.
+
+### Story E6.S4: PDF Archive Summary
+**As a coach,** I want to generate a full summary PDF of my entire athlete pool so that I have an offline reference.
+**Acceptance Criteria:**
+- [ ] Generates PDF listing all currently filtered athletes.
+- [ ] layout suitable for offline study/reading.
 
 
 ---

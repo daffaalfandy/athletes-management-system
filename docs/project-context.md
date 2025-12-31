@@ -29,7 +29,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 ### 1. Process & Database Architecture
 - **Process Separation:** Strictly separate Electron (Main) from React (Renderer).
 - **DB Singleton:** SQLite connection must be initialized once in the Main Process and exported as a singleton. NEVER open multiple connections.
-- **IPC Bridge:** All system calls must go through the typed IPC bridge in `preload.ts` using the `handle[Action]` naming convention.
+- **IPC Bridge:** All system calls must go through the typed IPC bridge in `preload.ts` using the `handle[Action]` naming convention. System-level method should be grouped under appropriate namespaces (e.g., `api.system.*`).
 - **Repository Pattern:** Centralize all SQL queries in `src/main/db/repositories/`. No raw SQL in IPC handlers.
 
 ### 2. Frontend & State Management
@@ -73,4 +73,4 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Review quarterly for outdated rules.
 - Remove rules that become redundant or "common sense" as the codebase matures.
 
-Last Updated: 2025-12-30
+Last Updated: 2025-12-31

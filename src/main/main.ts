@@ -6,6 +6,7 @@ import { setupAthleteHandlers } from './services/athleteService';
 import { athleteRepository } from './repositories/athleteRepository';
 import { historyRepository } from './repositories/historyRepository';
 import { setupHistoryHandlers } from './services/historyService';
+import { setupBackupHandlers } from './services/BackupService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -60,6 +61,7 @@ app.whenReady().then(() => {
     ipcMain.handle('ping', () => 'pong');
     setupAthleteHandlers();
     setupHistoryHandlers();
+    setupBackupHandlers();
 
     createWindow();
 });

@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { LayoutDashboard, Users, FileText, Plus, X } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Plus, X, Settings } from 'lucide-react';
 import '../index.css';
 
 import { AthleteForm } from './features/athletes/AthleteForm';
 import { useAthleteStore } from './features/athletes/useAthleteStore';
 import { AthleteList } from './features/athletes/AthleteList';
+import { SettingsPage } from './features/settings/SettingsPage';
 
 import { Athlete } from '../shared/schemas';
 
 function App() {
     const [isReady, setIsReady] = useState(false);
+    const [activeView, setActiveView] = useState<'dashboard' | 'athletes' | 'reports' | 'settings'>('athletes');
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -77,9 +79,30 @@ function App() {
                     </div>
 
                     <nav className="space-y-1">
-                        <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" />
-                        <NavItem icon={<Users size={20} />} label="Athletes" active />
-                        <NavItem icon={<FileText size={20} />} label="Reports" />
+                        <NavItem
+                            icon={<LayoutDashboard size={20} />}
+                            label="Dashboard"
+                            active={activeView === 'dashboard'}
+                            onClick={() => setActiveView('dashboard')}
+                        />
+                        <NavItem
+                            icon={<Users size={20} />}
+                            label="Athletes"
+                            active={activeView === 'athletes'}
+                            onClick={() => setActiveView('athletes')}
+                        />
+                        <NavItem
+                            icon={<FileText size={20} />}
+                            label="Reports"
+                            active={activeView === 'reports'}
+                            onClick={() => setActiveView('reports')}
+                        />
+                        <NavItem
+                            icon={<Settings size={20} />}
+                            label="Settings"
+                            active={activeView === 'settings'}
+                            onClick={() => setActiveView('settings')}
+                        />
                     </nav>
                 </div>
 
@@ -113,13 +136,15 @@ function App() {
                             </div>
                         </div>
 
-                        <button
-                            onClick={handleNewAthlete}
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
-                        >
-                            <Plus size={16} />
-                            New Athlete
-                        </button>
+                        {activeView === 'athletes' && (
+                            <button
+                                onClick={handleNewAthlete}
+                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
+                            >
+                                <Plus size={16} />
+                                New Athlete
+                            </button>
+                        )}
                     </div>
                 </header>
 
@@ -130,8 +155,15 @@ function App() {
                 )}
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-hidden relative">
-                    <AthleteList onEdit={handleEditAthlete} />
+                <div className="flex-1 overflow-hidden relative overflow-y-auto">
+                    {activeView === 'athletes' && <AthleteList onEdit={handleEditAthlete} />}
+                    {activeView === 'settings' && <SettingsPage />}
+                    {(activeView === 'dashboard' || activeView === 'reports') && (
+                        <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                            <div className="text-lg font-medium">Coming Soon</div>
+                            <div className="text-sm">This module is under development</div>
+                        </div>
+                    )}
                 </div>
             </main>
 
@@ -160,11 +192,14 @@ function App() {
     );
 }
 
-const NavItem = ({ icon, label, active = false }: { icon: React.ReactNode, label: string, active?: boolean }) => (
-    <div className={`
-        flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all duration-200 group
-        ${active ? 'bg-slate-800 text-white' : 'hover:bg-slate-800/50 text-slate-400 hover:text-white'}
-    `}>
+const NavItem = ({ icon, label, active = false, onClick }: { icon: React.ReactNode, label: string, active?: boolean, onClick?: () => void }) => (
+    <div
+        onClick={onClick}
+        className={`
+            flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all duration-200 group
+            ${active ? 'bg-slate-800 text-white' : 'hover:bg-slate-800/50 text-slate-400 hover:text-white'}
+        `}
+    >
         <span className={active ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}>{icon}</span>
         <span className="text-sm font-medium">{label}</span>
     </div>

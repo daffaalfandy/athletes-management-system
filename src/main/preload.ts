@@ -17,6 +17,10 @@ const api: IElectronAPI = {
         addMedal: (data) => ipcRenderer.invoke('history:addMedal', data),
         getMedals: (athleteId) => ipcRenderer.invoke('history:getMedals', athleteId),
     },
+    system: {
+        backupDatabase: () => ipcRenderer.invoke('system:backupDatabase'),
+        restoreDatabase: () => ipcRenderer.invoke('system:restoreDatabase'),
+    },
 };
 
 contextBridge.exposeInMainWorld('api', api);

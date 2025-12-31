@@ -40,3 +40,12 @@ export function getDatabase(): Database.Database {
     }
     return db;
 }
+
+export function closeDatabase(): void {
+    if (db) {
+        console.log('[DB] Closing database connection');
+        db.close();
+        db = null;
+        console.log('[DB] Database closed');
+    }
+}
