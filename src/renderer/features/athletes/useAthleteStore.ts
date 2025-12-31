@@ -7,6 +7,7 @@ interface AthleteState {
     error: string | null;
     activePromotions: Promotion[];
     activeMedals: Medal[];
+    historyLoading: boolean;
 
     loadAthletes: () => Promise<void>;
     addAthlete: (data: Omit<Athlete, 'id'>) => Promise<void>;
@@ -24,6 +25,7 @@ export const useAthleteStore = create<AthleteState>((set) => ({
     error: null,
     activePromotions: [],
     activeMedals: [],
+    historyLoading: false,
 
     loadAthletes: async () => {
         set({ loading: true });
@@ -67,15 +69,15 @@ export const useAthleteStore = create<AthleteState>((set) => ({
     },
 
     loadHistory: async (athleteId) => {
-        set({ loading: true });
+        set({ historyLoading: true, error: null });
         try {
             const [promotions, medals] = await Promise.all([
                 window.api.history.getPromotions(athleteId),
                 window.api.history.getMedals(athleteId),
             ]);
-            set({ activePromotions: promotions, activeMedals: medals, loading: false });
+            set({ activePromotions: promotions, activeMedals: medals, historyLoading: false });
         } catch (err: unknown) {
-            set({ error: (err as Error).message, loading: false });
+            set({ error: (err as Error).message, historyLoading: false });
         }
     },
 

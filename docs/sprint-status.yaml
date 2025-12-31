@@ -40,7 +40,8 @@ epics:
         status: "done"
       - id: "E2.S4"
         title: "Rank & Medal History"
-        status: "to_do"
+        status: "done"
+
 
   - id: "E3"
     title: "Rulesets & Dynamic Eligibility"

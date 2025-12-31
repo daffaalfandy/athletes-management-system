@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Award, Calendar, Trash2 } from 'lucide-react';
+import { Plus, Award, Calendar, Image as ImageIcon } from 'lucide-react';
 import { useAthleteStore } from '../useAthleteStore';
 import { MedalSchema, Medal } from '../../../../shared/schemas';
+
+import { ProofPreview } from '../../../components/ProofPreview';
 
 interface MedalListProps {
     athleteId: number;
 }
 
 export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
-    const { activeMedals, addMedal } = useAthleteStore();
+    const { activeMedals, addMedal, historyLoading, error } = useAthleteStore();
     const [isAdding, setIsAdding] = useState(false);
+    const [viewingProof, setViewingProof] = useState<{ title: string, date: string } | null>(null);
+
+    const sortedMedals = React.useMemo(() => {
+        return [...activeMedals].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [activeMedals]);
 
     const {
         register,
@@ -28,6 +35,24 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
             category: '',
         },
     });
+
+    if (historyLoading && activeMedals.length === 0) {
+        return (
+            <div className="space-y-4 animate-pulse p-4">
+                <div className="h-8 bg-slate-100 rounded w-1/3 mb-4"></div>
+                <div className="h-20 bg-slate-100 rounded w-full"></div>
+                <div className="h-20 bg-slate-100 rounded w-full"></div>
+            </div>
+        );
+    }
+
+    if (error && activeMedals.length === 0) {
+        return (
+            <div className="p-4 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
+                <span className="font-bold">Error:</span> {error}
+            </div>
+        );
+    }
 
     const onAddMedal = async (data: Omit<Medal, 'id'>) => {
         await addMedal({ ...data, athleteId });
@@ -46,14 +71,22 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
 
     return (
         <div className="space-y-6">
+            <ProofPreview
+                isOpen={!!viewingProof}
+                onClose={() => setViewingProof(null)}
+                title={viewingProof?.title || ''}
+                date={viewingProof?.date || ''}
+                type="medal"
+            />
+
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-800">Competition Record</h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
                     className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                 >
-                    <Plus className="w-4 h-4" />
-                    {isAdding ? 'Cancel' : 'Add Medal'}
+                    <Plus className={`w-4 h-4 transition-transform ${isAdding ? 'rotate-45' : ''}`} />
+                    {isAdding ? 'Cancel Entry' : 'Add Medal'}
                 </button>
             </div>
 
@@ -69,6 +102,16 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
                                 className="block w-full px-3 py-2 rounded-md border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                             />
                             {errors.tournament && <p className="text-red-500 text-xs mt-1">{errors.tournament.message}</p>}
+                        </div>
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Proof of Medal (Optional)</label>
+                        <div className="border-2 border-dashed border-slate-300 rounded-lg p-3 flex items-center justify-center gap-2 text-slate-400 hover:bg-slate-50 hover:border-blue-300 transition-all cursor-not-allowed bg-slate-50/50">
+                            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
+                                <span className="text-xs font-bold text-slate-500">IMG</span>
+                            </div>
+                            <span className="text-xs">Photo upload coming soon...</span>
                         </div>
                     </div>
                     <div className="grid grid-cols-3 gap-4 mb-4">
@@ -113,7 +156,7 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
             )}
 
             <div className="space-y-3">
-                {activeMedals.map((medal, index) => (
+                {sortedMedals.map((medal, index) => (
                     <div key={medal.id || index} className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-lg shadow-sm hover:border-blue-300 transition-colors">
                         <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border ${getMedalColor(medal.medal)}`}>
                             <Award className="w-5 h-5" />
@@ -129,6 +172,18 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
                                     </>
                                 )}
                             </div>
+                            <div className="mt-1.5 flex">
+                                <button
+                                    onClick={() => setViewingProof({ title: medal.tournament, date: medal.date })}
+                                    className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 hover:text-blue-600 hover:border-blue-200 hover:shadow-sm transition-all group"
+                                    title="View Proof"
+                                >
+                                    <div className="bg-slate-100 p-0.5 rounded group-hover:bg-blue-50 transition-colors">
+                                        <ImageIcon size={10} />
+                                    </div>
+                                    <span className="font-medium">View Proof</span>
+                                </button>
+                            </div>
                         </div>
                         <div className="flex flex-col items-end text-right">
                             <div className="flex items-center text-xs text-slate-400">
@@ -139,7 +194,7 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
                     </div>
                 ))}
 
-                {activeMedals.length === 0 && (
+                {sortedMedals.length === 0 && (
                     <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-lg">
                         <Award className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         <p className="text-sm text-slate-400">No competition records yet.</p>

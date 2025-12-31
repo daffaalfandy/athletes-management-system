@@ -201,7 +201,7 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
     };
 
     return (
-        <div className="flex flex-col h-full max-h-[85vh]">
+        <div className="flex flex-col h-[75vh]">
             {/* Tab Navigation */}
             {initialData?.id && (
                 <div className="flex border-b border-slate-200 mb-6 bg-slate-50/50 p-1 rounded-lg">

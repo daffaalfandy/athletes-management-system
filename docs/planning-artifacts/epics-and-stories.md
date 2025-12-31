@@ -81,9 +81,12 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E2.S4: Rank & Medal History
 **As a coach,** I want to record promotion dates and medal wins so that I can track athlete progression.
 **Acceptance Criteria:**
-- [ ] History log for "Rank Promotion" events with dates.
-- [ ] Ability to add "Medal/Achievement" records.
-- [ ] Current rank updates automatically based on latest promotion.
+- [x] History log for "Rank Promotion" events with dates.
+- [x] Ability to add "Medal/Achievement" records.
+- [x] Current rank updates automatically based on latest promotion.
+
+
+
 
 ---
 
@@ -123,11 +126,12 @@ This document outlines the epics and user stories for the Athletes Management Sy
 - [ ] Athlete list shows "Dossier Status" (e.g., "Scan Attached").
 
 ### Story E4.S2: Certificate Preview (Detail Drawer)
-**As a coach,** I want to preview certificate scans in a slide-out drawer so that I can verify data without leaving the list.
+**As a coach,** I want to preview certificate scans and proof images (e.g., from Rank/Medal history) in a slide-out drawer or modal so that I can verify data without leaving the context.
 **Acceptance Criteria:**
-- [ ] Slide-out `DetailDrawer` component (UX Spec).
+- [ ] Slide-out `DetailDrawer` component or High-Fidelity Modal.
 - [ ] High-resolution image preview.
 - [ ] Toggle for "Verified" status once the scan is checked.
+- [ ] Integrated with "View Proof" buttons in Rank & Medal History.
 
 ### Story E4.S3: Athlete Profile Photo
 **As a coach,** I want to upload a portrait photo of the athlete so that I can generate professional competition IDs.
