@@ -4,7 +4,7 @@ start_date: "2025-12-31"
 epics:
   - id: "E1"
     title: "Project Foundation & Core Infrastructure"
-    status: "in_progress"
+    status: "done"
     stories:
       - id: "E1.S1"
         title: "Project Initialization & Electron Shell"
@@ -23,7 +23,7 @@ epics:
         status: "done"
       - id: "E1.S6"
         title: "Application Update Mechanism"
-        status: "to_do"
+        status: "done"
 
   - id: "E2"
     title: "Athlete Management (CRUD & List)"

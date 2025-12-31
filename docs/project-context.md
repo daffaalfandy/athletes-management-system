@@ -47,7 +47,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **High-Density Lists:** Prefer infinite scroll (with sticky headers) over pagination for datasets < 500 items. Optimized for "Scanning".
 
 ### 5. Operations
-- **Seeding/Migration:** Use raw SQL scripts (`.sql`) executed via `sqlite3` CLI or internal IPC triggers. Avoid Node.js scripts using `better-sqlite3` due to Electron ABI mismatch.
+- **Seeding/Migration:** Use the `MigrationService` in the Main Process for schema changes. Migrations are TypeScript files in `src/main/migrations/`. External seed scripts should use `sqlite3` CLI to avoid Electron ABI usage.
 
 ## Critical Don't-Miss Rules (Anti-Patterns)
 

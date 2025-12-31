@@ -2,6 +2,8 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import * as path from 'path';
 import started from 'electron-squirrel-startup';
 import { initializeDatabase } from './db';
+import { MigrationService } from './services/MigrationService';
+import { migrations } from './migrations';
 import { setupAthleteHandlers } from './services/athleteService';
 import { athleteRepository } from './repositories/athleteRepository';
 import { historyRepository } from './repositories/historyRepository';
@@ -45,18 +47,18 @@ app.whenReady().then(() => {
     console.log('[MAIN] App is ready, initializing database...');
 
     try {
-        initializeDatabase();
+        const db = initializeDatabase();
 
-        // Initialize tables
-        athleteRepository.initTable();
-        historyRepository.initTable();
+        // Initialize and run migrations
+        const migrationService = new MigrationService(db);
+        migrationService.register(migrations);
+        migrationService.runMigrations();
 
         console.log('[MAIN] Database initialization completed');
     } catch (error) {
         console.error('[MAIN] Database initialization failed:', error);
     }
 
-    // Setup IPC handlers
     // Setup IPC handlers
     ipcMain.handle('ping', () => 'pong');
     setupAthleteHandlers();
@@ -82,6 +84,3 @@ app.on('activate', () => {
         createWindow();
     }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.

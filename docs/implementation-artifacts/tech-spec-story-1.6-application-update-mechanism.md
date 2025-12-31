@@ -1,7 +1,7 @@
 # Tech-Spec: Story 1.6 Application Update Mechanism
 
 **Created:** 2025-12-31
-**Status:** Ready for Development
+**Status:** Implementation Complete
 
 ## Overview
 
@@ -44,11 +44,11 @@ We will implement a robust **Schema Migration System** directly within the appli
 
 ### Tasks
 
-- [ ] **Task 1: Design Migration Architecture**
+- [x] **Task 1: Design Migration Architecture**
     -   Create `src/main/services/MigrationService.ts`.
     -   Define the `Migration` interface: `{ version: number; name: string; up: (db: Database) => void; }`.
 
-- [ ] **Task 2: Implement Migration Logic**
+- [x] **Task 2: Implement Migration Logic**
     -   Implement `getCurrentVersion(db)` using `PRAGMA user_version`.
     -   Implement `runMigrations(db)`:
         -   Fetch current version.
@@ -57,12 +57,12 @@ We will implement a robust **Schema Migration System** directly within the appli
         -   Execute each `up()` function inside a transaction.
         -   Update `user_version` after each success.
 
-- [ ] **Task 3: Refactor Initial Schema (Baseline)**
+- [x] **Task 3: Refactor Initial Schema (Baseline)**
     -   Create `src/main/migrations/001_initial_schema.ts`.
     -   Move the schema definition from `athleteRepository.ts` and `historyRepository.ts` into this migration.
-    -   Remove `initTable` methods from repositories.
+    *   Remove `initTable` methods from repositories.
 
-- [ ] **Task 4: Integrate with Startup**
+- [x] **Task 4: Integrate with Startup**
     -   Update `src/main/db.ts` or `src/main/main.ts` to execute `MigrationService.runMigrations()` immediately after database connection and before any other operations.
 
 ### Acceptance Criteria
@@ -95,3 +95,9 @@ We will implement a robust **Schema Migration System** directly within the appli
 
 ### Notes
 *   **Important**: Since SQLite DDL (CREATE TABLE) inside transactions is supported, we can wrap the entire migration in a transaction.
+
+## Review Notes
+- Adversarial review completed
+- Findings: 2 total, 1 fixed (F1 - Manual Import of Migrations), 1 found invalid (F2 - Broken references)
+- Resolution approach: Auto-fix
+

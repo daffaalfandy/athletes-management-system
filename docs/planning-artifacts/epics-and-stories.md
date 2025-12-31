@@ -46,8 +46,8 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E1.S6: Application Update Mechanism
 **As a coach,** I want to update the application by simply running a new installer so that I can get features without internet auto-updates.
 **Acceptance Criteria:**
-- [ ] Installer updates the binary but preserves the SQLite database (local implementation).
-- [ ] Logic to ensure database schema migrations run on startup if version changes.
+- [x] Installer updates the binary but preserves the SQLite database (local implementation).
+- [x] Logic to ensure database schema migrations run on startup if version changes.
 
 ---
 
