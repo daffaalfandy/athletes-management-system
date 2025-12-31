@@ -27,7 +27,8 @@ Without this system, the coach spends significant time on manual administration 
 
 ### Why Existing Solutions Fall Short
 
-General athlete management apps often require internet access—which is notoriously unreliable in stadium basements and sports halls—and lack the specific logic for Judo's age-weight grouping and Kyu/Dan rank progression. Generic spreadsheets lack the visual "Fighter Card" interface that allows for the instant, intuitive decision-making a coach needs.
+General athlete management apps often require internet access—which is notoriously unreliable in stadium basements and sports halls—and lack the specific logic for Judo's age-weight grouping and Kyu/Dan rank progression. Generic spreadsheets lack the professional "Athlete List" interface that allows for the instant, intuitive decision-making a coach needs.
+- **Athlete Lists:** High-efficiency list views containing critical athlete stats and belt indicators for rapid management.
 
 ### Proposed Solution
 
@@ -51,19 +52,19 @@ A local-first Windows application built with Electron, React, and SQLite that pr
 - **Persona:** Sensei Budi, the lead instructor for the Kabupaten (Regency) Judo association. 
 - **Context:** He manages the regional "Elite" pool. While there are multiple clubs under his jurisdiction, he currently oversees one main training hub. He is responsible for selecting the best athletes to represent the Regency in Provincial (PORPROV) or National competitions.
 - **Problem Experience:** He currently makes roster decisions based on memory, scattered WhatsApp photos of certificates, and high-density Excel sheets that are hard to read on a small laptop screen.
-- **Success Vision:** A professional "Battle Console" where he can instantly filter his Kabupaten's top fighters by their tournament success and rank to ensure the most competitive roster is selected.
+- **Success Vision:** A professional "Battle Console" where he can instantly filter his Kabupaten's top fighters via an optimized list view to ensure the most competitive roster is selected.
 
 ### Secondary Users: The Assistant Coach
 
 - **Role:** Helps with the heavy lifting of data entry and scanning certificates (Kyu/Dan).
 - **Context:** Needs to be able to verify an athlete's data when they bring in new paperwork.
-- **Interaction:** Uses the "Excel Export" to provide data snapshots to Sensei Budi if they are working from different locations, ensuring the Regency coordinator always has the most up-to-date fighter cards.
+- **Interaction:** Uses the "Excel Export" to provide data snapshots to Sensei Budi if they are working from different locations. Note that the system is a **Single-Admin Local Appliance**; there is no built-in user management or profile switching.
 
 ### User Journey (The "Roster Sprint")
 
 1. **The Roster Call:** A tournament announcement arrives. Sensei Budi opens the application during his free time to review the current candidate pool.
 2. **Instant Grouping:** He toggles the view to "Gender & Weight." He immediately sees that two of his top athletes have moved into the same weight category.
-3. **The Verify Moment (Aha!):** He clicks a "Fighter Card" to check an athlete's certificate scan. He confirms they have the required Kyu rank for this specific tournament.
+3. **The Verify Moment (Aha!):** He clicks an athlete in the list to check their certificate scan. He confirms they have the required Kyu rank for this specific tournament.
 4. **The Analog Factory:** He exports the chosen roster to Excel and prints the "Tournament Sheet" (Hardfile) to take to the technical meeting with the committee.
 5. **Success:** The Regency team is registered accurately, and the Sensei feels fully in control of the squad's data.
 
@@ -88,8 +89,8 @@ Success for the Athletes Management System is defined by the absolute reliabilit
 ### Key Performance Indicators (KPIs)
 
 - **Administrative Speed:** Reduction in time to generate a tournament-ready "Hardfile" from ~2 hours (manual) to **< 5 minutes**.
-- **Data Integrity Rate:** 0% rejection rate for registrations due to eligibility mismatches (system-enforced grouping).
-- **Adoption Rate:** 100% usage for Kabupaten-level roster decision-making within the first 6 months.
+- **Competitive Pool Accuracy:** 100% verification rate for athletes marked as "Constant" or "Intermittent" activity.
+- **Institutional Branding:** % of athlete lists and hardfiles featuring the official Regency and Club logos.
 - **Dossier Completion:** % of athletes in the system with at least one verified rank/achievement scan attached.
 
 ---
@@ -100,7 +101,7 @@ The MVP is focused on transforming Sensei Budi's laptop into a reliable "Offline
 
 ### Core Features (The "Must-Haves")
 
-- **Individual Fighter Cards:** High-density visual display of Name, Age, Gender, Current Weight, and Rank (Belt).
+- **Athlete Lists:** High-density visual display of Name, Age, Gender, Current Weight, and Rank (Belt) in a professional management list.
 - **Instant Grouping Engine:** Dynamic filtering by Age Class (U-18, etc.) and Weight Category (-60kg, -66kg, etc.) using the central SQLite database.
 - **Digital Dossier (Certification Storage):** Local file management to upload, store, and view scanned certificates (Kyu/Dan) and tournament diplomas directly in the app.
 - **The Analog Factory:** Basic "Export to Excel" functionality and a "Print Preview" view for generating tournament roster hardfiles.

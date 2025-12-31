@@ -17,8 +17,9 @@ The Athletes Management System is a specialized, offline-first desktop applicati
 
 - **Offline-First Zero Latency:** Built with Electron and SQLite to ensure the system is "always on" and lightning-fast in stadium basements and sports halls where internet is unavailable.
 - **The Digital Dossier:** A dedicated local vault for storing and instantly retrieving scanned copies of technical certifications (Kyu/Dan) and tournament diplomas.
-- **The Analog Factory:** Specialized logic to generate physical "Hardfiles" and Excel exports tailored for the registration requirements of provincial and national committees.
-- **Judo-Specific Logic:** Native support for technical rank progression, birth-year-based age calculation, and high-speed grouping by weight categories.
+- **Total Pool & Competitive Pool:** High-level metrics to distinguish between the entire database and the "Active" training roster.
+- **Activity Scale Logic:** Native support for three-tier engagement tracking: Constant (Elite Core), Intermittent (Variable), and Dormant (Archive).
+- **Institutional Branding:** Support for Regency (Kabupaten) and Partner Club logos to establish institutional authority.
 
 ## Project Classification
 
@@ -53,7 +54,7 @@ This project is a high-utility management tool focused on local data integrity a
 
 ### MVP - Minimum Viable Product
 - **Instant Engine:** SQLite-powered filtering for Age Category, Gender, and Weight Class.
-- **Fighter Cards:** Visual grid UI showing critical athlete stats and belt colors.
+- **Athlete Lists:** Professional, high-density list UI showing critical athlete stats and belt colors.
 - **Local Dossier:** Image path management for scanned certificates and diplomas.
 - **Excel & Print Factory:** One-click export for tournament registries and basic print layouts.
 - **Manual Backup:** A simple "Export Database to USB" reminder/button for snapshot safety.
@@ -147,7 +148,7 @@ The Athletes Management System is a specialized Windows 10 application. It is ar
 ### Athlete Management
 - **FR1:** Coach can create, read, update, and delete individual athlete profiles.
 - **FR2:** Coach can record mandatory athlete data (Name, Birth Year, Gender, Current Weight, Rank/Belt).
-- **FR3:** System can display athlete profiles as high-density "Fighter Cards" with visual belt color indicators.
+- **FR3:** System can display athlete profiles as high-density "Athlete Lists" with visual belt color indicators.
 - **FR4:** Coach can view an athlete's technical rank progression history.
 - **FR5:** Coach can attach achievement and medal records to an athlete's profile.
 
@@ -167,7 +168,7 @@ The Athletes Management System is a specialized Windows 10 application. It is ar
 ### Data Reporting & Export (Analog Factory)
 - **FR15:** Coach can export a selected tournament roster to a pre-formatted Excel registration sheet.
 - **FR16:** Coach can generate a printable PDF "Hardfile" (Roster Sheet) for physical submission.
-- **FR17:** System can produce a PDF summary of all athlete Fighter Cards for offline study.
+- **FR17:** System can produce a PDF summary of all athlete list data for offline study.
 - **FR18:** Coach can export the complete athlete roster to CSV for external data analysis.
 
 ### Rules & Configuration Management
@@ -181,6 +182,10 @@ The Athletes Management System is a specialized Windows 10 application. It is ar
 - **FR24:** System can recover data integrity automatically after an improper power loss or shutdown (via WAL).
 - **FR25:** User can perform a manual application update by replacing local binaries.
 - **FR26:** System can provide 100% of its functionality without requiring an active internet connection.
+
+### Institutional Branding
+- **FR27:** Coach can upload and display the Regency (Kabupaten) official logo in the application shell.
+- **FR28:** Coach can manage and display logos for local Partner Clubs.
 
 ## Non-Functional Requirements
 
