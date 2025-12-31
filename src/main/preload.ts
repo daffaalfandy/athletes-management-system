@@ -21,6 +21,14 @@ const api: IElectronAPI = {
         backupDatabase: () => ipcRenderer.invoke('system:backupDatabase'),
         restoreDatabase: () => ipcRenderer.invoke('system:restoreDatabase'),
     },
+    rulesets: {
+        getAll: () => ipcRenderer.invoke('rulesets:getAll'),
+        getById: (id) => ipcRenderer.invoke('rulesets:getById', id),
+        create: (data) => ipcRenderer.invoke('rulesets:create', data),
+        update: (data) => ipcRenderer.invoke('rulesets:update', data),
+        delete: (id) => ipcRenderer.invoke('rulesets:delete', id),
+        setActive: (id) => ipcRenderer.invoke('rulesets:setActive', id),
+    },
 };
 
 contextBridge.exposeInMainWorld('api', api);

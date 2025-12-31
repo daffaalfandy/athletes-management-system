@@ -96,9 +96,9 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E3.S1: Ruleset Definition UI
 **As a technical sensei,** I want to define birth-year thresholds for age categories (e.g., U-18) so that the system matches current federation standards.
 **Acceptance Criteria:**
-- [ ] Management UI for Age Categories.
-- [ ] Ability to set birth year ranges.
-- [ ] Stored in SQLite as templates.
+- [x] Management UI for Age Categories.
+- [x] Ability to set birth year ranges.
+- [x] Stored in SQLite as templates.
 
 ### Story E3.S2: Dynamic Age Category Calculation
 **As a system,** I want to automatically calculate an athlete's age category based on the active ruleset so that the coach doesn't have to do it manually.

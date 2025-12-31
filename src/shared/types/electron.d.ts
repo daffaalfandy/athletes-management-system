@@ -1,6 +1,6 @@
 // Shared type definitions for IPC communication
 
-import { Athlete, Promotion, Medal } from '../schemas';
+import { Athlete, Promotion, Medal, Ruleset } from '../schemas';
 
 export interface IElectronAPI {
     ping: () => Promise<string>;
@@ -19,6 +19,14 @@ export interface IElectronAPI {
     system: {
         backupDatabase: () => Promise<{ success: boolean; data?: string; error?: string }>;
         restoreDatabase: () => Promise<{ success: boolean; error?: string }>;
+    };
+    rulesets: {
+        getAll: () => Promise<Ruleset[]>;
+        getById: (id: number) => Promise<Ruleset | undefined>;
+        create: (data: unknown) => Promise<Ruleset>;
+        update: (data: unknown) => Promise<boolean>;
+        delete: (id: number) => Promise<boolean>;
+        setActive: (id: number) => Promise<boolean>;
     };
 }
 

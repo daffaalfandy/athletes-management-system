@@ -36,3 +36,24 @@ export const MedalSchema = z.object({
 });
 
 export type Medal = z.infer<typeof MedalSchema>;
+
+export const AgeCategorySchema = z.object({
+    id: z.number().optional(),
+    ruleset_id: z.number().optional(),
+    name: z.string().min(1, 'Name is required'),
+    min_year: z.number().int(),
+    max_year: z.number().int(),
+    gender: z.enum(['M', 'F', 'MIXED']),
+});
+
+export type AgeCategory = z.infer<typeof AgeCategorySchema>;
+
+export const RulesetSchema = z.object({
+    id: z.number().optional(),
+    name: z.string().min(1, 'Name is required'),
+    description: z.string().optional(),
+    is_active: z.union([z.boolean(), z.number()]).transform((val) => !!val).optional(),
+    categories: z.array(AgeCategorySchema).optional(),
+});
+
+export type Ruleset = z.infer<typeof RulesetSchema>;

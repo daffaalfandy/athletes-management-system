@@ -9,6 +9,7 @@ import { athleteRepository } from './repositories/athleteRepository';
 import { historyRepository } from './repositories/historyRepository';
 import { setupHistoryHandlers } from './services/historyService';
 import { setupBackupHandlers } from './services/BackupService';
+import { setupRulesetHandlers } from './services/rulesetService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -64,6 +65,7 @@ app.whenReady().then(() => {
     setupAthleteHandlers();
     setupHistoryHandlers();
     setupBackupHandlers();
+    setupRulesetHandlers();
 
     createWindow();
 });

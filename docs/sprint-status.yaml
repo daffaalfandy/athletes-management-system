@@ -27,7 +27,7 @@ epics:
 
   - id: "E2"
     title: "Athlete Management (CRUD & List)"
-    status: "in_progress"
+    status: "done"
     stories:
       - id: "E2.S1"
         title: "Athlete Profile Creation"
@@ -45,11 +45,11 @@ epics:
 
   - id: "E3"
     title: "Rulesets & Dynamic Eligibility"
-    status: "to_do"
+    status: "in_progress"
     stories:
       - id: "E3.S1"
         title: "Ruleset Definition UI"
-        status: "to_do"
+        status: "done"
       - id: "E3.S2"
         title: "Dynamic Age Category Calculation"
         status: "to_do"
