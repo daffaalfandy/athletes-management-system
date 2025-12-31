@@ -17,7 +17,7 @@ epics:
         status: "done"
       - id: "E1.S4"
         title: "Technical Rank & Medal History"
-        status: "to_do"
+        status: "done"
       - id: "E1.S5"
         title: "Digital Dossier - Certificate Attachment"
         status: "to_do"

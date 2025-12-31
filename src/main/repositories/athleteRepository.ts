@@ -4,20 +4,19 @@ import { Athlete } from '../../shared/schemas';
 export const athleteRepository = {
     initTable: () => {
         const db = getDatabase();
+
         db.exec(`
       CREATE TABLE IF NOT EXISTS athletes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        birthYear INTEGER NOT NULL,
+        birthDate TEXT NOT NULL,
         gender TEXT CHECK(gender IN ('male', 'female')) NOT NULL,
         weight REAL NOT NULL,
         rank TEXT NOT NULL,
         clubId INTEGER,
         createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
         updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT uq_athlete_name_year UNIQUE (name, birthYear)
-        -- Foreign Key for clubId will be enforced when Clubs table exists
-        -- FOREIGN KEY (clubId) REFERENCES clubs(id)
+        CONSTRAINT uq_athlete_name_dob UNIQUE (name, birthDate)
       );
 
       CREATE INDEX IF NOT EXISTS idx_athletes_name ON athletes(name);
@@ -27,8 +26,8 @@ export const athleteRepository = {
     create: (athlete: Athlete): Athlete => {
         const db = getDatabase();
         const stmt = db.prepare(`
-      INSERT INTO athletes (name, birthYear, gender, weight, rank, clubId)
-      VALUES (@name, @birthYear, @gender, @weight, @rank, @clubId)
+      INSERT INTO athletes (name, birthDate, gender, weight, rank, clubId)
+      VALUES (@name, @birthDate, @gender, @weight, @rank, @clubId)
     `);
         const safeAthlete = { ...athlete, clubId: athlete.clubId ?? null };
         const info = stmt.run(safeAthlete);
@@ -46,7 +45,7 @@ export const athleteRepository = {
         const stmt = db.prepare(`
       UPDATE athletes
       SET name = @name,
-          birthYear = @birthYear,
+          birthDate = @birthDate,
           gender = @gender,
           weight = @weight,
           rank = @rank,

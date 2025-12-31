@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LayoutDashboard, Users, FileText, Plus, X } from 'lucide-react';
 import '../index.css';
@@ -7,10 +7,18 @@ import { AthleteForm } from './features/athletes/AthleteForm';
 import { useAthleteStore } from './features/athletes/useAthleteStore';
 import { AthleteList } from './features/athletes/AthleteList';
 
+import { Athlete } from '../shared/schemas';
+
 function App() {
     const [isReady, setIsReady] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const { loadAthletes, addAthlete, error } = useAthleteStore();
+
+    const { athletes, loadAthletes, addAthlete, updateAthlete, error } = useAthleteStore();
+
+    const activeAthlete = useMemo(() =>
+        editingId ? athletes.find(a => a.id === editingId) : undefined
+        , [editingId, athletes]);
 
     useEffect(() => {
         const init = async () => {
@@ -20,9 +28,32 @@ function App() {
         init();
     }, [loadAthletes]);
 
-    const handleAddAthlete = async (data: any) => {
-        await addAthlete(data);
+    const handleFormSubmit = async (data: any) => {
+        if (editingId) {
+            await updateAthlete({ ...data, id: editingId });
+            // Do NOT close modal or reset editingId here for updates
+        } else {
+            await addAthlete(data);
+            setIsFormOpen(false);
+            setEditingId(null);
+        }
+    };
+
+    const handleEditAthlete = (athlete: Athlete) => {
+        if (athlete.id) {
+            setEditingId(athlete.id);
+            setIsFormOpen(true);
+        }
+    };
+
+    const handleNewAthlete = () => {
+        setEditingId(null);
+        setIsFormOpen(true);
+    };
+
+    const closeModal = () => {
         setIsFormOpen(false);
+        setEditingId(null);
     };
 
     if (!isReady) {
@@ -83,7 +114,7 @@ function App() {
                         </div>
 
                         <button
-                            onClick={() => setIsFormOpen(true)}
+                            onClick={handleNewAthlete}
                             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
                         >
                             <Plus size={16} />
@@ -100,22 +131,27 @@ function App() {
 
                 {/* Content Area */}
                 <div className="flex-1 overflow-hidden relative">
-                    <AthleteList />
+                    <AthleteList onEdit={handleEditAthlete} />
                 </div>
             </main>
 
-            {/* Add Athlete Modal */}
+            {/* Add/Edit Athlete Modal */}
             {isFormOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+                    <div className={`bg-white rounded-xl shadow-2xl w-full ${activeAthlete?.id ? 'max-w-2xl' : 'max-w-lg'} overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200`}>
                         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                            <h2 className="text-lg font-bold text-slate-800">Add New Athlete</h2>
-                            <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                            <h2 className="text-lg font-bold text-slate-800">
+                                {activeAthlete?.id ? 'Athlete Profile' : 'Add New Athlete'}
+                            </h2>
+                            <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="p-6">
-                            <AthleteForm onSubmit={handleAddAthlete} />
+                            <AthleteForm
+                                onSubmit={handleFormSubmit}
+                                initialData={activeAthlete}
+                            />
                         </div>
                     </div>
                 </div>

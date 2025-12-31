@@ -1,9 +1,11 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'node:path';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import * as path from 'path';
 import started from 'electron-squirrel-startup';
 import { initializeDatabase } from './db';
 import { setupAthleteHandlers } from './services/athleteService';
 import { athleteRepository } from './repositories/athleteRepository';
+import { historyRepository } from './repositories/historyRepository';
+import { setupHistoryHandlers } from './services/historyService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -46,6 +48,7 @@ app.whenReady().then(() => {
 
         // Initialize tables
         athleteRepository.initTable();
+        historyRepository.initTable();
 
         console.log('[MAIN] Database initialization completed');
     } catch (error) {
@@ -56,6 +59,7 @@ app.whenReady().then(() => {
     // Setup IPC handlers
     ipcMain.handle('ping', () => 'pong');
     setupAthleteHandlers();
+    setupHistoryHandlers();
 
     createWindow();
 });

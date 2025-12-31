@@ -38,7 +38,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **Typing:** Strict TypeScript required. Define interfaces for all IPC payloads. Avoid `any` at all costs; use `unknown` if necessary.
 
 ### 3. Business Logic & Assets
-- **Judo Rules Isolation:** Age and weight category calculations must live in `src/common/judo/`. NEVER hardcode these rules in UI components.
+- **Judo Rules Isolation:** Age and weight category calculations must live in `src/common/judo/` (using `birthDate` as source). NEVER hardcode these rules in UI components.
 - **Zero External CDNs:** 100% offline capability is mandatory. Bundle all fonts, icons (SVG preferred), and libraries locally.
 - **Response Wrapper:** Use `{ success: boolean, data?: any, error?: string }` for all IPC responses.
 

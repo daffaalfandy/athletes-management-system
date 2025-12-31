@@ -20,10 +20,12 @@ export function initializeDatabase(): Database.Database {
         db = new Database(dbPath);
 
         // Enable WAL mode for better concurrency
-        const walResult = db.pragma('journal_mode = WAL');
-        console.log('[DB] WAL mode enabled:', walResult);
+        db.pragma('journal_mode = WAL');
 
-        console.log('[DB] ✓ Database initialized successfully');
+        // Enable Foreign Key support
+        db.pragma('foreign_keys = ON');
+
+        console.log('[DB] ✓ Database initialized successfully with WAL and Foreign Keys');
 
         return db;
     } catch (error) {

@@ -16,7 +16,7 @@ The Athletes Management System is a specialized, offline-first desktop applicati
 ### What Makes This Special
 
 - **Offline-First Zero Latency:** Built with Electron and SQLite to ensure the system is "always on" and lightning-fast in stadium basements and sports halls where internet is unavailable.
-- **The Digital Dossier:** A dedicated local vault for storing and instantly retrieving scanned copies of technical certifications (Kyu/Dan) and tournament diplomas.
+- **The Digital Dossier:** A dedicated local vault for storing and instantly retrieving scanned copies of technical certifications (Kyu/Dan), tournament diplomas, and high-resolution athlete profile photos for competition ID generation.
 - **Total Pool & Competitive Pool:** High-level metrics to distinguish between the entire database and the "Active" training roster.
 - **Activity Scale Logic:** Native support for three-tier engagement tracking: Constant (Elite Core), Intermittent (Variable), and Dormant (Archive).
 - **Institutional Branding:** Support for Regency (Kabupaten) and Partner Club logos to establish institutional authority.
@@ -147,7 +147,7 @@ The Athletes Management System is a specialized Windows 10 application. It is ar
 
 ### Athlete Management
 - **FR1:** Coach can create, read, update, and delete individual athlete profiles.
-- **FR2:** Coach can record mandatory athlete data (Name, Birth Year, Gender, Current Weight, Rank/Belt).
+- **FR2:** Coach can record mandatory athlete data (Name, Birth Date, Gender, Current Weight, Rank/Belt).
 - **FR3:** System can display athlete profiles as high-density "Athlete Lists" with visual belt color indicators.
 - **FR4:** Coach can view an athlete's technical rank progression history.
 - **FR5:** Coach can attach achievement and medal records to an athlete's profile.
@@ -160,8 +160,8 @@ The Athletes Management System is a specialized Windows 10 application. It is ar
 - **FR10:** System can highlight eligibility conflicts (rank mismatches or weight class overlaps) during roster assembly.
 
 ### Digital Dossier (Document Management)
-- **FR11:** Coach can link scanned image files (Kyu/Dan certificates, diplomas) to an athlete's profile.
-- **FR12:** System can manage local file paths to ensure document attachments are retrievable.
+- **FR11:** Coach can link scanned image files (Kyu/Dan certificates, diplomas, profile photos) to an athlete's profile.
+- **FR12:** System can manage local file paths to ensure document attachments and photos are retrievable.
 - **FR13:** Coach can preview and view full-sized scans of certificates directly within the application.
 - **FR14:** Coach can flag athlete profiles as "Verified" once their physical paperwork matches the digital records.
 

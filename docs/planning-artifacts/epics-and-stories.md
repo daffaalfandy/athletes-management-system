@@ -51,17 +51,18 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E2.S1: Athlete Profile Creation
 **As a coach,** I want to create new athlete profiles with mandatory fields so that I can begin building my athlete pool.
 **Acceptance Criteria:**
-- [ ] Form for Name, Birth Year, Gender, Weight, and Rank.
+- [ ] Form for Name, Birth Date (Calendar), Gender, Weight, and Rank.
 - [ ] Zod validation for all inputs.
 - [ ] Success/Error feedback upon submission.
-- [ ] Persistence to SQLite.
+- [ ] Persistence to SQLite (TEXT ISO format).
 
 ### Story E2.S2: High-Density Athlete List
 **As a coach,** I want a fast, "clinical" list view of all athletes so that I can scan my entire pool efficiently.
 **Acceptance Criteria:**
 - [ ] High-density grid implementation (Tailwind).
-- [ ] Athlete names, birth years, and weight categories displayed clearly.
+- [ ] Athlete names, birth years (derived), and weight categories displayed clearly.
 - [ ] Visual belt color indicators (vector-style or stylized badges).
+- [ ] Profile picture/Initial avatar integration.
 - [ ] Search/Filter by name (client-side or fast SQL).
 
 ### Story E3.S3: Athlete Profile Editing & Deletion
@@ -108,6 +109,14 @@ This document outlines the epics and user stories for the Athletes Management Sy
 - [ ] Slide-out `DetailDrawer` component (UX Spec).
 - [ ] High-resolution image preview.
 - [ ] Toggle for "Verified" status once the scan is checked.
+
+### Story E4.S3: Athlete Profile Photo
+**As a coach,** I want to upload a portrait photo of the athlete so that I can generate professional competition IDs.
+**Acceptance Criteria:**
+- [ ] Image upload in the "Profile" tab of the dossier.
+- [ ] Automatic copying to a local "Vault" directory to prevent path breakage.
+- [ ] Square cropping or aspect ratio enforcement.
+- [ ] Image replaces initials as the primary list thumbnail.
 
 ---
 

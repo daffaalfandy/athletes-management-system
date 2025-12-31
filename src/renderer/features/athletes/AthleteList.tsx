@@ -1,15 +1,48 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Edit2, Trash2, Filter } from 'lucide-react';
+import { Search, User, Trash2, Filter, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAthleteStore } from './useAthleteStore';
 import { BeltBadge } from '../../components/BeltBadge';
 import { ActivityStatus, Rank } from '../../../shared/types/domain';
 import { Athlete } from '../../../shared/schemas';
 
-export const AthleteList: React.FC = () => {
+interface AthleteListProps {
+    onEdit: (athlete: Athlete) => void;
+}
+
+type SortColumn = 'name' | 'rank' | 'club' | 'status';
+type SortDirection = 'asc' | 'desc';
+
+const RANK_ORDER: Record<string, number> = {
+    [Rank.White]: 1,
+    [Rank.Yellow]: 2,
+    [Rank.Orange]: 3,
+    [Rank.Green]: 4,
+    [Rank.Blue]: 5,
+    [Rank.Brown]: 6,
+    [Rank.Dan1]: 7,
+    [Rank.Dan2]: 8,
+    [Rank.Dan3]: 9,
+    [Rank.Dan4]: 10,
+    [Rank.Dan5]: 11,
+    [Rank.Dan6]: 12,
+    [Rank.Dan7]: 13,
+};
+
+const STATUS_ORDER: Record<string, number> = {
+    [ActivityStatus.Constant]: 1,
+    [ActivityStatus.Intermittent]: 2,
+    [ActivityStatus.Dormant]: 3,
+};
+
+export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const { athletes, deleteAthlete } = useAthleteStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [rankFilter, setRankFilter] = useState('');
     const [clubFilter, setClubFilter] = useState('');
+    const [sortConfig, setSortConfig] = useState<{ key: SortColumn; direction: SortDirection }>({
+        key: 'name',
+        direction: 'asc',
+    });
 
     // Helper to derive UI fields from backend data
     const enhanceAthlete = (athlete: Athlete) => ({
@@ -23,20 +56,10 @@ export const AthleteList: React.FC = () => {
         isVerified: true
     });
 
-    // Derive unique clubs for filter dropdown
-    const availableClubs = useMemo(() => {
-        const clubs = new Set(athletes.map(a => a.clubId ? `Club #${a.clubId}` : 'Unattached'));
-        return Array.from(clubs).sort();
-    }, [athletes]);
-
-    // Filtering Logic
-    // Design Decision: Single Page / High Density List
-    // We intentionally avoid pagination (page 1, 2, 3) to allow Senseis to quickly scan the entire roster (~50-200 athletes).
-    // This aligns with the "High Density" requirement of Story 1.3.
-    // Performance Note: If roster exceeds 500 items, consider implementing virtualization (e.g. react-window) or client-side pagination.
+    // Filtering & Sorting Logic
     const filteredAthletes = useMemo(() => {
         const term = searchTerm.toLowerCase();
-        return athletes.map(enhanceAthlete).filter(
+        const results = athletes.map(enhanceAthlete).filter(
             (athlete) => {
                 const matchesName = athlete.name.toLowerCase().includes(term);
                 const matchesRank = rankFilter ? athlete.rank === rankFilter : true;
@@ -44,7 +67,56 @@ export const AthleteList: React.FC = () => {
                 return matchesName && matchesRank && matchesClub;
             }
         );
-    }, [athletes, searchTerm, rankFilter, clubFilter]);
+
+        // Apply Sorting
+        return results.sort((a, b) => {
+            let valA: any;
+            let valB: any;
+
+            switch (sortConfig.key) {
+                case 'name':
+                    valA = a.name.toLowerCase();
+                    valB = b.name.toLowerCase();
+                    break;
+                case 'rank':
+                    valA = RANK_ORDER[a.rank as Rank] || 0;
+                    valB = RANK_ORDER[b.rank as Rank] || 0;
+                    break;
+                case 'club':
+                    valA = a.clubName.toLowerCase();
+                    valB = b.clubName.toLowerCase();
+                    break;
+                case 'status':
+                    valA = STATUS_ORDER[a.status] || 0;
+                    valB = STATUS_ORDER[b.status] || 0;
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }, [athletes, searchTerm, rankFilter, clubFilter, sortConfig]);
+
+    // Derive unique clubs for filter dropdown
+    const availableClubs = useMemo(() => {
+        const clubs = new Set(athletes.map(a => a.clubId ? `Club #${a.clubId}` : 'Unattached'));
+        return Array.from(clubs).sort();
+    }, [athletes]);
+
+    const handleSort = (key: SortColumn) => {
+        setSortConfig((prev) => ({
+            key,
+            direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+        }));
+    };
+
+    const renderSortIcon = (key: SortColumn) => {
+        if (sortConfig.key !== key) return null;
+        return sortConfig.direction === 'asc' ? <ChevronUp size={12} className="ml-1" /> : <ChevronDown size={12} className="ml-1" />;
+    };
 
     // Handler for Delete
     const handleDelete = (id: number, name: string) => {
@@ -53,10 +125,9 @@ export const AthleteList: React.FC = () => {
         }
     };
 
-    // Handler for Edit (Mock)
-    const handleEdit = (id: number) => {
-        console.log(`Open edit drawer for athlete ${id}`);
-        // In a real app, this would open the drawer from Story 1.2
+    // Handler for Edit
+    const handleEdit = (athlete: Athlete) => {
+        onEdit(athlete);
     };
 
     return (
@@ -111,17 +182,45 @@ export const AthleteList: React.FC = () => {
                 <table className="min-w-full divide-y divide-slate-100">
                     <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm ring-1 ring-slate-900/5">
                         <tr>
-                            <th scope="col" className="px-3 pl-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                Athlete Identity
+                            <th
+                                scope="col"
+                                className="px-3 pl-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors"
+                                onClick={() => handleSort('name')}
+                            >
+                                <div className="flex items-center">
+                                    Athlete Identity
+                                    {renderSortIcon('name')}
+                                </div>
                             </th>
-                            <th scope="col" className="px-3 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                Rank
+                            <th
+                                scope="col"
+                                className="px-3 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors"
+                                onClick={() => handleSort('rank')}
+                            >
+                                <div className="flex items-center">
+                                    Rank
+                                    {renderSortIcon('rank')}
+                                </div>
                             </th>
-                            <th scope="col" className="px-3 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                Club
+                            <th
+                                scope="col"
+                                className="px-3 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors"
+                                onClick={() => handleSort('club')}
+                            >
+                                <div className="flex items-center">
+                                    Club
+                                    {renderSortIcon('club')}
+                                </div>
                             </th>
-                            <th scope="col" className="px-3 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                Status
+                            <th
+                                scope="col"
+                                className="px-3 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors"
+                                onClick={() => handleSort('status')}
+                            >
+                                <div className="flex items-center justify-center">
+                                    Status
+                                    {renderSortIcon('status')}
+                                </div>
                             </th>
                             <th scope="col" className="relative px-3 py-3">
                                 <span className="sr-only">Actions</span>
@@ -132,6 +231,7 @@ export const AthleteList: React.FC = () => {
                         {filteredAthletes.map((athlete) => (
                             <tr
                                 key={athlete.id}
+                                onClick={() => handleEdit(athlete)}
                                 className="group hover:bg-blue-50/40 transition-colors duration-150 ease-in-out cursor-pointer"
                             >
                                 {/* Identity Column */}
@@ -146,7 +246,7 @@ export const AthleteList: React.FC = () => {
                                                 {athlete.name}
                                             </div>
                                             <div className="text-[10px] font-mono text-slate-500 mt-0.5">
-                                                {athlete.weightClass} • {athlete.birthYear}
+                                                {athlete.weightClass} • {athlete.birthDate?.toString().split('-')[0] || 'N/A'}
                                             </div>
                                         </div>
                                     </div>
@@ -173,11 +273,11 @@ export const AthleteList: React.FC = () => {
                                 <td className="px-3 py-2.5 whitespace-nowrap text-right text-sm font-medium">
                                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); athlete.id && handleEdit(athlete.id); }}
+                                            onClick={(e) => { e.stopPropagation(); handleEdit(athlete); }}
                                             className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                                            title="Edit Athlete"
+                                            title="View Details"
                                         >
-                                            <Edit2 className="w-4 h-4" />
+                                            <User className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); athlete.id && handleDelete(athlete.id, athlete.name); }}
