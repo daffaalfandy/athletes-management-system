@@ -11,12 +11,17 @@ interface RulesetState {
     updateRuleset: (data: Ruleset) => Promise<void>;
     deleteRuleset: (id: number) => Promise<void>;
     setActiveRuleset: (id: number) => Promise<void>;
+    getActiveRuleset: () => Ruleset | undefined;
 }
 
-export const useRulesetStore = create<RulesetState>((set) => ({
+export const useRulesetStore = create<RulesetState>((set, get) => ({
     rulesets: [],
     loading: false,
     error: null,
+
+    getActiveRuleset: () => {
+        return get().rulesets.find(r => r.is_active);
+    },
 
     loadRulesets: async () => {
         set({ loading: true });

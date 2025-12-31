@@ -17,9 +17,9 @@ export const RulesetEditor: React.FC<RulesetEditorProps> = ({ ruleset, onBack })
     const handleAddCategory = () => {
         const newCategory: AgeCategory = {
             name: '',
-            min_year: new Date().getFullYear() - 18,
-            max_year: new Date().getFullYear() - 16,
-            gender: 'MIXED'
+            min_age: '' as any, // Will be converted to number on input
+            max_age: '' as any, // Will be converted to number on input
+            gender: 'M'
         };
         setCategories([...categories, newCategory]);
     };
@@ -121,21 +121,25 @@ export const RulesetEditor: React.FC<RulesetEditorProps> = ({ ruleset, onBack })
                                 <div className="col-span-2">
                                     <input
                                         type="number"
-                                        placeholder="Min Year"
-                                        value={cat.min_year}
-                                        onChange={(e) => handleCategoryChange(idx, 'min_year', parseInt(e.target.value))}
+                                        placeholder="Min Age"
+                                        value={cat.min_age}
+                                        onChange={(e) => handleCategoryChange(idx, 'min_age', parseInt(e.target.value))}
                                         className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded focus:border-blue-400 outline-none text-sm"
                                         required
+                                        min="0"
+                                        max="150"
                                     />
                                 </div>
                                 <div className="col-span-2">
                                     <input
                                         type="number"
-                                        placeholder="Max Year"
-                                        value={cat.max_year}
-                                        onChange={(e) => handleCategoryChange(idx, 'max_year', parseInt(e.target.value))}
+                                        placeholder="Max Age"
+                                        value={cat.max_age}
+                                        onChange={(e) => handleCategoryChange(idx, 'max_age', parseInt(e.target.value))}
                                         className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded focus:border-blue-400 outline-none text-sm"
                                         required
+                                        min="0"
+                                        max="150"
                                     />
                                 </div>
                                 <div className="col-span-3">

@@ -6,10 +6,18 @@ export const rulesetRepository = {
         const db = getDatabase();
         const stmt = db.prepare('SELECT * FROM rulesets ORDER BY created_at DESC');
         const rows = stmt.all() as any[];
-        return rows.map(row => ({
-            ...row,
-            is_active: !!row.is_active
-        }));
+
+        // Load categories for each ruleset
+        const categoryStmt = db.prepare('SELECT * FROM age_categories WHERE ruleset_id = ?');
+
+        return rows.map(row => {
+            const categories = categoryStmt.all(row.id) as AgeCategory[];
+            return {
+                ...row,
+                is_active: !!row.is_active,
+                categories
+            };
+        });
     },
 
     getById: (id: number): Ruleset | undefined => {
@@ -44,8 +52,8 @@ export const rulesetRepository = {
 
             if (ruleset.categories && ruleset.categories.length > 0) {
                 const insertCategory = db.prepare(`
-                    INSERT INTO age_categories (ruleset_id, name, min_year, max_year, gender)
-                    VALUES (@ruleset_id, @name, @min_year, @max_year, @gender)
+                    INSERT INTO age_categories (ruleset_id, name, min_age, max_age, gender)
+                    VALUES (@ruleset_id, @name, @min_age, @max_age, @gender)
                 `);
 
                 for (const cat of ruleset.categories) {
@@ -77,8 +85,8 @@ export const rulesetRepository = {
             if (ruleset.categories) {
                 db.prepare('DELETE FROM age_categories WHERE ruleset_id = ?').run(id);
                 const insertCategory = db.prepare(`
-                    INSERT INTO age_categories (ruleset_id, name, min_year, max_year, gender)
-                    VALUES (@ruleset_id, @name, @min_year, @max_year, @gender)
+                    INSERT INTO age_categories (ruleset_id, name, min_age, max_age, gender)
+                    VALUES (@ruleset_id, @name, @min_age, @max_age, @gender)
                 `);
                 for (const cat of ruleset.categories) {
                     insertCategory.run({ ...cat, ruleset_id: id });

@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { User, History as HistoryIcon, Save, Info, Edit2, X as CloseIcon, Check } from 'lucide-react';
+import { User, History as HistoryIcon, Save, Info, Edit2, X as CloseIcon, Check, Calendar } from 'lucide-react';
 import { AthleteSchema, Athlete } from '../../../shared/schemas';
 import { Rank } from '../../../shared/types/domain';
+import { calculateAgeCategory } from '../../../shared/judo/calculateAgeCategory';
+import { useRulesetStore } from '../settings/useRulesetStore';
 import { Timeline } from './history/Timeline';
 import { MedalList } from './history/MedalList';
 import { useAthleteStore } from './useAthleteStore';
@@ -20,6 +22,22 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
     const [activeTab, setActiveTab] = useState<TabType>('profile');
     const [editingField, setEditingField] = useState<string | null>(null);
     const { loadHistory } = useAthleteStore();
+    const { loadRulesets } = useRulesetStore();
+    // Use Zustand selector for reactivity
+    const activeRuleset = useRulesetStore(state => state.rulesets.find(r => r.is_active));
+    const currentYear = new Date().getFullYear();
+    const [referenceYear, setReferenceYear] = useState(currentYear);
+
+    // Generate year options (current year + next 3 years)
+    const yearOptions = useMemo(() => {
+        return Array.from({ length: 4 }, (_, i) => currentYear + i);
+    }, [currentYear]);
+
+    // Load rulesets on mount
+    useEffect(() => {
+        loadRulesets();
+    }, [loadRulesets]);
+
 
     const {
         register,
@@ -262,6 +280,39 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                                         { value: 'female', label: 'Female' }
                                     ])}
                                 </div>
+
+                                {initialData && (
+                                    <div className="p-4 rounded-xl border border-slate-100 bg-blue-50/20">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Age Category</label>
+                                            <div className="flex items-center gap-1.5">
+                                                <Calendar className="h-3 w-3 text-slate-400" />
+                                                <select
+                                                    value={referenceYear}
+                                                    onChange={(e) => setReferenceYear(Number(e.target.value))}
+                                                    className="text-[10px] px-2 py-0.5 border border-slate-200 rounded bg-white text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
+                                                >
+                                                    {yearOptions.map((year) => (
+                                                        <option key={year} value={year}>
+                                                            {year === currentYear ? `${year} (Current)` : year}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-2 py-1 rounded-md bg-white border border-blue-100 text-blue-700 text-sm font-bold shadow-sm">
+                                                {calculateAgeCategory(
+                                                    getValues('birthDate'),
+                                                    getValues('gender'),
+                                                    activeRuleset?.categories || [],
+                                                    referenceYear
+                                                )}
+                                            </span>
+                                            <span className="text-[9px] text-slate-400 font-medium">Based on active ruleset</span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="grid grid-cols-2 gap-4">
                                     {renderField('weight', 'Weight (kg)', 'number')}

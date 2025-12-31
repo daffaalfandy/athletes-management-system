@@ -41,8 +41,8 @@ export const AgeCategorySchema = z.object({
     id: z.number().optional(),
     ruleset_id: z.number().optional(),
     name: z.string().min(1, 'Name is required'),
-    min_year: z.number().int(),
-    max_year: z.number().int(),
+    min_age: z.number().int().min(0),
+    max_age: z.number().int().max(150),
     gender: z.enum(['M', 'F', 'MIXED']),
 });
 

@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from 'react';
-import { Search, User, Trash2, Filter, ChevronUp, ChevronDown } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { Search, User, Trash2, Filter, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
 import { useAthleteStore } from './useAthleteStore';
 import { BeltBadge } from '../../components/BeltBadge';
 import { ActivityStatus, Rank } from '../../../shared/types/domain';
-import { Athlete } from '../../../shared/schemas';
+import { Athlete, AgeCategory } from '../../../shared/schemas';
+import { calculateAgeCategory } from '../../../shared/judo/calculateAgeCategory';
+import { useRulesetStore } from '../settings/useRulesetStore';
 
 interface AthleteListProps {
     onEdit: (athlete: Athlete) => void;
@@ -36,25 +38,47 @@ const STATUS_ORDER: Record<string, number> = {
 
 export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const { athletes, deleteAthlete } = useAthleteStore();
+    const { loadRulesets } = useRulesetStore();
+    // Use Zustand selector for reactivity
+    const activeRuleset = useRulesetStore(state => state.rulesets.find(r => r.is_active));
+    const currentYear = new Date().getFullYear();
+
+    // Load rulesets on mount
+    useEffect(() => {
+        loadRulesets();
+    }, [loadRulesets]);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [rankFilter, setRankFilter] = useState('');
     const [clubFilter, setClubFilter] = useState('');
+    const [referenceYear, setReferenceYear] = useState(currentYear);
     const [sortConfig, setSortConfig] = useState<{ key: SortColumn; direction: SortDirection }>({
         key: 'name',
         direction: 'asc',
     });
 
+    // Generate year options (current year + next 3 years)
+    const yearOptions = useMemo(() => {
+        return Array.from({ length: 4 }, (_, i) => currentYear + i);
+    }, [currentYear]);
+
     // Helper to derive UI fields from backend data
-    const enhanceAthlete = (athlete: Athlete) => ({
+    const enhanceAthlete = useCallback((athlete: Athlete) => ({
         ...athlete,
         // TODO: Implement real weight class logic in a shared utility
         weightClass: athlete.weight > 0 ? `-${athlete.weight}kg` : 'Open',
+        ageCategory: calculateAgeCategory(
+            athlete.birthDate,
+            athlete.gender,
+            activeRuleset?.categories || [],
+            referenceYear // Use selected reference year
+        ),
         // TODO: Fetch club name from ClubStore when implemented
         clubName: athlete.clubId ? `Club #${athlete.clubId}` : 'Unattached',
         // TODO: Real status logic based on attendance
         status: ActivityStatus.Constant,
         isVerified: true
-    });
+    }), [activeRuleset, referenceYear]);
 
     // Filtering & Sorting Logic
     const filteredAthletes = useMemo(() => {
@@ -98,7 +122,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
             if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
             return 0;
         });
-    }, [athletes, searchTerm, rankFilter, clubFilter, sortConfig]);
+    }, [athletes, searchTerm, rankFilter, clubFilter, sortConfig, enhanceAthlete]);
 
     // Derive unique clubs for filter dropdown
     const availableClubs = useMemo(() => {
@@ -169,6 +193,23 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                             <option key={club} value={club}>{club}</option>
                         ))}
                     </select>
+
+                    {/* Tournament Year Selector */}
+                    <div className="flex items-center gap-2 ml-2 pl-2 border-l border-slate-200">
+                        <Calendar className="h-4 w-4 text-slate-400" />
+                        <select
+                            value={referenceYear}
+                            onChange={(e) => setReferenceYear(Number(e.target.value))}
+                            className="block w-32 pl-3 pr-8 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm font-medium"
+                            title="Select tournament year for age category calculation"
+                        >
+                            {yearOptions.map((year) => (
+                                <option key={year} value={year}>
+                                    {year === currentYear ? `${year} (Current)` : year}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
                     <div className="flex items-center text-xs text-slate-500 font-medium ml-auto">
                         <Filter className="w-3 h-3 mr-1.5" />
@@ -245,8 +286,14 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                                             <div className="text-sm font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
                                                 {athlete.name}
                                             </div>
-                                            <div className="text-[10px] font-mono text-slate-500 mt-0.5">
-                                                {athlete.weightClass} • {athlete.birthDate?.toString().split('-')[0] || 'N/A'}
+                                            <div className="text-[10px] font-mono text-slate-500 mt-0.5 flex items-center gap-1">
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold border border-slate-200">
+                                                    {athlete.ageCategory}
+                                                </span>
+                                                <span>•</span>
+                                                <span>{athlete.weightClass}</span>
+                                                <span>•</span>
+                                                <span>{athlete.birthDate?.toString().split('-')[0] || 'N/A'}</span>
                                             </div>
                                         </div>
                                     </div>

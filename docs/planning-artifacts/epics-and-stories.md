@@ -94,18 +94,21 @@ This document outlines the epics and user stories for the Athletes Management Sy
 *Goal: Implement the "Judo Engine" that calculates categories and eligibility.*
 
 ### Story E3.S1: Ruleset Definition UI
-**As a technical sensei,** I want to define birth-year thresholds for age categories (e.g., U-18) so that the system matches current federation standards.
+**As a technical sensei,** I want to define age ranges for age categories (e.g., U-18 = ages 15-17) so that the system matches current federation standards.
 **Acceptance Criteria:**
 - [x] Management UI for Age Categories.
-- [x] Ability to set birth year ranges.
+- [x] Ability to set age ranges (min_age, max_age) instead of birth years.
+- [x] Age calculated as of January 1st of tournament year (IJF standard).
 - [x] Stored in SQLite as templates.
 
 ### Story E3.S2: Dynamic Age Category Calculation
-**As a system,** I want to automatically calculate an athlete's age category based on the active ruleset so that the coach doesn't have to do it manually.
+**As a system,** I want to automatically calculate an athlete's age category based on the active ruleset and tournament year so that the coach doesn't have to do it manually.
 **Acceptance Criteria:**
-- [ ] Utility function in `common/judo/` for calculation.
-- [ ] Athlete list displays the calculated category (e.g., "U-18").
-- [ ] Updates instantly when the ruleset or athlete birth year changes.
+- [x] Utility function in `shared/judo/` for age calculation (age = referenceYear - birthYear).
+- [x] Athlete list displays the calculated category (e.g., "U-18 Cadets").
+- [x] Tournament year selector (current year + 3 future years) for planning.
+- [x] Updates instantly when the tournament year or athlete birth date changes.
+- [x] Age categories prioritize exact gender match (M/F) over MIXED.
 
 ### Story E3.S3: Rank Order Configuration
 **As a technical sensei,** I want to define the order of belt ranks so that the system knows how to sort athletes by seniority.
