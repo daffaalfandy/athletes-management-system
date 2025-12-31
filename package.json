@@ -48,12 +48,14 @@
     "zod": "^4.2.1"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "better-sqlite3": "^12.5.0",
     "clsx": "^2.1.1",
     "electron-squirrel-startup": "^1.0.1",
     "lucide-react": "^0.562.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-hook-form": "^7.69.0",
     "tailwind-merge": "^3.4.0",
     "zustand": "^5.0.9"
   }
