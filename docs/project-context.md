@@ -42,6 +42,13 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - **Zero External CDNs:** 100% offline capability is mandatory. Bundle all fonts, icons (SVG preferred), and libraries locally.
 - **Response Wrapper:** Use `{ success: boolean, data?: any, error?: string }` for all IPC responses.
 
+### 4. UI Patterns & Workflows
+- **Modals for CRUD:** Use lightweight Modals (not new pages) for creating/editing main resources (Athletes, Clubs).
+- **High-Density Lists:** Prefer infinite scroll (with sticky headers) over pagination for datasets < 500 items. Optimized for "Scanning".
+
+### 5. Operations
+- **Seeding/Migration:** Use raw SQL scripts (`.sql`) executed via `sqlite3` CLI or internal IPC triggers. Avoid Node.js scripts using `better-sqlite3` due to Electron ABI mismatch.
+
 ## Critical Don't-Miss Rules (Anti-Patterns)
 
 - **❌ NO Browser Storage:** Do not use `localStorage` or `IndexedDB`. All persistence MUST be SQLite.

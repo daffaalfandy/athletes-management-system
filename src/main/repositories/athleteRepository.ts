@@ -30,7 +30,8 @@ export const athleteRepository = {
       INSERT INTO athletes (name, birthYear, gender, weight, rank, clubId)
       VALUES (@name, @birthYear, @gender, @weight, @rank, @clubId)
     `);
-        const info = stmt.run(athlete);
+        const safeAthlete = { ...athlete, clubId: athlete.clubId ?? null };
+        const info = stmt.run(safeAthlete);
         return { ...athlete, id: Number(info.lastInsertRowid) };
     },
 
@@ -53,7 +54,8 @@ export const athleteRepository = {
           updatedAt = CURRENT_TIMESTAMP
       WHERE id = @id
     `);
-        const info = stmt.run(athlete);
+        const safeAthlete = { ...athlete, clubId: athlete.clubId ?? null };
+        const info = stmt.run(safeAthlete);
         return info.changes > 0;
     },
 

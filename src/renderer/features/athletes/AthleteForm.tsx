@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AthleteSchema, Athlete } from '../../../shared/schemas';
+import { Rank } from '../../../shared/types/domain';
 
 interface AthleteFormProps {
     onSubmit: (data: Omit<Athlete, 'id'>) => Promise<void>;
@@ -20,77 +21,96 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit }) => {
             birthYear: new Date().getFullYear() - 10,
             gender: 'male' as const,
             weight: 0,
-            rank: 'White Belt',
+            rank: Rank.White, // Use Enum Default
         },
     });
 
     const onFormSubmit = async (data: Omit<Athlete, 'id'>) => {
-        await onSubmit(data); // onSubmit is expected to return a promise now
+        await onSubmit(data);
         reset();
     };
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 p-4 bg-gray-800 rounded-lg">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
             <div>
-                <label className="block text-sm font-medium text-gray-300">Name</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
                 <input
                     {...register('name')}
-                    className="mt-1 block w-full rounded-md bg-gray-700 border-transparent focus:border-blue-500 focus:ring-0 text-white"
+                    placeholder="e.g. Judoka"
+                    className="block w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm sm:text-sm placeholder-slate-400"
                 />
-                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+                {errors.name && <p className="text-red-500 text-xs mt-1 font-medium">{errors.name.message}</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-300">Birth Year</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Birth Year</label>
                     <input
                         type="number"
                         {...register('birthYear', { valueAsNumber: true })}
-                        className="mt-1 block w-full rounded-md bg-gray-700 border-transparent focus:border-blue-500 focus:ring-0 text-white"
+                        className="block w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm sm:text-sm"
                     />
-                    {errors.birthYear && <p className="text-red-500 text-xs mt-1">{errors.birthYear.message}</p>}
+                    {errors.birthYear && <p className="text-red-500 text-xs mt-1 font-medium">{errors.birthYear.message}</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-300">Gender</label>
-                    <select
-                        {...register('gender')}
-                        className="mt-1 block w-full rounded-md bg-gray-700 border-transparent focus:border-blue-500 focus:ring-0 text-white"
-                    >
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                    </select>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Gender</label>
+                    <div className="relative">
+                        <select
+                            {...register('gender')}
+                            className="block w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm sm:text-sm appearance-none"
+                        >
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-300">Weight (kg)</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Weight (kg)</label>
                     <input
                         type="number"
                         step="0.1"
                         {...register('weight', { valueAsNumber: true })}
-                        className="mt-1 block w-full rounded-md bg-gray-700 border-transparent focus:border-blue-500 focus:ring-0 text-white"
+                        className="block w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm sm:text-sm"
                     />
-                    {errors.weight && <p className="text-red-500 text-xs mt-1">{errors.weight.message}</p>}
+                    {errors.weight && <p className="text-red-500 text-xs mt-1 font-medium">{errors.weight.message}</p>}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-300">Rank</label>
-                    <input
-                        {...register('rank')}
-                        className="mt-1 block w-full rounded-md bg-gray-700 border-transparent focus:border-blue-500 focus:ring-0 text-white"
-                    />
-                    {errors.rank && <p className="text-red-500 text-xs mt-1">{errors.rank.message}</p>}
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Rank</label>
+                    <div className="relative">
+                        <select
+                            {...register('rank')}
+                            className="block w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm sm:text-sm appearance-none"
+                        >
+                            {Object.values(Rank).map((rank) => (
+                                <option key={rank} value={rank}>
+                                    {rank}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                    </div>
+                    {errors.rank && <p className="text-red-500 text-xs mt-1 font-medium">{errors.rank.message}</p>}
                 </div>
             </div>
 
-            <button
-                type="submit"
-                className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-                Add Athlete
-            </button>
+            <div className="pt-2">
+                <button
+                    type="submit"
+                    className="w-full py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                >
+                    Create Athlete
+                </button>
+            </div>
         </form>
     );
 };
