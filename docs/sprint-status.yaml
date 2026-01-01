@@ -76,7 +76,7 @@ epics:
 
   - id: "E5"
     title: "Roster Selection & Competition"
-    status: "done"
+    status: "in_progress"
     stories:
       - id: "E5.S1"
         title: "Instant-Switch Roster Filters"
@@ -87,6 +87,12 @@ epics:
       - id: "E5.S3"
         title: "Eligibility Conflict Detection"
         status: "done"
+      - id: "E5.S4"
+        title: "Tournament Management & History"
+        status: "to_do"
+      - id: "E5.S5"
+        title: "Club Management"
+        status: "to_do"
 
   - id: "E6"
     title: "Export Factory (Excel & PDF)"
@@ -111,4 +117,15 @@ epics:
     stories:
       - id: "E7.S1"
         title: "Regency & Club Branding"
+        status: "to_do"
+
+  - id: "E8"
+    title: "Advanced Competition History & Analytics"
+    status: "to_do"
+    stories:
+      - id: "E8.S1"
+        title: "Automated Tournament History"
+        status: "to_do"
+      - id: "E8.S2"
+        title: "Integrated Medal Records"
         status: "to_do"
