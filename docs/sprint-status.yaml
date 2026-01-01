@@ -76,17 +76,17 @@ epics:
 
   - id: "E5"
     title: "Roster Selection & Competition"
-    status: "to_do"
+    status: "done"
     stories:
       - id: "E5.S1"
         title: "Instant-Switch Roster Filters"
-        status: "to_do"
+        status: "done"
       - id: "E5.S2"
         title: "Tournament Roster Assembly"
-        status: "to_do"
+        status: "done"
       - id: "E5.S3"
         title: "Eligibility Conflict Detection"
-        status: "to_do"
+        status: "done"
 
   - id: "E6"
     title: "Export Factory (Excel & PDF)"

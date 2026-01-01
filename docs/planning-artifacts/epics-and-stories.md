@@ -169,9 +169,9 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E5.S1: Instant-Switch Roster Filters
 **As a coach,** I want to filter the athlete list by Gender, Age Category, and Weight Class in <100ms so that I can quickly find candidates.
 **Acceptance Criteria:**
-- [ ] Multi-select or dropdown filters in the list header.
-- [ ] Performance target met (<100ms).
-- [ ] Zero-latency visual updates.
+- [x] Multi-select or dropdown filters in the list header.
+- [x] Performance target met (<100ms).
+- [x] Zero-latency visual updates.
 
 ### Story E5.S2: Tournament Roster Assembly
 **As a coach,** I want to select athletes and add them to a specific tournament roster so that I can prepare my registration.

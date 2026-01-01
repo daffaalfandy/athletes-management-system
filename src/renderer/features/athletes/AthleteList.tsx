@@ -1,11 +1,14 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Search, User, Trash2, Filter, ChevronUp, ChevronDown, Calendar, FileCheck, FileX } from 'lucide-react';
+import { Search, User, Trash2, Filter, ChevronUp, ChevronDown, Calendar, FileCheck, FileX, Clipboard, AlertTriangle } from 'lucide-react';
 import { useAthleteStore } from './useAthleteStore';
+import { useRosterStore } from './useRosterStore';
 import { BeltBadge } from '../../components/BeltBadge';
 import { ActivityStatus, Rank } from '../../../shared/types/domain';
 import { Athlete, AgeCategory } from '../../../shared/schemas';
 import { calculateAgeCategory } from '../../../shared/judo/calculateAgeCategory';
 import { useRulesetStore } from '../settings/useRulesetStore';
+import { RosterView } from './RosterView';
+import { validateEligibility } from '../../../shared/judo/validateEligibility';
 
 interface AthleteListProps {
     onEdit: (athlete: Athlete) => void;
@@ -45,14 +48,11 @@ const WEIGHT_DIVISIONS = {
 export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const { athletes, deleteAthlete } = useAthleteStore();
     const { loadRulesets } = useRulesetStore();
+    // Story 5.2: Roster selection state
+    const { selectedAthleteIds, toggleAthlete, addMultiple, clearRoster, isSelected, setConflicts, getConflicts, hasConflicts } = useRosterStore();
     // Use Zustand selector for reactivity
     const activeRuleset = useRulesetStore(state => state.rulesets.find(r => r.is_active));
     const currentYear = new Date().getFullYear();
-
-    // Load rulesets on mount
-    useEffect(() => {
-        loadRulesets();
-    }, [loadRulesets]);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [referenceYear, setReferenceYear] = useState(currentYear);
@@ -67,6 +67,29 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const [weightClassFilter, setWeightClassFilter] = useState<string[]>([]);
     const [rankFilter, setRankFilter] = useState<string[]>([]); // Changed to array for multi-select
     const [clubFilter, setClubFilter] = useState<string[]>([]); // Changed to array for multi-select
+
+    // Story 5.2: Roster View state
+    const [isRosterViewOpen, setIsRosterViewOpen] = useState(false);
+
+    // Load rulesets on mount
+    useEffect(() => {
+        loadRulesets();
+    }, [loadRulesets]);
+
+    // Story 5.3: Validate selected athletes for conflicts
+    useEffect(() => {
+        if (!activeRuleset || selectedAthleteIds.length === 0) return;
+
+        selectedAthleteIds.forEach(athleteId => {
+            const athlete = athletes.find(a => a.id === athleteId);
+            if (athlete && athlete.id) {
+                const conflicts = validateEligibility(athlete, activeRuleset, referenceYear);
+                setConflicts(athlete.id, conflicts);
+            }
+        });
+    }, [selectedAthleteIds, athletes, activeRuleset, referenceYear, setConflicts]);
+
+
 
     // Generate year options (current year + next 3 years)
     const yearOptions = useMemo(() => {
@@ -258,6 +281,34 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         ageCategoryFilter.length > 0 || weightClassFilter.length > 0 ||
         rankFilter.length > 0 || clubFilter.length > 0;
 
+    // Story 5.2: Select All handler - only selects visible (filtered) athletes
+    const handleSelectAll = () => {
+        const visibleAthleteIds = filteredAthletes.map(a => a.id).filter((id): id is number => id !== undefined);
+        const allSelected = visibleAthleteIds.every(id => isSelected(id));
+
+        if (allSelected) {
+            // Deselect all visible athletes
+            visibleAthleteIds.forEach(id => {
+                if (isSelected(id)) toggleAthlete(id);
+            });
+        } else {
+            // Select all visible athletes
+            addMultiple(visibleAthleteIds);
+        }
+    };
+
+    // Story 5.2: Check if all visible athletes are selected (for indeterminate state)
+    const visibleAthleteIds = useMemo(() =>
+        filteredAthletes.map(a => a.id).filter((id): id is number => id !== undefined),
+        [filteredAthletes]
+    );
+    const selectedVisibleCount = useMemo(() =>
+        visibleAthleteIds.filter(id => isSelected(id)).length,
+        [visibleAthleteIds, selectedAthleteIds]
+    );
+    const allVisibleSelected = visibleAthleteIds.length > 0 && selectedVisibleCount === visibleAthleteIds.length;
+    const someVisibleSelected = selectedVisibleCount > 0 && selectedVisibleCount < visibleAthleteIds.length;
+
     return (
         <div className="flex flex-col h-full bg-slate-50">
             {/* Control Bar - Improved Multi-Row Layout */}
@@ -326,9 +377,22 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                     />
 
                     {/* Result Count */}
-                    <div className="flex items-center text-sm text-slate-500 font-medium ml-auto">
-                        <Filter className="w-4 h-4 mr-2" />
-                        Showing {filteredAthletes.length} of {athletes.length}
+                    <div className="flex items-center gap-4 text-sm text-slate-500 font-medium ml-auto">
+                        <div className="flex items-center">
+                            <Filter className="w-4 h-4 mr-2" />
+                            Showing {filteredAthletes.length} of {athletes.length}
+                        </div>
+                        {/* Story 5.2: Selection Count Indicator */}
+                        {selectedAthleteIds.length > 0 && (
+                            <button
+                                onClick={() => setIsRosterViewOpen(true)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 border border-blue-700 rounded-lg text-white font-semibold transition-colors shadow-sm"
+                                title="View Roster"
+                            >
+                                <Clipboard className="w-4 h-4" />
+                                <span>Roster ({selectedAthleteIds.length})</span>
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -426,6 +490,19 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                 <table className="min-w-full divide-y divide-slate-100">
                     <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm ring-1 ring-slate-900/5">
                         <tr>
+                            {/* Story 5.2: Checkbox Column */}
+                            <th scope="col" className="px-3 pl-4 py-3 w-12">
+                                <input
+                                    type="checkbox"
+                                    checked={allVisibleSelected}
+                                    ref={(el) => {
+                                        if (el) el.indeterminate = someVisibleSelected;
+                                    }}
+                                    onChange={handleSelectAll}
+                                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                                    title={allVisibleSelected ? 'Deselect All' : 'Select All'}
+                                />
+                            </th>
                             <th
                                 scope="col"
                                 className="px-3 pl-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors"
@@ -472,100 +549,128 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-50">
-                        {filteredAthletes.map((athlete) => (
-                            <tr
-                                key={athlete.id}
-                                onClick={() => handleEdit(athlete)}
-                                className="group hover:bg-blue-50/40 transition-colors duration-150 ease-in-out cursor-pointer"
-                            >
-                                {/* Identity Column */}
-                                <td className="px-3 pl-4 py-2.5 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                        {/* Initials Avatar */}
-                                        <div className="flex-shrink-0 h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 overflow-hidden">
-                                            {athlete.profile_photo_path ? (
-                                                <img src={`dossier://${athlete.profile_photo_path}`} alt={athlete.name} className="h-full w-full object-cover" />
-                                            ) : (
-                                                athlete.name.split(' ').map(n => n[0]).join('').substring(0, 2)
-                                            )}
-                                        </div>
-                                        <div className="ml-4">
-                                            <div className="text-sm font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
-                                                {athlete.name}
+                        {filteredAthletes.map((athlete) => {
+                            const selected = athlete.id ? isSelected(athlete.id) : false;
+                            return (
+                                <tr
+                                    key={athlete.id}
+                                    onClick={() => handleEdit(athlete)}
+                                    className={`group hover:bg-blue-50/40 transition-colors duration-150 ease-in-out cursor-pointer ${selected ? 'bg-blue-50/60 ring-1 ring-blue-200' : ''
+                                        }`}
+                                >
+                                    {/* Story 5.2: Checkbox Column */}
+                                    <td className="px-3 pl-4 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selected}
+                                            onChange={() => athlete.id && toggleAthlete(athlete.id)}
+                                            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                                        />
+                                    </td>
+                                    {/* Identity Column */}
+                                    <td className="px-3 pl-4 py-2.5 whitespace-nowrap">
+                                        <div className="flex items-center">
+                                            {/* Initials Avatar */}
+                                            <div className="flex-shrink-0 h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 overflow-hidden">
+                                                {athlete.profile_photo_path ? (
+                                                    <img src={`dossier://${athlete.profile_photo_path}`} alt={athlete.name} className="h-full w-full object-cover" />
+                                                ) : (
+                                                    athlete.name.split(' ').map(n => n[0]).join('').substring(0, 2)
+                                                )}
                                             </div>
-                                            <div className="text-[10px] font-mono text-slate-500 mt-0.5 flex items-center gap-1">
-                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold border border-slate-200">
-                                                    {athlete.ageCategory}
-                                                </span>
-                                                <span>•</span>
-                                                <span>{athlete.weightClass}</span>
-                                                <span>•</span>
-                                                <span>{athlete.birthDate?.toString().split('-')[0] || 'N/A'}</span>
+                                            <div className="ml-4">
+                                                <div className="text-sm font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
+                                                    {athlete.name}
+                                                </div>
+                                                <div className="text-[10px] font-mono text-slate-500 mt-0.5 flex items-center gap-1">
+                                                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold border border-slate-200">
+                                                        {athlete.ageCategory}
+                                                    </span>
+                                                    <span>•</span>
+                                                    <span>{athlete.weightClass}</span>
+                                                    <span>•</span>
+                                                    <span>{athlete.birthDate?.toString().split('-')[0] || 'N/A'}</span>
+                                                </div>
+                                            </div>
+                                            {/* Dossier Status Badge (Visible mostly on desktop or if critical) */}
+                                            <div className="ml-auto pr-4 hidden sm:flex items-center gap-2">
+                                                {/* Story 5.3: Conflict Indicator */}
+                                                {selected && hasConflicts(athlete.id!) && (
+                                                    <div className="group/conflict relative">
+                                                        <AlertTriangle size={16} className="text-amber-500" />
+                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 px-3 py-2 bg-slate-800 text-white text-xs rounded opacity-0 group-hover/conflict:opacity-100 transition-opacity whitespace-nowrap mb-2 z-10 min-w-[200px]">
+                                                            <div className="font-semibold mb-1">Eligibility Conflicts:</div>
+                                                            {getConflicts(athlete.id!).map((conflict, idx) => (
+                                                                <div key={idx} className="text-[10px] mt-1">
+                                                                    ⚠️ {conflict.message}
+                                                                    {conflict.details && <div className="text-slate-300 mt-0.5">{conflict.details}</div>}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {athlete.profile_photo_path ? (
+                                                    <div className="group/dossier relative">
+                                                        <FileCheck size={16} className="text-emerald-500" />
+                                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover/dossier:opacity-100 transition-opacity whitespace-nowrap mb-1">
+                                                            Dossier Active
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="group/dossier relative">
+                                                        <FileX size={16} className="text-slate-300" />
+                                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover/dossier:opacity-100 transition-opacity whitespace-nowrap mb-1">
+                                                            No Photo
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                        {/* Dossier Status Badge (Visible mostly on desktop or if critical) */}
-                                        <div className="ml-auto pr-4 hidden sm:block">
-                                            {athlete.profile_photo_path ? (
-                                                <div className="group/dossier relative">
-                                                    <FileCheck size={16} className="text-emerald-500" />
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover/dossier:opacity-100 transition-opacity whitespace-nowrap mb-1">
-                                                        Dossier Active
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <div className="group/dossier relative">
-                                                    <FileX size={16} className="text-slate-300" />
-                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover/dossier:opacity-100 transition-opacity whitespace-nowrap mb-1">
-                                                        No Photo
-                                                    </span>
-                                                </div>
-                                            )}
+                                    </td>
+
+                                    {/* Rank Column */}
+                                    <td className="px-3 py-2.5 whitespace-nowrap">
+                                        <BeltBadge rank={athlete.rank} />
+                                    </td>
+
+                                    {/* Club Column */}
+                                    <td className="px-3 py-2.5 whitespace-nowrap">
+                                        <div className="text-xs text-slate-600 font-medium">
+                                            {athlete.clubName}
                                         </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                                {/* Rank Column */}
-                                <td className="px-3 py-2.5 whitespace-nowrap">
-                                    <BeltBadge rank={athlete.rank} />
-                                </td>
+                                    {/* Status Column */}
+                                    <td className="px-3 py-2.5 whitespace-nowrap text-center">
+                                        <StatusPill status={athlete.status} isVerified={athlete.isVerified} />
+                                    </td>
 
-                                {/* Club Column */}
-                                <td className="px-3 py-2.5 whitespace-nowrap">
-                                    <div className="text-xs text-slate-600 font-medium">
-                                        {athlete.clubName}
-                                    </div>
-                                </td>
-
-                                {/* Status Column */}
-                                <td className="px-3 py-2.5 whitespace-nowrap text-center">
-                                    <StatusPill status={athlete.status} isVerified={athlete.isVerified} />
-                                </td>
-
-                                {/* Actions Column (Visible on Hover) */}
-                                <td className="px-3 py-2.5 whitespace-nowrap text-right text-sm font-medium">
-                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleEdit(athlete); }}
-                                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                                            title="View Details"
-                                        >
-                                            <User className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); athlete.id && handleDelete(athlete.id, athlete.name); }}
-                                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                            title="Delete Athlete"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                                    {/* Actions Column (Visible on Hover) */}
+                                    <td className="px-3 py-2.5 whitespace-nowrap text-right text-sm font-medium">
+                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleEdit(athlete); }}
+                                                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                                title="View Details"
+                                            >
+                                                <User className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); athlete.id && handleDelete(athlete.id, athlete.name); }}
+                                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                title="Delete Athlete"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
 
                         {filteredAthletes.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                                <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
                                     <p className="text-sm">No athletes found matching "{searchTerm}"</p>
                                 </td>
                             </tr>
@@ -573,6 +678,13 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Story 5.2: Roster View Panel */}
+            <RosterView
+                isOpen={isRosterViewOpen}
+                onClose={() => setIsRosterViewOpen(false)}
+                referenceYear={referenceYear}
+            />
         </div>
     );
 };
