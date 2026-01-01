@@ -16,7 +16,9 @@ interface AthleteState {
 
     loadHistory: (athleteId: number) => Promise<void>;
     addPromotion: (data: Omit<Promotion, 'id'> & { tempFilePath?: string }) => Promise<void>;
+    deletePromotion: (id: number) => Promise<void>;
     addMedal: (data: Omit<Medal, 'id'> & { tempFilePath?: string }) => Promise<void>;
+    deleteMedal: (id: number) => Promise<void>;
 }
 
 export const useAthleteStore = create<AthleteState>((set) => ({
@@ -95,11 +97,33 @@ export const useAthleteStore = create<AthleteState>((set) => ({
         }
     },
 
+    deletePromotion: async (id) => {
+        try {
+            await window.api.history.deletePromotion(id);
+            set((state) => ({
+                activePromotions: state.activePromotions.filter((p) => p.id !== id),
+            }));
+        } catch (err: unknown) {
+            set({ error: (err as Error).message });
+        }
+    },
+
     addMedal: async (data) => {
         try {
             const newMedal = await window.api.history.addMedal(data);
             set((state) => ({
                 activeMedals: [newMedal, ...state.activeMedals],
+            }));
+        } catch (err: unknown) {
+            set({ error: (err as Error).message });
+        }
+    },
+
+    deleteMedal: async (id) => {
+        try {
+            await window.api.history.deleteMedal(id);
+            set((state) => ({
+                activeMedals: state.activeMedals.filter((m) => m.id !== id),
             }));
         } catch (err: unknown) {
             set({ error: (err as Error).message });

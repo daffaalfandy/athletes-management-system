@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Calendar, Image as ImageIcon } from 'lucide-react';
+import { Plus, Calendar, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { useAthleteStore } from '../useAthleteStore';
 import { Rank } from '../../../../shared/types/domain';
 import { PromotionSchema, Promotion } from '../../../../shared/schemas';
@@ -13,7 +13,7 @@ interface TimelineProps {
 }
 
 export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
-    const { activePromotions, addPromotion, historyLoading, error } = useAthleteStore();
+    const { activePromotions, addPromotion, deletePromotion, historyLoading, error } = useAthleteStore();
     const [isAdding, setIsAdding] = useState(false);
     const [viewingProof, setViewingProof] = useState<{ title: string, date: string, imagePath?: string } | null>(null);
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
@@ -76,6 +76,12 @@ export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
         const path = await window.api.files.selectImage();
         if (path) {
             setSelectedFile(path);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Are you sure you want to delete this promotion record? This action cannot be undone.')) {
+            await deletePromotion(id);
         }
     };
 
@@ -168,13 +174,21 @@ export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
                                 <div className="mt-1.5 flex">
                                     <button
                                         onClick={() => setViewingProof({ title: promo.rank, date: promo.date, imagePath: promo.proof_image_path })}
-                                        className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 hover:text-blue-600 hover:border-blue-200 hover:shadow-sm transition-all group"
+                                        className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 hover:text-blue-600 hover:border-blue-200 hover:shadow-sm transition-all group mr-2"
                                         title="View Proof"
                                     >
                                         <div className="bg-slate-100 p-0.5 rounded group-hover:bg-blue-50 transition-colors">
                                             <ImageIcon size={10} />
                                         </div>
                                         <span className="font-medium">View Proof</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => promo.id && handleDelete(promo.id)}
+                                        className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                        title="Delete Record"
+                                    >
+                                        <Trash2 size={12} />
                                     </button>
                                 </div>
                             </div>

@@ -13,8 +13,10 @@ export interface IElectronAPI {
     history: {
         addPromotion: (data: unknown) => Promise<Promotion>;
         getPromotions: (athleteId: number) => Promise<Promotion[]>;
+        deletePromotion: (id: number) => Promise<boolean>;
         addMedal: (data: unknown) => Promise<Medal>;
         getMedals: (athleteId: number) => Promise<Medal[]>;
+        deleteMedal: (id: number) => Promise<boolean>;
     };
     system: {
         backupDatabase: () => Promise<{ success: boolean; data?: string; error?: string }>;

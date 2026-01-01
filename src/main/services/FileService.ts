@@ -114,6 +114,24 @@ export const FileService = {
             console.error('[FileService] Error downloading file:', error);
             throw error;
         }
+    },
+
+    async deleteFile(relativePath: string): Promise<boolean> {
+        try {
+            const vaultPath = this.getVaultPath();
+            const safeRelative = path.normalize(relativePath).replace(/^(\.\.[\/\\])+/, '');
+            const targetPath = path.join(vaultPath, safeRelative);
+
+            if (fs.existsSync(targetPath)) {
+                await fs.promises.unlink(targetPath);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('[FileService] Error deleting file:', error);
+            // Don't throw for deletion errors, just return false
+            return false;
+        }
     }
 };
 

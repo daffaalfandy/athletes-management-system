@@ -36,6 +36,12 @@ const STATUS_ORDER: Record<string, number> = {
     [ActivityStatus.Dormant]: 3,
 };
 
+// Story 5.1: Weight Class Divisions (Placeholder - will be replaced by ruleset-based logic in Story 5.3)
+const WEIGHT_DIVISIONS = {
+    male: ['-60kg', '-66kg', '-73kg', '-81kg', '-90kg', '-100kg', '+100kg'],
+    female: ['-48kg', '-52kg', '-57kg', '-63kg', '-70kg', '-78kg', '+78kg'],
+};
+
 export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const { athletes, deleteAthlete } = useAthleteStore();
     const { loadRulesets } = useRulesetStore();
@@ -49,13 +55,18 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     }, [loadRulesets]);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [rankFilter, setRankFilter] = useState('');
-    const [clubFilter, setClubFilter] = useState('');
     const [referenceYear, setReferenceYear] = useState(currentYear);
     const [sortConfig, setSortConfig] = useState<{ key: SortColumn; direction: SortDirection }>({
         key: 'name',
         direction: 'asc',
     });
+
+    // Story 5.1: Roster Filter States
+    const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
+    const [ageCategoryFilter, setAgeCategoryFilter] = useState<string[]>([]);
+    const [weightClassFilter, setWeightClassFilter] = useState<string[]>([]);
+    const [rankFilter, setRankFilter] = useState<string[]>([]); // Changed to array for multi-select
+    const [clubFilter, setClubFilter] = useState<string[]>([]); // Changed to array for multi-select
 
     // Generate year options (current year + next 3 years)
     const yearOptions = useMemo(() => {
@@ -63,22 +74,46 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     }, [currentYear]);
 
     // Helper to derive UI fields from backend data
-    const enhanceAthlete = useCallback((athlete: Athlete) => ({
-        ...athlete,
-        // TODO: Implement real weight class logic in a shared utility
-        weightClass: athlete.weight > 0 ? `-${athlete.weight}kg` : 'Open',
-        ageCategory: calculateAgeCategory(
-            athlete.birthDate,
-            athlete.gender,
-            activeRuleset?.categories || [],
-            referenceYear // Use selected reference year
-        ),
-        // TODO: Fetch club name from ClubStore when implemented
-        clubName: athlete.clubId ? `Club #${athlete.clubId}` : 'Unattached',
-        // TODO: Real status logic based on attendance
-        status: ActivityStatus.Constant,
-        isVerified: true
-    }), [activeRuleset, referenceYear]);
+    const enhanceAthlete = useCallback((athlete: Athlete) => {
+        // Calculate weight class based on gender and weight
+        let weightClass = 'Unclassified';
+        if (athlete.weight > 0) {
+            const divisions = WEIGHT_DIVISIONS[athlete.gender];
+            for (const division of divisions) {
+                if (division.startsWith('+')) {
+                    // For +100kg or +78kg, assign if weight is greater than the threshold
+                    const threshold = parseInt(division.substring(1).replace('kg', ''));
+                    if (athlete.weight > threshold) {
+                        weightClass = division;
+                        break;
+                    }
+                } else {
+                    // For -60kg, -66kg, etc., assign if weight is less than or equal to the limit
+                    const limit = parseInt(division.substring(1).replace('kg', ''));
+                    if (athlete.weight <= limit) {
+                        weightClass = division;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return {
+            ...athlete,
+            weightClass,
+            ageCategory: calculateAgeCategory(
+                athlete.birthDate,
+                athlete.gender,
+                activeRuleset?.categories || [],
+                referenceYear // Use selected reference year
+            ),
+            // TODO: Fetch club name from ClubStore when implemented
+            clubName: athlete.clubId ? `Club #${athlete.clubId}` : 'Unattached',
+            // TODO: Real status logic based on attendance
+            status: ActivityStatus.Constant,
+            isVerified: true
+        };
+    }, [activeRuleset, referenceYear]);
 
     // Filtering & Sorting Logic
     const filteredAthletes = useMemo(() => {
@@ -86,9 +121,15 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         const results = athletes.map(enhanceAthlete).filter(
             (athlete) => {
                 const matchesName = athlete.name.toLowerCase().includes(term);
-                const matchesRank = rankFilter ? athlete.rank === rankFilter : true;
-                const matchesClub = clubFilter ? athlete.clubName === clubFilter : true;
-                return matchesName && matchesRank && matchesClub;
+
+                // Story 5.1: New roster filters
+                const matchesGender = genderFilter === 'all' || athlete.gender === genderFilter;
+                const matchesAgeCategory = ageCategoryFilter.length === 0 || ageCategoryFilter.includes(athlete.ageCategory);
+                const matchesWeightClass = weightClassFilter.length === 0 || weightClassFilter.includes(athlete.weightClass);
+                const matchesRank = rankFilter.length === 0 || rankFilter.includes(athlete.rank); // Multi-select
+                const matchesClub = clubFilter.length === 0 || clubFilter.includes(athlete.clubName); // Multi-select
+
+                return matchesName && matchesGender && matchesAgeCategory && matchesWeightClass && matchesRank && matchesClub;
             }
         );
 
@@ -112,7 +153,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                     break;
                 case 'status':
                     valA = STATUS_ORDER[a.status] || 0;
-                    valB = STATUS_ORDER[b.status] || 0;
+                    valB = STATUS_ORDER[a.status] || 0;
                     break;
                 default:
                     return 0;
@@ -122,13 +163,29 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
             if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
             return 0;
         });
-    }, [athletes, searchTerm, rankFilter, clubFilter, sortConfig, enhanceAthlete]);
+    }, [athletes, searchTerm, sortConfig, enhanceAthlete, genderFilter, ageCategoryFilter, weightClassFilter, rankFilter, clubFilter]);
 
     // Derive unique clubs for filter dropdown
     const availableClubs = useMemo(() => {
         const clubs = new Set(athletes.map(a => a.clubId ? `Club #${a.clubId}` : 'Unattached'));
         return Array.from(clubs).sort();
     }, [athletes]);
+
+    // Story 5.1: Extract available age categories from active ruleset
+    const availableAgeCategories = useMemo(() => {
+        if (!activeRuleset?.categories) return [];
+        const categories = new Set(activeRuleset.categories.map(cat => cat.name));
+        return Array.from(categories).sort();
+    }, [activeRuleset]);
+
+    // Story 5.1: Get available weight classes based on current gender filter
+    const availableWeightClasses = useMemo(() => {
+        if (genderFilter === 'all') {
+            // Show both male and female divisions when "all" is selected
+            return [...WEIGHT_DIVISIONS.male, ...WEIGHT_DIVISIONS.female].sort();
+        }
+        return WEIGHT_DIVISIONS[genderFilter];
+    }, [genderFilter]);
 
     const handleSort = (key: SortColumn) => {
         setSortConfig((prev) => ({
@@ -154,69 +211,215 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         onEdit(athlete);
     };
 
+    // Story 5.1: Filter handlers
+    const handleClearAllFilters = () => {
+        setSearchTerm('');
+        setGenderFilter('all');
+        setAgeCategoryFilter([]);
+        setWeightClassFilter([]);
+        setRankFilter([]);
+        setClubFilter([]);
+    };
+
+    const toggleAgeCategory = (category: string) => {
+        setAgeCategoryFilter(prev =>
+            prev.includes(category)
+                ? prev.filter(c => c !== category)
+                : [...prev, category]
+        );
+    };
+
+    const toggleWeightClass = (weightClass: string) => {
+        setWeightClassFilter(prev =>
+            prev.includes(weightClass)
+                ? prev.filter(w => w !== weightClass)
+                : [...prev, weightClass]
+        );
+    };
+
+    const toggleRank = (rank: string) => {
+        setRankFilter(prev =>
+            prev.includes(rank)
+                ? prev.filter(r => r !== rank)
+                : [...prev, rank]
+        );
+    };
+
+    const toggleClub = (club: string) => {
+        setClubFilter(prev =>
+            prev.includes(club)
+                ? prev.filter(c => c !== club)
+                : [...prev, club]
+        );
+    };
+
+    // Check if any filters are active
+    const hasActiveFilters = searchTerm !== '' || genderFilter !== 'all' ||
+        ageCategoryFilter.length > 0 || weightClassFilter.length > 0 ||
+        rankFilter.length > 0 || clubFilter.length > 0;
+
     return (
         <div className="flex flex-col h-full bg-slate-50">
-            {/* Control Bar */}
-            <div className="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between sticky top-0 z-10">
-                <div className="flex items-center gap-4 flex-1">
-                    <div className="relative flex-1 max-w-sm group">
+            {/* Control Bar - Improved Multi-Row Layout */}
+            <div className="px-6 py-4 bg-white border-b border-slate-200 sticky top-0 z-20">
+                {/* Row 1: Search + Gender + Year + Count */}
+                <div className="flex items-center gap-3 flex-wrap mb-3">
+                    {/* Search Bar */}
+                    <div className="relative flex-1 min-w-[280px] max-w-md group">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                         </div>
                         <input
                             type="text"
                             placeholder="Search by name..."
-                            className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all shadow-sm"
+                            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-lg leading-5 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all shadow-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
-                    <select
-                        value={rankFilter}
-                        onChange={(e) => setRankFilter(e.target.value)}
-                        className="block w-40 pl-3 pr-8 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm"
-                    >
-                        <option value="">All Ranks</option>
-                        {Object.values(Rank).map((rank) => (
-                            <option key={rank} value={rank}>{rank}</option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={clubFilter}
-                        onChange={(e) => setClubFilter(e.target.value)}
-                        className="block w-40 pl-3 pr-8 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm"
-                    >
-                        <option value="">All Clubs</option>
-                        {availableClubs.map((club) => (
-                            <option key={club} value={club}>{club}</option>
-                        ))}
-                    </select>
-
-                    {/* Tournament Year Selector */}
-                    <div className="flex items-center gap-2 ml-2 pl-2 border-l border-slate-200">
-                        <Calendar className="h-4 w-4 text-slate-400" />
-                        <select
-                            value={referenceYear}
-                            onChange={(e) => setReferenceYear(Number(e.target.value))}
-                            className="block w-32 pl-3 pr-8 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm font-medium"
-                            title="Select tournament year for age category calculation"
+                    {/* Story 5.1: Gender Filter Toggle - Larger Buttons */}
+                    <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden shadow-sm bg-slate-50">
+                        <button
+                            onClick={() => setGenderFilter('all')}
+                            className={`px-4 py-2.5 text-sm font-medium transition-all ${genderFilter === 'all'
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                }`}
                         >
-                            {yearOptions.map((year) => (
-                                <option key={year} value={year}>
-                                    {year === currentYear ? `${year} (Current)` : year}
-                                </option>
-                            ))}
-                        </select>
+                            All
+                        </button>
+                        <button
+                            onClick={() => setGenderFilter('male')}
+                            className={`px-4 py-2.5 text-sm font-medium transition-all border-l border-slate-200 ${genderFilter === 'male'
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                }`}
+                        >
+                            Male
+                        </button>
+                        <button
+                            onClick={() => setGenderFilter('female')}
+                            className={`px-4 py-2.5 text-sm font-medium transition-all border-l border-slate-200 ${genderFilter === 'female'
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                }`}
+                        >
+                            Female
+                        </button>
                     </div>
 
-                    <div className="flex items-center text-xs text-slate-500 font-medium ml-auto">
-                        <Filter className="w-3 h-3 mr-1.5" />
+                    {/* Tournament Year Selector */}
+                    <MultiSelectDropdown
+                        label="Tournament Year"
+                        options={yearOptions.map(year =>
+                            year === currentYear ? `${year} (Current)` : year.toString()
+                        )}
+                        selectedOptions={[referenceYear === currentYear ? `${referenceYear} (Current)` : referenceYear.toString()]}
+                        onToggle={(yearStr) => {
+                            const year = parseInt(yearStr.replace(' (Current)', ''));
+                            setReferenceYear(year);
+                        }}
+                        onClear={() => setReferenceYear(currentYear)}
+                        onSelectAll={() => { }} // Not applicable for single-select
+                        hideActions={true}
+                    />
+
+                    {/* Result Count */}
+                    <div className="flex items-center text-sm text-slate-500 font-medium ml-auto">
+                        <Filter className="w-4 h-4 mr-2" />
                         Showing {filteredAthletes.length} of {athletes.length}
                     </div>
                 </div>
+
+                {/* Row 2: Roster Filters + Standard Filters */}
+                <div className="flex items-center gap-3 flex-wrap">
+                    {/* Story 5.1: Age Category Multi-Select */}
+                    <MultiSelectDropdown
+                        label="Age Category"
+                        options={availableAgeCategories}
+                        selectedOptions={ageCategoryFilter}
+                        onToggle={toggleAgeCategory}
+                        onClear={() => setAgeCategoryFilter([])}
+                        onSelectAll={() => setAgeCategoryFilter(availableAgeCategories)}
+                    />
+
+                    {/* Story 5.1: Weight Class Multi-Select */}
+                    <MultiSelectDropdown
+                        label="Weight Class"
+                        options={availableWeightClasses}
+                        selectedOptions={weightClassFilter}
+                        onToggle={toggleWeightClass}
+                        onClear={() => setWeightClassFilter([])}
+                        onSelectAll={() => setWeightClassFilter(availableWeightClasses)}
+                    />
+
+                    {/* Rank Filter */}
+                    <MultiSelectDropdown
+                        label="Rank"
+                        options={Object.values(Rank)}
+                        selectedOptions={rankFilter}
+                        onToggle={toggleRank}
+                        onClear={() => setRankFilter([])}
+                        onSelectAll={() => setRankFilter(Object.values(Rank))}
+                    />
+
+                    {/* Club Filter */}
+                    <MultiSelectDropdown
+                        label="Club"
+                        options={availableClubs}
+                        selectedOptions={clubFilter}
+                        onToggle={toggleClub}
+                        onClear={() => setClubFilter([])}
+                        onSelectAll={() => setClubFilter(availableClubs)}
+                    />
+                </div>
             </div>
+
+            {/* Story 5.1: Active Filter Indicators */}
+            {hasActiveFilters && (
+                <div className="px-6 py-3 bg-blue-50 border-b border-blue-100 flex items-center gap-3">
+                    <span className="text-xs font-medium text-slate-600">Active Filters:</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {genderFilter !== 'all' && (
+                            <span className="px-2 py-1 bg-white border border-blue-200 rounded text-xs text-slate-700">
+                                Gender: <strong>{genderFilter}</strong>
+                            </span>
+                        )}
+                        {ageCategoryFilter.length > 0 && (
+                            <span className="px-2 py-1 bg-white border border-blue-200 rounded text-xs text-slate-700">
+                                Age: <strong>{ageCategoryFilter.join(', ')}</strong>
+                            </span>
+                        )}
+                        {weightClassFilter.length > 0 && (
+                            <span className="px-2 py-1 bg-white border border-blue-200 rounded text-xs text-slate-700">
+                                Weight: <strong>{weightClassFilter.join(', ')}</strong>
+                            </span>
+                        )}
+                        {rankFilter.length > 0 && (
+                            <span className="px-2 py-1 bg-white border border-blue-200 rounded text-xs text-slate-700">
+                                Rank: <strong>{rankFilter.join(', ')}</strong>
+                            </span>
+                        )}
+                        {clubFilter.length > 0 && (
+                            <span className="px-2 py-1 bg-white border border-blue-200 rounded text-xs text-slate-700">
+                                Club: <strong>{clubFilter.join(', ')}</strong>
+                            </span>
+                        )}
+                        {searchTerm && (
+                            <span className="px-2 py-1 bg-white border border-blue-200 rounded text-xs text-slate-700">
+                                Search: <strong>"{searchTerm}"</strong>
+                            </span>
+                        )}
+                    </div>
+                    <button
+                        onClick={handleClearAllFilters}
+                        className="ml-auto px-3 py-1 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors"
+                    >
+                        Clear All Filters
+                    </button>
+                </div>
+            )}
 
             {/* List Container */}
             <div className="flex-1 overflow-x-auto overflow-y-auto">
@@ -370,6 +573,110 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                     </tbody>
                 </table>
             </div>
+        </div>
+    );
+};
+
+// Story 5.1: Multi-Select Dropdown Component
+interface MultiSelectDropdownProps {
+    label: string;
+    options: string[];
+    selectedOptions: string[];
+    onToggle: (option: string) => void;
+    onClear: () => void;
+    onSelectAll: () => void;
+    hideActions?: boolean; // Optional: hide Select All/Clear buttons
+}
+
+const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
+    label,
+    options,
+    selectedOptions,
+    onToggle,
+    onClear,
+    onSelectAll,
+    hideActions = false,
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium shadow-sm transition-all min-w-[160px]"
+            >
+                <span>{label}</span>
+                {selectedOptions.length > 0 && (
+                    <span className="px-1.5 py-0.5 bg-blue-500 text-white rounded-full text-[10px] font-bold">
+                        {selectedOptions.length}
+                    </span>
+                )}
+                <ChevronDown className={`w-4 h-4 ml-auto transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute top-full mt-1 left-0 bg-white border border-slate-200 rounded-lg shadow-xl min-w-[220px] max-h-[320px] overflow-y-auto z-50">
+                    {/* Select All / Clear All */}
+                    {!hideActions && (
+                        <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100 bg-slate-50 sticky top-0">
+                            <button
+                                onClick={onSelectAll}
+                                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                                Select All
+                            </button>
+                            <button
+                                onClick={onClear}
+                                className="text-xs text-slate-500 hover:text-slate-700 font-medium"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Options List */}
+                    {options.length === 0 ? (
+                        <div className="px-3 py-4 text-xs text-slate-400 text-center">
+                            No options available
+                        </div>
+                    ) : (
+                        <div className="py-1">
+                            {options.map((option) => (
+                                <label
+                                    key={option}
+                                    className="flex items-center gap-2 px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedOptions.includes(option)}
+                                        onChange={() => onToggle(option)}
+                                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-slate-700">{option}</span>
+                                </label>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

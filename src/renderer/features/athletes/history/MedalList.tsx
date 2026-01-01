@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Award, Calendar, Image as ImageIcon } from 'lucide-react';
+import { Plus, Award, Calendar, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { useAthleteStore } from '../useAthleteStore';
 import { MedalSchema, Medal } from '../../../../shared/schemas';
 
@@ -12,7 +12,7 @@ interface MedalListProps {
 }
 
 export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
-    const { activeMedals, addMedal, historyLoading, error } = useAthleteStore();
+    const { activeMedals, addMedal, deleteMedal, historyLoading, error } = useAthleteStore();
     const [isAdding, setIsAdding] = useState(false);
     const [viewingProof, setViewingProof] = useState<{ title: string, date: string, imagePath?: string } | null>(null);
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
@@ -76,6 +76,12 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
         const path = await window.api.files.selectImage();
         if (path) {
             setSelectedFile(path);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Are you sure you want to delete this medal record? This action cannot be undone.')) {
+            await deleteMedal(id);
         }
     };
 
@@ -199,13 +205,21 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
                             <div className="mt-1.5 flex">
                                 <button
                                     onClick={() => setViewingProof({ title: medal.tournament, date: medal.date, imagePath: medal.proof_image_path })}
-                                    className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 hover:text-blue-600 hover:border-blue-200 hover:shadow-sm transition-all group"
+                                    className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 hover:text-blue-600 hover:border-blue-200 hover:shadow-sm transition-all group mr-2"
                                     title="View Proof"
                                 >
                                     <div className="bg-slate-100 p-0.5 rounded group-hover:bg-blue-50 transition-colors">
                                         <ImageIcon size={10} />
                                     </div>
                                     <span className="font-medium">View Proof</span>
+                                </button>
+
+                                <button
+                                    onClick={() => medal.id && handleDelete(medal.id)}
+                                    className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                    title="Delete Record"
+                                >
+                                    <Trash2 size={12} />
                                 </button>
                             </div>
                         </div>

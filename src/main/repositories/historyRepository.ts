@@ -31,6 +31,12 @@ export const historyRepository = {
         return stmt.all(athleteId) as Promotion[];
     },
 
+    deletePromotion: (id: number): Promotion | undefined => {
+        const db = getDatabase();
+        const stmt = db.prepare('DELETE FROM promotions WHERE id = ? RETURNING *');
+        return stmt.get(id) as Promotion | undefined;
+    },
+
     addMedal: (medal: Medal): Medal => {
         const db = getDatabase();
         const stmt = db.prepare(`
@@ -45,6 +51,12 @@ export const historyRepository = {
         const db = getDatabase();
         const stmt = db.prepare('SELECT * FROM medals WHERE athleteId = ? ORDER BY date DESC');
         return stmt.all(athleteId) as Medal[];
+    },
+
+    deleteMedal: (id: number): Medal | undefined => {
+        const db = getDatabase();
+        const stmt = db.prepare('DELETE FROM medals WHERE id = ? RETURNING *');
+        return stmt.get(id) as Medal | undefined;
     },
 
     updatePromotionProof: (id: number, path: string): void => {

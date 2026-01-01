@@ -14,8 +14,10 @@ const api: IElectronAPI = {
     history: {
         addPromotion: (data) => ipcRenderer.invoke('history:addPromotion', data),
         getPromotions: (athleteId) => ipcRenderer.invoke('history:getPromotions', athleteId),
+        deletePromotion: (id) => ipcRenderer.invoke('history:deletePromotion', id),
         addMedal: (data) => ipcRenderer.invoke('history:addMedal', data),
         getMedals: (athleteId) => ipcRenderer.invoke('history:getMedals', athleteId),
+        deleteMedal: (id) => ipcRenderer.invoke('history:deleteMedal', id),
     },
     system: {
         backupDatabase: () => ipcRenderer.invoke('system:backupDatabase'),

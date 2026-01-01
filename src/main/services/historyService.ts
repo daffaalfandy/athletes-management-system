@@ -32,6 +32,17 @@ export function setupHistoryHandlers() {
         return historyRepository.getPromotions(id);
     });
 
+    ipcMain.handle('history:deletePromotion', async (_, id) => {
+        const promotionId = z.number().parse(id);
+        const deleted = historyRepository.deletePromotion(promotionId);
+
+        if (deleted && deleted.proof_image_path) {
+            await FileService.deleteFile(deleted.proof_image_path);
+        }
+
+        return !!deleted;
+    });
+
     ipcMain.handle('history:addMedal', async (_, data: any) => {
         const { tempFilePath, ...rest } = data;
         const validated = MedalSchema.parse(rest);
@@ -56,5 +67,16 @@ export function setupHistoryHandlers() {
     ipcMain.handle('history:getMedals', async (_, athleteId) => {
         const id = z.number().parse(athleteId);
         return historyRepository.getMedals(id);
+    });
+
+    ipcMain.handle('history:deleteMedal', async (_, id) => {
+        const medalId = z.number().parse(id);
+        const deleted = historyRepository.deleteMedal(medalId);
+
+        if (deleted && deleted.proof_image_path) {
+            await FileService.deleteFile(deleted.proof_image_path);
+        }
+
+        return !!deleted;
     });
 }
