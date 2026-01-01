@@ -7,8 +7,8 @@ export const historyRepository = {
     addPromotion: (promotion: Promotion): Promotion => {
         const db = getDatabase();
         const insert = db.prepare(`
-            INSERT INTO promotions (athleteId, rank, date, notes)
-            VALUES (@athleteId, @rank, @date, @notes)
+            INSERT INTO promotions (athleteId, rank, date, notes, proof_image_path)
+            VALUES (@athleteId, @rank, @date, @notes, @proof_image_path)
         `);
 
         const updateAthlete = db.prepare(`
@@ -16,7 +16,7 @@ export const historyRepository = {
         `);
 
         const transaction = db.transaction((data) => {
-            const info = insert.run(data);
+            const info = insert.run({ ...data, proof_image_path: data.proof_image_path || null });
             updateAthlete.run({ rank: data.rank, athleteId: data.athleteId });
             return info;
         });
@@ -34,10 +34,10 @@ export const historyRepository = {
     addMedal: (medal: Medal): Medal => {
         const db = getDatabase();
         const stmt = db.prepare(`
-            INSERT INTO medals (athleteId, tournament, date, medal, category)
-            VALUES (@athleteId, @tournament, @date, @medal, @category)
+            INSERT INTO medals (athleteId, tournament, date, medal, category, proof_image_path)
+            VALUES (@athleteId, @tournament, @date, @medal, @category, @proof_image_path)
         `);
-        const info = stmt.run(medal);
+        const info = stmt.run({ ...medal, proof_image_path: medal.proof_image_path || null });
         return { ...medal, id: Number(info.lastInsertRowid) };
     },
 
@@ -45,5 +45,15 @@ export const historyRepository = {
         const db = getDatabase();
         const stmt = db.prepare('SELECT * FROM medals WHERE athleteId = ? ORDER BY date DESC');
         return stmt.all(athleteId) as Medal[];
+    },
+
+    updatePromotionProof: (id: number, path: string): void => {
+        const db = getDatabase();
+        db.prepare('UPDATE promotions SET proof_image_path = ? WHERE id = ?').run(path, id);
+    },
+
+    updateMedalProof: (id: number, path: string): void => {
+        const db = getDatabase();
+        db.prepare('UPDATE medals SET proof_image_path = ? WHERE id = ?').run(path, id);
     }
 };

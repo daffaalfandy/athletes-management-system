@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Search, User, Trash2, Filter, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
+import { Search, User, Trash2, Filter, ChevronUp, ChevronDown, Calendar, FileCheck, FileX } from 'lucide-react';
 import { useAthleteStore } from './useAthleteStore';
 import { BeltBadge } from '../../components/BeltBadge';
 import { ActivityStatus, Rank } from '../../../shared/types/domain';
@@ -279,8 +279,12 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                                 <td className="px-3 pl-4 py-2.5 whitespace-nowrap">
                                     <div className="flex items-center">
                                         {/* Initials Avatar */}
-                                        <div className="flex-shrink-0 h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                                            {athlete.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                                        <div className="flex-shrink-0 h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 overflow-hidden">
+                                            {athlete.profile_photo_path ? (
+                                                <img src={`dossier://${athlete.profile_photo_path}`} alt={athlete.name} className="h-full w-full object-cover" />
+                                            ) : (
+                                                athlete.name.split(' ').map(n => n[0]).join('').substring(0, 2)
+                                            )}
                                         </div>
                                         <div className="ml-4">
                                             <div className="text-sm font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
@@ -295,6 +299,24 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                                                 <span>•</span>
                                                 <span>{athlete.birthDate?.toString().split('-')[0] || 'N/A'}</span>
                                             </div>
+                                        </div>
+                                        {/* Dossier Status Badge (Visible mostly on desktop or if critical) */}
+                                        <div className="ml-auto pr-4 hidden sm:block">
+                                            {athlete.profile_photo_path ? (
+                                                <div className="group/dossier relative">
+                                                    <FileCheck size={16} className="text-emerald-500" />
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover/dossier:opacity-100 transition-opacity whitespace-nowrap mb-1">
+                                                        Dossier Active
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <div className="group/dossier relative">
+                                                    <FileX size={16} className="text-slate-300" />
+                                                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover/dossier:opacity-100 transition-opacity whitespace-nowrap mb-1">
+                                                        No Photo
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </td>

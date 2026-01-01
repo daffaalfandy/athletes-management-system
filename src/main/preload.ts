@@ -29,6 +29,12 @@ const api: IElectronAPI = {
         delete: (id) => ipcRenderer.invoke('rulesets:delete', id),
         setActive: (id) => ipcRenderer.invoke('rulesets:setActive', id),
     },
+    files: {
+        selectImage: () => ipcRenderer.invoke('files:selectImage'),
+        uploadToVault: (sourcePath, type, recordId) => ipcRenderer.invoke('files:uploadToVault', sourcePath, type, recordId),
+        getImagePath: (relativePath) => ipcRenderer.invoke('files:getImagePath', relativePath),
+        downloadVaultFile: (relativePath, defaultName) => ipcRenderer.invoke('files:downloadVaultFile', relativePath, defaultName),
+    },
 };
 
 contextBridge.exposeInMainWorld('api', api);

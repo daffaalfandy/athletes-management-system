@@ -7,12 +7,13 @@ export const athleteRepository = {
   create: (athlete: Athlete): Athlete => {
     const db = getDatabase();
     const stmt = db.prepare(`
-      INSERT INTO athletes (name, birthDate, gender, weight, rank, clubId, birth_place, region, address, phone, email, parent_guardian, parent_phone)
-      VALUES (@name, @birthDate, @gender, @weight, @rank, @clubId, @birth_place, @region, @address, @phone, @email, @parent_guardian, @parent_phone)
+      INSERT INTO athletes (name, birthDate, gender, weight, rank, clubId, profile_photo_path, birth_place, region, address, phone, email, parent_guardian, parent_phone)
+      VALUES (@name, @birthDate, @gender, @weight, @rank, @clubId, @profile_photo_path, @birth_place, @region, @address, @phone, @email, @parent_guardian, @parent_phone)
     `);
     const safeAthlete = {
       ...athlete,
       clubId: athlete.clubId ?? null,
+      profile_photo_path: athlete.profile_photo_path || null,
       birth_place: athlete.birth_place || '',
       region: athlete.region || '',
       address: athlete.address || '',
@@ -41,6 +42,7 @@ export const athleteRepository = {
           weight = @weight,
           rank = @rank,
           clubId = @clubId,
+          profile_photo_path = @profile_photo_path,
           birth_place = @birth_place,
           region = @region,
           address = @address,
@@ -54,6 +56,7 @@ export const athleteRepository = {
     const safeAthlete = {
       ...athlete,
       clubId: athlete.clubId ?? null,
+      profile_photo_path: athlete.profile_photo_path || null,
       birth_place: athlete.birth_place || '',
       region: athlete.region || '',
       address: athlete.address || '',

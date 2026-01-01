@@ -15,7 +15,8 @@ interface TimelineProps {
 export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
     const { activePromotions, addPromotion, historyLoading, error } = useAthleteStore();
     const [isAdding, setIsAdding] = useState(false);
-    const [viewingProof, setViewingProof] = useState<{ title: string, date: string } | null>(null);
+    const [viewingProof, setViewingProof] = useState<{ title: string, date: string, imagePath?: string } | null>(null);
+    const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
     const sortedPromotions = React.useMemo(() => {
         return [...activePromotions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -55,9 +56,27 @@ export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
     }
 
     const onAddPromotion = async (data: Omit<Promotion, 'id'>) => {
-        await addPromotion({ ...data, athleteId }); // Ensure athleteId is set
-        reset({ athleteId, rank: Rank.White, date: new Date().toISOString().split('T')[0], notes: '' });
-        setIsAdding(false);
+        try {
+            await addPromotion({ ...data, athleteId, tempFilePath: selectedFile || undefined });
+            reset({ athleteId, rank: Rank.White, date: new Date().toISOString().split('T')[0], notes: '' });
+            setSelectedFile(null);
+            setIsAdding(false);
+        } catch (error: any) {
+            console.error("Failed to add promotion", error);
+            const message = error.message || String(error);
+            if (message.includes('File too large')) {
+                alert("The selected file is too large. Please choose an image smaller than 1MB.");
+            } else {
+                alert("Failed to save promotion. Please check details and try again.");
+            }
+        }
+    };
+
+    const handleFileSelect = async () => {
+        const path = await window.api.files.selectImage();
+        if (path) {
+            setSelectedFile(path);
+        }
     };
 
     return (
@@ -68,6 +87,7 @@ export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
                 title={viewingProof?.title || ''}
                 date={viewingProof?.date || ''}
                 type="rank"
+                imagePath={viewingProof?.imagePath}
             />
 
             <div className="flex items-center justify-between">
@@ -108,11 +128,15 @@ export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
                     </div>
                     <div className="mb-4">
                         <label className="block text-xs font-semibold text-slate-600 mb-1">Proof of Promotion (Optional)</label>
-                        <div className="border-2 border-dashed border-slate-300 rounded-lg p-3 flex items-center justify-center gap-2 text-slate-400 hover:bg-slate-50 hover:border-blue-300 transition-all cursor-not-allowed bg-slate-50/50">
+                        <div
+                            onClick={handleFileSelect}
+                            className={`border-2 border-dashed rounded-lg p-3 flex items-center justify-center gap-2 transition-all cursor-pointer ${selectedFile ? 'border-blue-300 bg-blue-50 text-blue-600' : 'border-slate-300 text-slate-400 hover:bg-slate-50 hover:border-blue-300'
+                                }`}
+                        >
                             <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-                                <span className="text-xs font-bold text-slate-500">IMG</span>
+                                {selectedFile ? <ImageIcon size={16} /> : <span className="text-xs font-bold text-slate-500">IMG</span>}
                             </div>
-                            <span className="text-xs">Photo upload coming soon...</span>
+                            <span className="text-xs truncate max-w-[200px]">{selectedFile ? selectedFile.split(/[/\\]/).pop() : 'Click to select proof image...'}</span>
                         </div>
                     </div>
                     <div className="mb-4">
@@ -143,7 +167,7 @@ export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
                                 {promo.notes && <p className="text-xs text-slate-500 mt-0.5">{promo.notes}</p>}
                                 <div className="mt-1.5 flex">
                                     <button
-                                        onClick={() => setViewingProof({ title: promo.rank, date: promo.date })}
+                                        onClick={() => setViewingProof({ title: promo.rank, date: promo.date, imagePath: promo.proof_image_path })}
                                         className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white px-2 py-1 rounded border border-slate-200 hover:text-blue-600 hover:border-blue-200 hover:shadow-sm transition-all group"
                                         title="View Proof"
                                     >

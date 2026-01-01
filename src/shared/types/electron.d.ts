@@ -28,6 +28,12 @@ export interface IElectronAPI {
         delete: (id: number) => Promise<boolean>;
         setActive: (id: number) => Promise<boolean>;
     };
+    files: {
+        selectImage: () => Promise<string | null>;
+        uploadToVault: (sourcePath: string, type: 'profiles' | 'certificates' | 'medals', recordId: number) => Promise<string>;
+        getImagePath: (relativePath: string) => Promise<string>;
+        downloadVaultFile: (relativePath: string, defaultName?: string) => Promise<boolean>;
+    };
 }
 
 declare global {

@@ -130,8 +130,8 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E3.S3: Rank Order Configuration
 **As a technical sensei,** I want to define the order of belt ranks so that the system knows how to sort athletes by seniority.
 **Acceptance Criteria:**
-- [ ] Configuration UI to reorder ranks (e.g., White < Yellow).
-- [ ] Sorting logic in Athlete List respects this hierarchy.
+- [x] Configuration UI to reorder ranks (e.g., White < Yellow).
+- [x] Sorting logic in Athlete List respects this hierarchy.
 
 ---
 
@@ -141,25 +141,25 @@ This document outlines the epics and user stories for the Athletes Management Sy
 ### Story E4.S1: Document Attachment (Link to Local File)
 **As a coach,** I want to link a scanned certificate to an athlete's profile so that I have a digital record of their rank.
 **Acceptance Criteria:**
-- [ ] File selection dialog restricted to image formats.
-- [ ] System handles local path persistence (absolute paths or vault relative).
-- [ ] Athlete list shows "Dossier Status" (e.g., "Scan Attached").
+- [x] File selection dialog restricted to image formats.
+- [x] System handles local path persistence (absolute paths or vault relative).
+- [x] Athlete list shows "Dossier Status" (e.g., "Scan Attached").
 
 ### Story E4.S2: Certificate Preview (Detail Drawer)
 **As a coach,** I want to preview certificate scans and proof images (e.g., from Rank/Medal history) in a slide-out drawer or modal so that I can verify data without leaving the context.
 **Acceptance Criteria:**
-- [ ] Slide-out `DetailDrawer` component or High-Fidelity Modal.
-- [ ] High-resolution image preview.
-- [ ] Toggle for "Verified" status once the scan is checked.
-- [ ] Integrated with "View Proof" buttons in Rank & Medal History.
+- [x] Slide-out `DetailDrawer` component or High-Fidelity Modal (`ProofPreview`).
+- [x] High-resolution image preview (with Zoom).
+- [ ] Toggle for "Verified" status once the scan is checked (Implicit via upload for now).
+- [x] Integrated with "View Proof" buttons in Rank & Medal History.
 
 ### Story E4.S3: Athlete Profile Photo
 **As a coach,** I want to upload a portrait photo of the athlete so that I can generate professional competition IDs.
 **Acceptance Criteria:**
-- [ ] Image upload in the "Profile" tab of the dossier.
-- [ ] Automatic copying to a local "Vault" directory to prevent path breakage.
-- [ ] Square cropping or aspect ratio enforcement.
-- [ ] Image replaces initials as the primary list thumbnail.
+- [x] Image upload in the "Profile" tab of the dossier.
+- [x] Automatic copying to a local "Vault" directory to prevent path breakage.
+- [ ] Square cropping or aspect ratio enforcement (Basic display cropping implemented).
+- [x] Image replaces initials as the primary list thumbnail.
 
 ---
 

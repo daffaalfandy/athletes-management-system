@@ -61,6 +61,7 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
             email: '',
             parent_guardian: '',
             parent_phone: '',
+            profile_photo_path: '',
         },
     });
 
@@ -118,6 +119,66 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
         }
         setEditingField(null);
     };
+
+    const handlePhotoUpload = async () => {
+        try {
+            const filePath = await window.api.files.selectImage();
+            if (!filePath) return;
+
+            // In create mode, we can't upload to vault with ID yet.
+            // We might need to store the source path and upload AFTER creation?
+            // OR we just allow upload for existing athletes only?
+            // Tech spec says: "Handle file selection -> upload -> update athlete record flow"
+            // For new athletes, it might be complex because we need ID.
+            // Let's implement for EXISTING athletes first as per "AC4: Given an athlete has an uploaded profile photo... when viewing... clicking allows re-uploading"
+            // For new athletes, maybe we just show a placeholder "Save athlete to upload photo".
+
+            if (!initialData?.id) {
+                alert("Please save the athlete first before uploading a photo.");
+                return;
+            }
+
+            const vaultPath = await window.api.files.uploadToVault(filePath, 'profiles', initialData.id);
+
+            // Update local state and DB
+            // Sanitize optional fields to avoid "invalid_union" errors with empty strings
+            const currentValues = getValues();
+            const payload = {
+                ...currentValues,
+                profile_photo_path: vaultPath,
+                parent_guardian: currentValues.parent_guardian || undefined,
+                parent_phone: currentValues.parent_phone || undefined,
+                clubId: currentValues.clubId || null,
+                // Ensure other optional fields are handled if necessary, though strings usually fine
+            };
+            await onSubmit(payload);
+
+            // Force reload or update UI? onSubmit usually refreshes.
+        } catch (error: any) {
+            console.error("Upload failed", error);
+            const message = error.message || String(error);
+            if (message.includes('File too large')) {
+                alert("The selected file is too large. Please choose an image smaller than 1MB.");
+            } else {
+                alert("Failed to upload photo. Please check the logs for details.");
+            }
+        }
+    };
+
+    // Helper to get image src
+    const [photoSrc, setPhotoSrc] = useState<string | null>(null);
+    useEffect(() => {
+        const loadPhoto = async () => {
+            const path = watch('profile_photo_path');
+            if (path) {
+                // Use custom protocol for secure loading
+                setPhotoSrc(`dossier://${path}`);
+            } else {
+                setPhotoSrc(null);
+            }
+        };
+        loadPhoto();
+    }, [watch('profile_photo_path')]);
 
     const renderField = (name: keyof Athlete, label: string, type: string = 'text', options?: any[]) => {
         const isEditing = editingField === name;
@@ -277,18 +338,26 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
             <div className="flex-1 overflow-y-auto pr-1">
                 {activeTab === 'profile' ? (
                     <div className="space-y-6 pb-2">
-                        {/* Profile Picture Placeholder */}
                         <div className="flex flex-col items-center gap-4 mb-6 pt-2">
-                            <div className="relative group cursor-not-allowed">
+                            <div className={`relative group ${initialData?.id ? 'cursor-pointer' : 'cursor-not-allowed'}`} onClick={(e) => {
+                                if (initialData?.id) { e.stopPropagation(); handlePhotoUpload(); }
+                            }}>
                                 <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center text-slate-400 overflow-hidden group-hover:border-blue-400 transition-colors shadow-inner">
-                                    {initialData ? (
+                                    {photoSrc ? (
+                                        <img src={photoSrc} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : initialData ? (
                                         <span className="text-2xl font-bold text-slate-500">{initialData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}</span>
                                     ) : (
                                         <User size={40} className="text-slate-300" />
                                     )}
                                 </div>
-                                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight bg-white/90 px-2 py-1 rounded shadow-sm border border-slate-200">Coming Soon</span>
+                                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer" onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (initialData?.id) handlePhotoUpload();
+                                }}>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight bg-white/90 px-2 py-1 rounded shadow-sm border border-slate-200">
+                                        {initialData?.id ? 'Upload Photo' : 'Save First'}
+                                    </span>
                                 </div>
                             </div>
                             <div className="text-center">

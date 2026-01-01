@@ -8,15 +8,16 @@ export const AthleteSchema = z.object({
     weight: z.number().positive(),
     rank: z.string().min(1, 'Rank is required'),
     clubId: z.number().nullable().optional(), // Linked to Clubs table (Story 1.5)
+    profile_photo_path: z.string().optional(),
 
     // Detailed information fields for tournament registration
-    birth_place: z.string().min(2, 'Birth place must be at least 2 characters').max(100, 'Birth place is too long').optional().or(z.literal('')),
-    region: z.string().min(2, 'Region must be at least 2 characters').max(100, 'Region is too long').optional().or(z.literal('')),
-    address: z.string().max(500, 'Address is too long').optional().or(z.literal('')),
-    phone: z.string().regex(/^[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').optional().or(z.literal('')),
-    email: z.string().trim().email('Invalid email format').max(255, 'Email is too long').optional().or(z.literal('')),
-    parent_guardian: z.string().max(200, 'Name is too long').optional().or(z.literal('')),
-    parent_phone: z.string().regex(/^[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').optional().or(z.literal('')),
+    birth_place: z.string().min(2, 'Birth place must be at least 2 characters').max(100, 'Birth place is too long').nullable().optional().or(z.literal('')),
+    region: z.string().min(2, 'Region must be at least 2 characters').max(100, 'Region is too long').nullable().optional().or(z.literal('')),
+    address: z.string().max(500, 'Address is too long').nullable().optional().or(z.literal('')),
+    phone: z.string().regex(/^[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').nullable().optional().or(z.literal('')),
+    email: z.string().trim().email('Invalid email format').max(255, 'Email is too long').nullable().optional().or(z.literal('')),
+    parent_guardian: z.string().max(200, 'Name is too long').nullable().optional().or(z.literal('')),
+    parent_phone: z.string().regex(/^[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').nullable().optional().or(z.literal('')),
 });
 
 export type Athlete = z.infer<typeof AthleteSchema>;
@@ -31,6 +32,7 @@ export const PromotionSchema = z.object({
     rank: z.string(),
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
     notes: z.string().optional(),
+    proof_image_path: z.string().optional(),
 });
 
 export type Promotion = z.infer<typeof PromotionSchema>;
@@ -42,6 +44,7 @@ export const MedalSchema = z.object({
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
     medal: z.enum(['Gold', 'Silver', 'Bronze']),
     category: z.string().optional(),
+    proof_image_path: z.string().optional(),
 });
 
 export type Medal = z.infer<typeof MedalSchema>;

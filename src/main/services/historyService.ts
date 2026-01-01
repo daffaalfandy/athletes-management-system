@@ -1,12 +1,30 @@
+
 import { ipcMain } from 'electron';
 import { historyRepository } from '../repositories/historyRepository';
 import { PromotionSchema, MedalSchema } from '../../shared/schemas';
 import { z } from 'zod';
+import { FileService } from './FileService';
 
 export function setupHistoryHandlers() {
-    ipcMain.handle('history:addPromotion', async (_, data) => {
-        const validated = PromotionSchema.parse(data);
-        return historyRepository.addPromotion(validated);
+    ipcMain.handle('history:addPromotion', async (_, data: any) => {
+        const { tempFilePath, ...rest } = data;
+        const validated = PromotionSchema.parse(rest);
+
+        const newRecord = historyRepository.addPromotion(validated);
+
+        if (tempFilePath && newRecord.id) {
+            try {
+                const isValid = await FileService.validateFileSize(tempFilePath);
+                if (!isValid) throw new Error('File validation failed: File too large (max 1MB)');
+
+                const vaultPath = await FileService.copyToVault(tempFilePath, 'certificates', newRecord.id);
+                historyRepository.updatePromotionProof(newRecord.id, vaultPath);
+                newRecord.proof_image_path = vaultPath;
+            } catch (e) {
+                console.error("Failed to upload promotion proof", e);
+            }
+        }
+        return newRecord;
     });
 
     ipcMain.handle('history:getPromotions', async (_, athleteId) => {
@@ -14,9 +32,25 @@ export function setupHistoryHandlers() {
         return historyRepository.getPromotions(id);
     });
 
-    ipcMain.handle('history:addMedal', async (_, data) => {
-        const validated = MedalSchema.parse(data);
-        return historyRepository.addMedal(validated);
+    ipcMain.handle('history:addMedal', async (_, data: any) => {
+        const { tempFilePath, ...rest } = data;
+        const validated = MedalSchema.parse(rest);
+
+        const newRecord = historyRepository.addMedal(validated);
+
+        if (tempFilePath && newRecord.id) {
+            try {
+                const isValid = await FileService.validateFileSize(tempFilePath);
+                if (!isValid) throw new Error('File validation failed: File too large (max 1MB)');
+
+                const vaultPath = await FileService.copyToVault(tempFilePath, 'medals', newRecord.id);
+                historyRepository.updateMedalProof(newRecord.id, vaultPath);
+                newRecord.proof_image_path = vaultPath;
+            } catch (e) {
+                console.error("Failed to upload medal proof", e);
+            }
+        }
+        return newRecord;
     });
 
     ipcMain.handle('history:getMedals', async (_, athleteId) => {

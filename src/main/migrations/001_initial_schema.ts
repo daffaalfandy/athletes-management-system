@@ -14,6 +14,7 @@ export const initialSchemaMigration: Migration = {
             weight REAL NOT NULL,
             rank TEXT NOT NULL,
             clubId INTEGER,
+            profile_photo_path TEXT,
             
             -- Detailed information fields for tournament registration
             birth_place TEXT,
@@ -42,6 +43,7 @@ export const initialSchemaMigration: Migration = {
                 rank TEXT NOT NULL,
                 date TEXT NOT NULL,
                 notes TEXT,
+                proof_image_path TEXT,
                 createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (athleteId) REFERENCES athletes(id) ON DELETE CASCADE
             );
@@ -53,6 +55,7 @@ export const initialSchemaMigration: Migration = {
                 date TEXT NOT NULL,
                 medal TEXT NOT NULL,
                 category TEXT,
+                proof_image_path TEXT,
                 createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (athleteId) REFERENCES athletes(id) ON DELETE CASCADE
             );

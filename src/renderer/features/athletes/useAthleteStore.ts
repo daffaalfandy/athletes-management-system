@@ -15,8 +15,8 @@ interface AthleteState {
     deleteAthlete: (id: number) => Promise<void>;
 
     loadHistory: (athleteId: number) => Promise<void>;
-    addPromotion: (data: Omit<Promotion, 'id'>) => Promise<void>;
-    addMedal: (data: Omit<Medal, 'id'>) => Promise<void>;
+    addPromotion: (data: Omit<Promotion, 'id'> & { tempFilePath?: string }) => Promise<void>;
+    addMedal: (data: Omit<Medal, 'id'> & { tempFilePath?: string }) => Promise<void>;
 }
 
 export const useAthleteStore = create<AthleteState>((set) => ({

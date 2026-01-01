@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, protocol, net } from 'electron';
 import * as path from 'path';
 import started from 'electron-squirrel-startup';
 import { initializeDatabase } from './db';
@@ -10,6 +10,7 @@ import { historyRepository } from './repositories/historyRepository';
 import { setupHistoryHandlers } from './services/historyService';
 import { setupBackupHandlers } from './services/BackupService';
 import { setupRulesetHandlers } from './services/rulesetService';
+import { setupFileHandlers } from './services/FileService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -47,6 +48,14 @@ const createWindow = () => {
 app.whenReady().then(() => {
     console.log('[MAIN] App is ready, initializing database...');
 
+    // Story 1.6: Register 'dossier' protocol for secure local file access
+    protocol.handle('dossier', (request) => {
+        const url = request.url.replace('dossier://', '');
+        const vaultPath = path.join(app.getPath('userData'), 'dossier');
+        const filePath = path.join(vaultPath, decodeURIComponent(url));
+        return net.fetch('file://' + filePath);
+    });
+
     try {
         const db = initializeDatabase();
 
@@ -66,6 +75,7 @@ app.whenReady().then(() => {
     setupHistoryHandlers();
     setupBackupHandlers();
     setupRulesetHandlers();
+    setupFileHandlers();
 
     createWindow();
 });
