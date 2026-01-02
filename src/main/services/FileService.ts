@@ -38,7 +38,7 @@ export const FileService = {
 
     async ensureVaultDirectories() {
         const vaultPath = this.getVaultPath();
-        const subdirs = ['profiles', 'certificates', 'medals'];
+        const subdirs = ['profiles', 'certificates', 'medals', 'clubs'];
 
         try {
             if (!fs.existsSync(vaultPath)) {
@@ -57,7 +57,7 @@ export const FileService = {
         }
     },
 
-    async copyToVault(sourcePath: string, type: 'profiles' | 'certificates' | 'medals', recordId: number): Promise<string> {
+    async copyToVault(sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs', recordId: number): Promise<string> {
         try {
             await this.ensureVaultDirectories();
 
@@ -142,7 +142,7 @@ export const setupFileHandlers = () => {
         return await FileService.selectImageFile();
     });
 
-    ipcMain.handle('files:uploadToVault', async (_: any, sourcePath: string, type: 'profiles' | 'certificates' | 'medals', recordId: number) => {
+    ipcMain.handle('files:uploadToVault', async (_: any, sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs', recordId: number) => {
         const isValid = await FileService.validateFileSize(sourcePath);
         if (!isValid) {
             throw new Error('File validation failed: File too large (max 1MB)');

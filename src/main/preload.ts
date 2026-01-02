@@ -46,6 +46,13 @@ const api: IElectronAPI = {
         saveRoster: (tournamentId, entries) => ipcRenderer.invoke('tournaments:saveRoster', tournamentId, entries),
         getRoster: (tournamentId) => ipcRenderer.invoke('tournaments:getRoster', tournamentId),
     },
+    clubs: {
+        getAll: () => ipcRenderer.invoke('clubs:getAll'),
+        getById: (id) => ipcRenderer.invoke('clubs:getById', id),
+        create: (data) => ipcRenderer.invoke('clubs:create', data),
+        update: (data) => ipcRenderer.invoke('clubs:update', data),
+        delete: (id) => ipcRenderer.invoke('clubs:delete', id),
+    },
 };
 
 contextBridge.exposeInMainWorld('api', api);

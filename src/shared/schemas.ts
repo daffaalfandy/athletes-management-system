@@ -7,8 +7,14 @@ export const AthleteSchema = z.object({
     gender: z.enum(['male', 'female']),
     weight: z.number().positive(),
     rank: z.string().min(1, 'Rank is required'),
-    clubId: z.number().nullable().optional(), // Linked to Clubs table (Story 1.5)
-    profile_photo_path: z.string().optional(),
+    clubId: z.union([z.number(), z.string(), z.null()])
+        .optional()
+        .transform(val => {
+            if (val === '' || val === null || val === undefined) return null;
+            const num = typeof val === 'number' ? val : parseInt(String(val), 10);
+            return isNaN(num) ? null : num;
+        }),
+    profile_photo_path: z.union([z.string(), z.null(), z.undefined()]).optional(),
 
     // Detailed information fields for tournament registration
     birth_place: z.string().min(2, 'Birth place must be at least 2 characters').max(100, 'Birth place is too long').nullable().optional().or(z.literal('')),
@@ -105,3 +111,21 @@ export const TournamentRosterEntrySchema = z.object({
 
 export type TournamentRosterEntry = z.infer<typeof TournamentRosterEntrySchema>;
 
+// Club Schema
+export const ClubSchema = z.object({
+    id: z.number().optional(),
+    name: z.string().min(1, 'Club name is required').max(200, 'Name is too long'),
+    logo_path: z.string().optional(),
+    contact_person: z.string().max(200, 'Name is too long').optional().or(z.literal('')),
+    contact_phone: z.string().regex(/^[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').optional().or(z.literal('')),
+    contact_email: z.string().trim().email('Invalid email format').max(255, 'Email is too long').optional().or(z.literal('')),
+    location: z.string().max(500, 'Location is too long').optional().or(z.literal('')),
+    created_at: z.string().optional(),
+    updated_at: z.string().optional(),
+});
+
+export type Club = z.infer<typeof ClubSchema>;
+
+export const ClubUpdateSchema = ClubSchema.extend({
+    id: z.number(),
+});

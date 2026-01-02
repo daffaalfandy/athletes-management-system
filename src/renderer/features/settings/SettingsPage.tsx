@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Save, AlertCircle, CheckCircle, Loader2, Upload, Database, Settings2 } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle, Loader2, Upload, Database, Settings2, Building2 } from 'lucide-react';
 import { RulesetList } from './RulesetList';
 import { RulesetEditor } from './RulesetEditor';
-import { Ruleset } from '../../../shared/schemas';
+import { ClubList } from './ClubList';
+import { ClubForm } from './ClubForm';
+import { Ruleset, Club } from '../../../shared/schemas';
 
-type SettingsTab = 'rulesets' | 'database';
+type SettingsTab = 'rulesets' | 'database' | 'clubs';
 
 export const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState<SettingsTab>('rulesets');
     const [editingRuleset, setEditingRuleset] = useState<Ruleset | null>(null);
     const [isAdding, setIsAdding] = useState(false);
+    const [editingClub, setEditingClub] = useState<Club | null>(null);
+    const [isAddingClub, setIsAddingClub] = useState(false);
 
     // Database state
     const [isBackingUp, setIsBackingUp] = useState(false);
@@ -73,6 +77,16 @@ export const SettingsPage = () => {
         setIsAdding(true);
     };
 
+    const handleEditClub = (club: Club) => {
+        setEditingClub(club);
+        setIsAddingClub(false);
+    };
+
+    const handleNewClub = () => {
+        setEditingClub(null);
+        setIsAddingClub(true);
+    };
+
     return (
         <div className="p-8 max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-8">
@@ -90,6 +104,13 @@ export const SettingsPage = () => {
                 >
                     <Settings2 size={18} />
                     Ruleset Management
+                </button>
+                <button
+                    onClick={() => setActiveTab('clubs')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'clubs' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    <Building2 size={18} />
+                    Club Management
                 </button>
                 <button
                     onClick={() => setActiveTab('database')}
@@ -110,6 +131,19 @@ export const SettingsPage = () => {
                             />
                         ) : (
                             <RulesetList onEdit={handleEditRuleset} onAdd={handleNewRuleset} />
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'clubs' && (
+                    <div className="animate-in fade-in duration-300">
+                        {editingClub || isAddingClub ? (
+                            <ClubForm
+                                club={editingClub || undefined}
+                                onBack={() => { setEditingClub(null); setIsAddingClub(false); }}
+                            />
+                        ) : (
+                            <ClubList onEdit={handleEditClub} onAdd={handleNewClub} />
                         )}
                     </div>
                 )}

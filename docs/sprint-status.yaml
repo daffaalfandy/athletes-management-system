@@ -48,7 +48,7 @@ epics:
 
   - id: "E3"
     title: "Rulesets & Dynamic Eligibility"
-    status: "in_progress"
+    status: "done"
     stories:
       - id: "E3.S1"
         title: "Ruleset Definition UI"
@@ -76,7 +76,7 @@ epics:
 
   - id: "E5"
     title: "Roster Selection & Competition"
-    status: "in_progress"
+    status: "done"
     stories:
       - id: "E5.S1"
         title: "Instant-Switch Roster Filters"
@@ -92,7 +92,7 @@ epics:
         status: "done"
       - id: "E5.S5"
         title: "Club Management"
-        status: "to_do"
+        status: "done"
 
   - id: "E6"
     title: "Export Factory (Excel & PDF)"

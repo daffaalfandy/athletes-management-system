@@ -7,6 +7,7 @@ import { ActivityStatus, Rank } from '../../../shared/types/domain';
 import { Athlete, AgeCategory } from '../../../shared/schemas';
 import { calculateAgeCategory } from '../../../shared/judo/calculateAgeCategory';
 import { useRulesetStore } from '../settings/useRulesetStore';
+import { useClubStore } from '../settings/useClubStore';
 
 
 interface AthleteListProps {
@@ -45,8 +46,11 @@ const WEIGHT_DIVISIONS = {
 };
 
 export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
-    const { athletes, deleteAthlete } = useAthleteStore();
-    const { loadRulesets } = useRulesetStore();
+    const athletes = useAthleteStore(state => state.athletes);
+    const deleteAthlete = useAthleteStore(state => state.deleteAthlete);
+    const loadRulesets = useRulesetStore(state => state.loadRulesets);
+    const clubs = useClubStore(state => state.clubs);
+    const loadClubs = useClubStore(state => state.loadClubs);
 
 
     // Use Zustand selector for reactivity
@@ -69,10 +73,11 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
 
 
 
-    // Load rulesets on mount
+    // Load rulesets and clubs on mount
     useEffect(() => {
         loadRulesets();
-    }, [loadRulesets]);
+        loadClubs();
+    }, [loadRulesets, loadClubs]);
 
     // Story 5.3: Validate selected athletes for conflicts
 
@@ -118,13 +123,12 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                 activeRuleset?.categories || [],
                 referenceYear // Use selected reference year
             ),
-            // TODO: Fetch club name from ClubStore when implemented
-            clubName: athlete.clubId ? `Club #${athlete.clubId}` : 'Unattached',
+            clubName: athlete.clubId ? (clubs.find(c => c.id === athlete.clubId)?.name || 'Unknown Club') : 'Unattached',
             // TODO: Real status logic based on attendance
             status: ActivityStatus.Constant,
             isVerified: true
         };
-    }, [activeRuleset, referenceYear]);
+    }, [activeRuleset, referenceYear, clubs]);
 
     // Filtering & Sorting Logic
     const filteredAthletes = useMemo(() => {
@@ -176,11 +180,16 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         });
     }, [athletes, searchTerm, sortConfig, enhanceAthlete, genderFilter, ageCategoryFilter, weightClassFilter, rankFilter, clubFilter]);
 
-    // Derive unique clubs for filter dropdown
+    // Derive unique clubs for filter dropdown - show all clubs, not just assigned ones
     const availableClubs = useMemo(() => {
-        const clubs = new Set(athletes.map(a => a.clubId ? `Club #${a.clubId}` : 'Unattached'));
-        return Array.from(clubs).sort();
-    }, [athletes]);
+        const clubNames = clubs.map(c => c.name);
+        // Add "Unattached" if any athletes don't have a club
+        const hasUnattached = athletes.some(a => !a.clubId);
+        if (hasUnattached) {
+            clubNames.push('Unattached');
+        }
+        return clubNames.sort();
+    }, [athletes, clubs]);
 
     // Story 5.1: Extract available age categories from active ruleset
     const availableAgeCategories = useMemo(() => {

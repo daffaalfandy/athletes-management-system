@@ -33,6 +33,24 @@ export const initialSchemaMigration: Migration = {
           CREATE INDEX IF NOT EXISTS idx_athletes_name ON athletes(name);
           CREATE INDEX IF NOT EXISTS idx_athletes_birth_place ON athletes(birth_place);
           CREATE INDEX IF NOT EXISTS idx_athletes_region ON athletes(region);
+          CREATE INDEX IF NOT EXISTS idx_athletes_clubId ON athletes(clubId);
+        `);
+
+        // Clubs Table
+        db.exec(`
+          CREATE TABLE IF NOT EXISTS clubs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            logo_path TEXT,
+            contact_person TEXT,
+            contact_phone TEXT,
+            contact_email TEXT,
+            location TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+          );
+          
+          CREATE INDEX IF NOT EXISTS idx_clubs_name ON clubs(name);
         `);
 
         // Promotions and Medals Tables

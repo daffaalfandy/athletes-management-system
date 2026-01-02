@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3]
+stepsCompleted: [1, 2, 3, 4, 5]
 inputDocuments: ['docs/planning-artifacts/prd.md', 'docs/planning-artifacts/epics-and-stories.md']
 ---
 

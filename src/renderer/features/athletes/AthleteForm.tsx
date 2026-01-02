@@ -6,6 +6,7 @@ import { AthleteSchema, Athlete } from '../../../shared/schemas';
 import { Rank } from '../../../shared/types/domain';
 import { calculateAgeCategory } from '../../../shared/judo/calculateAgeCategory';
 import { useRulesetStore } from '../settings/useRulesetStore';
+import { useClubStore } from '../settings/useClubStore';
 import { Timeline } from './history/Timeline';
 import { MedalList } from './history/MedalList';
 import { useAthleteStore } from './useAthleteStore';
@@ -23,6 +24,7 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
     const [editingField, setEditingField] = useState<string | null>(null);
     const { loadHistory } = useAthleteStore();
     const { loadRulesets } = useRulesetStore();
+    const { clubs, loadClubs } = useClubStore();
     // Use Zustand selector for reactivity
     const activeRuleset = useRulesetStore(state => state.rulesets.find(r => r.is_active));
     const currentYear = new Date().getFullYear();
@@ -33,10 +35,11 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
         return Array.from({ length: 4 }, (_, i) => currentYear + i);
     }, [currentYear]);
 
-    // Load rulesets on mount
+    // Load rulesets and clubs on mount
     useEffect(() => {
         loadRulesets();
-    }, [loadRulesets]);
+        loadClubs();
+    }, [loadRulesets, loadClubs]);
 
 
     const {
@@ -108,9 +111,15 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
 
     const onFieldSave = async (fieldName: string) => {
         const values = getValues();
-        // Submit the full update
-        await onSubmit(values);
-        setEditingField(null);
+        try {
+            // Validate and transform data before submission
+            const validatedData = AthleteSchema.parse(values);
+            await onSubmit(validatedData);
+            setEditingField(null);
+        } catch (err: any) {
+            console.error("Field save validation failed:", err);
+            // Optionally show error to user
+        }
     };
 
     const cancelEdit = () => {
@@ -146,12 +155,11 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
             const payload = {
                 ...currentValues,
                 profile_photo_path: vaultPath,
-                parent_guardian: currentValues.parent_guardian || undefined,
-                parent_phone: currentValues.parent_phone || undefined,
-                clubId: currentValues.clubId || null,
-                // Ensure other optional fields are handled if necessary, though strings usually fine
             };
-            await onSubmit(payload);
+
+            // Validate and transform before submission
+            const validatedData = AthleteSchema.parse(payload);
+            await onSubmit(validatedData);
 
             // Force reload or update UI? onSubmit usually refreshes.
         } catch (error: any) {
@@ -290,6 +298,8 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                                 <BeltBadge rank={value} />
                             ) : name === 'gender' ? (
                                 value.charAt(0).toUpperCase() + value.slice(1)
+                            ) : name === 'clubId' ? (
+                                clubs.find(c => c.id === Number(value))?.name || 'Unattached'
                             ) : (
                                 value
                             )}
@@ -415,6 +425,11 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                                     {renderField('weight', 'Weight (kg)', 'number')}
                                     {renderField('rank', 'Current Rank', 'text', Object.values(Rank).map(r => ({ value: r, label: r })))}
                                 </div>
+
+                                {renderField('clubId', 'Club', 'text', [
+                                    { value: '', label: 'Unattached' },
+                                    ...clubs.map(club => ({ value: club.id, label: club.name }))
+                                ])}
 
                                 {/* Detailed Information Section */}
                                 <div className="space-y-4 pt-6 border-t border-slate-200">
