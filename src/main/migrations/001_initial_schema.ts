@@ -63,5 +63,35 @@ export const initialSchemaMigration: Migration = {
             CREATE INDEX IF NOT EXISTS idx_promotions_athleteId ON promotions(athleteId);
             CREATE INDEX IF NOT EXISTS idx_medals_athleteId ON medals(athleteId);
         `);
+
+        // Tournaments Table
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS tournaments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                date TEXT NOT NULL,
+                location TEXT,
+                ruleset_snapshot TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE INDEX IF NOT EXISTS idx_tournaments_date ON tournaments(date);
+        `);
+
+        // Tournament Rosters Table with Weight Class
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS tournament_rosters (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tournament_id INTEGER NOT NULL,
+                athlete_id INTEGER NOT NULL,
+                weight_class TEXT NOT NULL,
+                added_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
+                FOREIGN KEY (athlete_id) REFERENCES athletes(id) ON DELETE CASCADE,
+                UNIQUE(tournament_id, athlete_id)
+            );
+            
+            CREATE INDEX IF NOT EXISTS idx_tournament_rosters_tournament ON tournament_rosters(tournament_id);
+        `);
     }
 };

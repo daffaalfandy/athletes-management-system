@@ -1,20 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { LayoutDashboard, Users, FileText, Plus, X, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Plus, X, Settings, Trophy } from 'lucide-react';
 import '../index.css';
 
 import { AthleteForm } from './features/athletes/AthleteForm';
 import { useAthleteStore } from './features/athletes/useAthleteStore';
 import { AthleteList } from './features/athletes/AthleteList';
 import { SettingsPage } from './features/settings/SettingsPage';
+import { TournamentList } from './features/tournaments/TournamentList';
+import { TournamentDetail } from './features/tournaments/TournamentDetail';
 
 import { Athlete } from '../shared/schemas';
 
 function App() {
     const [isReady, setIsReady] = useState(false);
-    const [activeView, setActiveView] = useState<'dashboard' | 'athletes' | 'reports' | 'settings'>('athletes');
+    const [activeView, setActiveView] = useState<'dashboard' | 'athletes' | 'tournaments' | 'tournament-detail' | 'reports' | 'settings'>('athletes');
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [tournamentId, setTournamentId] = useState<string | null>(null);
 
     const { athletes, loadAthletes, addAthlete, updateAthlete, error } = useAthleteStore();
 
@@ -92,6 +95,12 @@ function App() {
                             onClick={() => setActiveView('athletes')}
                         />
                         <NavItem
+                            icon={<Trophy size={20} />}
+                            label="Tournaments"
+                            active={activeView === 'tournaments' || activeView === 'tournament-detail'}
+                            onClick={() => setActiveView('tournaments')}
+                        />
+                        <NavItem
                             icon={<FileText size={20} />}
                             label="Reports"
                             active={activeView === 'reports'}
@@ -124,7 +133,14 @@ function App() {
                 {/* Header */}
                 <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-6 flex-shrink-0">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-lg font-bold text-slate-800">Athlete Management</h1>
+                        <h1 className="text-lg font-bold text-slate-800">
+                            {activeView === 'athletes' && 'Athlete Management'}
+                            {activeView === 'tournaments' && 'Tournaments'}
+                            {activeView === 'tournament-detail' && 'Tournament Details'}
+                            {activeView === 'settings' && 'System Settings'}
+                            {activeView === 'dashboard' && 'Dashboard'}
+                            {activeView === 'reports' && 'Reports'}
+                        </h1>
                     </div>
 
                     <div className="flex items-center gap-6">
@@ -157,6 +173,27 @@ function App() {
                 {/* Content Area */}
                 <div className="flex-1 overflow-hidden relative overflow-y-auto">
                     {activeView === 'athletes' && <AthleteList onEdit={handleEditAthlete} />}
+                    {activeView === 'tournaments' && (
+                        <TournamentList
+                            onNew={() => {
+                                setTournamentId('new');
+                                setActiveView('tournament-detail');
+                            }}
+                            onEdit={(id) => {
+                                setTournamentId(id.toString());
+                                setActiveView('tournament-detail');
+                            }}
+                        />
+                    )}
+                    {activeView === 'tournament-detail' && (
+                        <TournamentDetail
+                            tournamentId={tournamentId}
+                            onBack={() => {
+                                setTournamentId(null);
+                                setActiveView('tournaments');
+                            }}
+                        />
+                    )}
                     {activeView === 'settings' && <SettingsPage />}
                     {(activeView === 'dashboard' || activeView === 'reports') && (
                         <div className="flex flex-col items-center justify-center h-full text-slate-400">

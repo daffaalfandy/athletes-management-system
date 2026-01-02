@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Athlete, Promotion, Medal } from '../../../shared/schemas';
-import { useRosterStore } from './useRosterStore';
+
 
 interface AthleteState {
     athletes: Athlete[];
@@ -66,8 +66,6 @@ export const useAthleteStore = create<AthleteState>((set) => ({
             set((state) => ({
                 athletes: state.athletes.filter((a) => a.id !== id),
             }));
-            // Story 5.2: Remove deleted athlete from roster
-            useRosterStore.getState().removeAthlete(id);
         } catch (err: unknown) {
             set({ error: (err as Error).message });
         }

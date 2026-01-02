@@ -37,6 +37,15 @@ const api: IElectronAPI = {
         getImagePath: (relativePath) => ipcRenderer.invoke('files:getImagePath', relativePath),
         downloadVaultFile: (relativePath, defaultName) => ipcRenderer.invoke('files:downloadVaultFile', relativePath, defaultName),
     },
+    tournaments: {
+        create: (data) => ipcRenderer.invoke('tournaments:create', data),
+        getAll: () => ipcRenderer.invoke('tournaments:getAll'),
+        getById: (id) => ipcRenderer.invoke('tournaments:getById', id),
+        update: (data) => ipcRenderer.invoke('tournaments:update', data),
+        delete: (id) => ipcRenderer.invoke('tournaments:delete', id),
+        saveRoster: (tournamentId, entries) => ipcRenderer.invoke('tournaments:saveRoster', tournamentId, entries),
+        getRoster: (tournamentId) => ipcRenderer.invoke('tournaments:getRoster', tournamentId),
+    },
 };
 
 contextBridge.exposeInMainWorld('api', api);

@@ -89,7 +89,7 @@ epics:
         status: "done"
       - id: "E5.S4"
         title: "Tournament Management & History"
-        status: "to_do"
+        status: "done"
       - id: "E5.S5"
         title: "Club Management"
         status: "to_do"

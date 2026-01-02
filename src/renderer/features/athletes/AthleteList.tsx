@@ -1,14 +1,13 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Search, User, Trash2, Filter, ChevronUp, ChevronDown, Calendar, FileCheck, FileX, Clipboard, AlertTriangle } from 'lucide-react';
 import { useAthleteStore } from './useAthleteStore';
-import { useRosterStore } from './useRosterStore';
+
 import { BeltBadge } from '../../components/BeltBadge';
 import { ActivityStatus, Rank } from '../../../shared/types/domain';
 import { Athlete, AgeCategory } from '../../../shared/schemas';
 import { calculateAgeCategory } from '../../../shared/judo/calculateAgeCategory';
 import { useRulesetStore } from '../settings/useRulesetStore';
-import { RosterView } from './RosterView';
-import { validateEligibility } from '../../../shared/judo/validateEligibility';
+
 
 interface AthleteListProps {
     onEdit: (athlete: Athlete) => void;
@@ -48,8 +47,8 @@ const WEIGHT_DIVISIONS = {
 export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const { athletes, deleteAthlete } = useAthleteStore();
     const { loadRulesets } = useRulesetStore();
-    // Story 5.2: Roster selection state
-    const { selectedAthleteIds, toggleAthlete, addMultiple, clearRoster, isSelected, setConflicts, getConflicts, hasConflicts } = useRosterStore();
+
+
     // Use Zustand selector for reactivity
     const activeRuleset = useRulesetStore(state => state.rulesets.find(r => r.is_active));
     const currentYear = new Date().getFullYear();
@@ -68,8 +67,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const [rankFilter, setRankFilter] = useState<string[]>([]); // Changed to array for multi-select
     const [clubFilter, setClubFilter] = useState<string[]>([]); // Changed to array for multi-select
 
-    // Story 5.2: Roster View state
-    const [isRosterViewOpen, setIsRosterViewOpen] = useState(false);
+
 
     // Load rulesets on mount
     useEffect(() => {
@@ -77,17 +75,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     }, [loadRulesets]);
 
     // Story 5.3: Validate selected athletes for conflicts
-    useEffect(() => {
-        if (!activeRuleset || selectedAthleteIds.length === 0) return;
 
-        selectedAthleteIds.forEach(athleteId => {
-            const athlete = athletes.find(a => a.id === athleteId);
-            if (athlete && athlete.id) {
-                const conflicts = validateEligibility(athlete, activeRuleset, referenceYear);
-                setConflicts(athlete.id, conflicts);
-            }
-        });
-    }, [selectedAthleteIds, athletes, activeRuleset, referenceYear, setConflicts]);
 
 
 
@@ -281,33 +269,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         ageCategoryFilter.length > 0 || weightClassFilter.length > 0 ||
         rankFilter.length > 0 || clubFilter.length > 0;
 
-    // Story 5.2: Select All handler - only selects visible (filtered) athletes
-    const handleSelectAll = () => {
-        const visibleAthleteIds = filteredAthletes.map(a => a.id).filter((id): id is number => id !== undefined);
-        const allSelected = visibleAthleteIds.every(id => isSelected(id));
 
-        if (allSelected) {
-            // Deselect all visible athletes
-            visibleAthleteIds.forEach(id => {
-                if (isSelected(id)) toggleAthlete(id);
-            });
-        } else {
-            // Select all visible athletes
-            addMultiple(visibleAthleteIds);
-        }
-    };
-
-    // Story 5.2: Check if all visible athletes are selected (for indeterminate state)
-    const visibleAthleteIds = useMemo(() =>
-        filteredAthletes.map(a => a.id).filter((id): id is number => id !== undefined),
-        [filteredAthletes]
-    );
-    const selectedVisibleCount = useMemo(() =>
-        visibleAthleteIds.filter(id => isSelected(id)).length,
-        [visibleAthleteIds, selectedAthleteIds]
-    );
-    const allVisibleSelected = visibleAthleteIds.length > 0 && selectedVisibleCount === visibleAthleteIds.length;
-    const someVisibleSelected = selectedVisibleCount > 0 && selectedVisibleCount < visibleAthleteIds.length;
 
     return (
         <div className="flex flex-col h-full bg-slate-50">
@@ -382,17 +344,6 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                             <Filter className="w-4 h-4 mr-2" />
                             Showing {filteredAthletes.length} of {athletes.length}
                         </div>
-                        {/* Story 5.2: Selection Count Indicator */}
-                        {selectedAthleteIds.length > 0 && (
-                            <button
-                                onClick={() => setIsRosterViewOpen(true)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 border border-blue-700 rounded-lg text-white font-semibold transition-colors shadow-sm"
-                                title="View Roster"
-                            >
-                                <Clipboard className="w-4 h-4" />
-                                <span>Roster ({selectedAthleteIds.length})</span>
-                            </button>
-                        )}
                     </div>
                 </div>
 
@@ -490,19 +441,6 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                 <table className="min-w-full divide-y divide-slate-100">
                     <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm ring-1 ring-slate-900/5">
                         <tr>
-                            {/* Story 5.2: Checkbox Column */}
-                            <th scope="col" className="px-3 pl-4 py-3 w-12">
-                                <input
-                                    type="checkbox"
-                                    checked={allVisibleSelected}
-                                    ref={(el) => {
-                                        if (el) el.indeterminate = someVisibleSelected;
-                                    }}
-                                    onChange={handleSelectAll}
-                                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
-                                    title={allVisibleSelected ? 'Deselect All' : 'Select All'}
-                                />
-                            </th>
                             <th
                                 scope="col"
                                 className="px-3 pl-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors"
@@ -550,23 +488,12 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-50">
                         {filteredAthletes.map((athlete) => {
-                            const selected = athlete.id ? isSelected(athlete.id) : false;
                             return (
                                 <tr
                                     key={athlete.id}
                                     onClick={() => handleEdit(athlete)}
-                                    className={`group hover:bg-blue-50/40 transition-colors duration-150 ease-in-out cursor-pointer ${selected ? 'bg-blue-50/60 ring-1 ring-blue-200' : ''
-                                        }`}
+                                    className="group hover:bg-blue-50/40 transition-colors duration-150 ease-in-out cursor-pointer"
                                 >
-                                    {/* Story 5.2: Checkbox Column */}
-                                    <td className="px-3 pl-4 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                                        <input
-                                            type="checkbox"
-                                            checked={selected}
-                                            onChange={() => athlete.id && toggleAthlete(athlete.id)}
-                                            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
-                                        />
-                                    </td>
                                     {/* Identity Column */}
                                     <td className="px-3 pl-4 py-2.5 whitespace-nowrap">
                                         <div className="flex items-center">
@@ -594,21 +521,6 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                                             </div>
                                             {/* Dossier Status Badge (Visible mostly on desktop or if critical) */}
                                             <div className="ml-auto pr-4 hidden sm:flex items-center gap-2">
-                                                {/* Story 5.3: Conflict Indicator */}
-                                                {selected && hasConflicts(athlete.id!) && (
-                                                    <div className="group/conflict relative">
-                                                        <AlertTriangle size={16} className="text-amber-500" />
-                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 px-3 py-2 bg-slate-800 text-white text-xs rounded opacity-0 group-hover/conflict:opacity-100 transition-opacity whitespace-nowrap mb-2 z-10 min-w-[200px]">
-                                                            <div className="font-semibold mb-1">Eligibility Conflicts:</div>
-                                                            {getConflicts(athlete.id!).map((conflict, idx) => (
-                                                                <div key={idx} className="text-[10px] mt-1">
-                                                                    ⚠️ {conflict.message}
-                                                                    {conflict.details && <div className="text-slate-300 mt-0.5">{conflict.details}</div>}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
                                                 {athlete.profile_photo_path ? (
                                                     <div className="group/dossier relative">
                                                         <FileCheck size={16} className="text-emerald-500" />
@@ -678,13 +590,6 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                     </tbody>
                 </table>
             </div>
-
-            {/* Story 5.2: Roster View Panel */}
-            <RosterView
-                isOpen={isRosterViewOpen}
-                onClose={() => setIsRosterViewOpen(false)}
-                referenceYear={referenceYear}
-            />
         </div>
     );
 };

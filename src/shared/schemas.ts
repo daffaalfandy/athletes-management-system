@@ -56,6 +56,10 @@ export const AgeCategorySchema = z.object({
     min_age: z.number().int().min(0),
     max_age: z.number().int().max(150),
     gender: z.enum(['M', 'F', 'MIXED']),
+    weight_classes: z.array(z.object({
+        limit: z.number().positive(),
+        label: z.string().min(1),
+    })).optional(), // Only used in tournament snapshots
 });
 
 export type AgeCategory = z.infer<typeof AgeCategorySchema>;
@@ -69,3 +73,35 @@ export const RulesetSchema = z.object({
 });
 
 export type Ruleset = z.infer<typeof RulesetSchema>;
+
+// Weight Class Schema
+export const WeightClassSchema = z.object({
+    limit: z.number().positive(),
+    label: z.string().min(1),
+});
+
+export type WeightClass = z.infer<typeof WeightClassSchema>;
+
+// Tournament Schema
+export const TournamentSchema = z.object({
+    id: z.number().optional(),
+    name: z.string().min(1, 'Tournament name is required'),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+    location: z.string().optional(),
+    ruleset_snapshot: z.string(), // JSON string
+    created_at: z.string().optional(),
+});
+
+export type Tournament = z.infer<typeof TournamentSchema>;
+
+// Tournament Roster Entry Schema
+export const TournamentRosterEntrySchema = z.object({
+    id: z.number().optional(),
+    tournament_id: z.number(),
+    athlete_id: z.number(),
+    weight_class: z.string().min(1),
+    added_at: z.string().optional(),
+});
+
+export type TournamentRosterEntry = z.infer<typeof TournamentRosterEntrySchema>;
+

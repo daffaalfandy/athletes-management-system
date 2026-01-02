@@ -438,7 +438,7 @@ So that I avoid registration rejection.
 ### Story E5.S4: Tournament Management & History
 
 As a coach,
-I want to create, manage, and switch between different tournaments,
+I want to create, manage, and switch between different tournaments with weight class assignment,
 So that I can keep my rosters organized and compliant with specific rules.
 
 **Acceptance Criteria:**
@@ -446,9 +446,12 @@ So that I can keep my rosters organized and compliant with specific rules.
 **Given** the Tournament Management screen
 **When** the coach creates a new tournament
 **Then** they must enter Name, Date, Location, and select a **Ruleset**
-**And** the selected Ruleset's parameters must be **snapshotted/frozen** for this tournament (changes to global ruleset later shouldn't affect this history)
-**When** the coach selects this tournament as "Active"
-**Then** all roster operations should apply to this specific tournament context.
+**And** they can define weight classes for each age category in the tournament
+**And** the selected Ruleset's parameters and weight classes must be **snapshotted/frozen** for this tournament
+**When** the coach selects athletes for the roster
+**Then** they must assign each athlete to a specific weight class
+**And** the system displays warnings if athlete's weight exceeds the assigned class limit
+**And** all roster operations are saved with weight class assignments to the database.
 
 ### Story E5.S5: Club Management
 

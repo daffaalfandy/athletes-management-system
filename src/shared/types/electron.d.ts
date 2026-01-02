@@ -1,6 +1,6 @@
 // Shared type definitions for IPC communication
 
-import { Athlete, Promotion, Medal, Ruleset } from '../schemas';
+import { Athlete, Promotion, Medal, Ruleset, Tournament, TournamentRosterEntry } from '../schemas';
 
 export interface IElectronAPI {
     ping: () => Promise<string>;
@@ -35,6 +35,15 @@ export interface IElectronAPI {
         uploadToVault: (sourcePath: string, type: 'profiles' | 'certificates' | 'medals', recordId: number) => Promise<string>;
         getImagePath: (relativePath: string) => Promise<string>;
         downloadVaultFile: (relativePath: string, defaultName?: string) => Promise<boolean>;
+    };
+    tournaments: {
+        create: (data: Tournament) => Promise<Tournament>;
+        getAll: () => Promise<Tournament[]>;
+        getById: (id: number) => Promise<Tournament | undefined>;
+        update: (data: Partial<Tournament> & { id: number }) => Promise<boolean>;
+        delete: (id: number) => Promise<boolean>;
+        saveRoster: (tournamentId: number, entries: Array<{ athleteId: number; weightClass: string }>) => Promise<void>;
+        getRoster: (tournamentId: number) => Promise<TournamentRosterEntry[]>;
     };
 }
 
