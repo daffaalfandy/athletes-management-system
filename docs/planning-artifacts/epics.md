@@ -508,7 +508,7 @@ Goal: Personalize the app and finalize the user experience.
 ### Story E7.S1: Regency & Club Branding
 
 As a coach,
-I want to upload the Kabupaten (Regency) logo,
+I want to configure the Kabupaten (Regency) name and logo,
 So that the app reflects our institution.
 
 **Acceptance Criteria:**
@@ -517,6 +517,28 @@ So that the app reflects our institution.
 **When** the coach uploads a logo image
 **Then** it should be persisted across app sessions
 **And** displayed in the application sidebar or header.
+
+**Given** the Settings menu
+**When** the coach enters the "Kabupaten Name" (e.g., "Bogor", "Bandung")
+**Then** this name should be saved and replace any hardcoded instances of the location name in the UI (Sidebar, Headers).
+**And** this name should be used in all generated Export files (PDF Rosters, Excel dumps) to ensure documents are branded correctly.
+
+### Story E7.S2: Executive Dashboard (Home)
+
+As a Sensei,
+I want a dashboard landing page with key statistics and quick actions,
+So that I can immediately assess the state of my athlete pool upon launching the app.
+
+**Acceptance Criteria:**
+
+**Given** the application is launched
+**When** the user lands on the Home/Dashboard page
+**Then** they should see the **Regency Logo** (if configured in E7.S1) prominently displayed
+**And** "Key Performance Indicators" (KPIs) cards showing: **Total Pool** size, **Competitive Pool** (Active/Intermittent) size, and **Gender Distribution** (Male/Female counts)
+**And** a **Medallion Summary** section showing total counts (Gold, Silver, Bronze)
+**And** a **Year Selector** dropdown that allows filtering the medallion counts by a specific year or "All Time"
+**And** "Quick Action" buttons to navigate to **Add Athlete** or **Manage Tournaments**
+**And** the layout should be clean, spacious, and "Command Center" style.
 
 ---
 
