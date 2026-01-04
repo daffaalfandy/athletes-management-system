@@ -96,12 +96,12 @@ epics:
 
   - id: "E6"
     title: "Export Factory (PDF & Data)"
-    status: "to_do"
+    status: "in_progress"
     stories:
 
       - id: "E6.S1"
         title: "PDF Roster Printout"
-        status: "to_do"
+        status: "done"
 
       - id: "E6.S2"
         title: "PDF Archive Summary"

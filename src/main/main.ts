@@ -13,6 +13,7 @@ import { setupRulesetHandlers } from './services/rulesetService';
 import { setupFileHandlers } from './services/FileService';
 import { setupTournamentHandlers } from './services/tournamentService';
 import { setupClubHandlers } from './services/clubService';
+import { setupExportHandlers } from './services/ExportService';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -80,6 +81,7 @@ app.whenReady().then(() => {
     setupFileHandlers();
     setupTournamentHandlers();
     setupClubHandlers();
+    setupExportHandlers();
 
     createWindow();
 });

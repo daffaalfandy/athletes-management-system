@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTournamentStore } from './useTournamentStore';
 import { Tournament } from '../../../shared/schemas';
+import { FileDown } from 'lucide-react';
 
 interface TournamentListProps {
     onEdit: (id: number) => void;
@@ -88,7 +89,7 @@ export const TournamentList: React.FC<TournamentListProps> = ({ onEdit, onNew })
                                     <TournamentRow
                                         key={tournament.id}
                                         tournament={tournament}
-                                        onEdit={() => onEdit(tournament.id!)}
+                                        onView={() => onEdit(tournament.id!)}
                                         onDelete={() => setDeleteConfirm(tournament.id!)}
                                     />
                                 ))}
@@ -129,10 +130,11 @@ export const TournamentList: React.FC<TournamentListProps> = ({ onEdit, onNew })
 
 const TournamentRow: React.FC<{
     tournament: Tournament;
-    onEdit: () => void;
+    onView: () => void;
     onDelete: () => void;
-}> = ({ tournament, onEdit, onDelete }) => {
+}> = ({ tournament, onView, onDelete }) => {
     const [rosterCount, setRosterCount] = useState<number | null>(null);
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
         const loadRosterCount = async () => {
@@ -146,8 +148,49 @@ const TournamentRow: React.FC<{
         loadRosterCount();
     }, [tournament.id]);
 
+    const handleDownloadPDF = async (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent row click
+
+        if (rosterCount === 0) {
+            alert('No athletes in roster. Please add athletes before exporting.');
+            return;
+        }
+
+        setExporting(true);
+        try {
+            const result = await window.api.export.generateRosterPDF(tournament.id!, {
+                includeColumns: []
+            });
+
+            if (result.success) {
+                alert(`PDF exported successfully to:\n${result.filePath}`);
+            } else {
+                const userMessage = result.error?.includes('not found')
+                    ? 'Tournament or roster data not found'
+                    : result.error?.includes('No athletes')
+                        ? 'No athletes in roster. Please add athletes before exporting.'
+                        : 'Failed to generate PDF. Please try again.';
+                alert(userMessage);
+                console.error('Export error:', result.error);
+            }
+        } catch (error) {
+            console.error('Failed to export PDF:', error);
+            alert('An unexpected error occurred while exporting. Please try again.');
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent row click
+        onDelete();
+    };
+
     return (
-        <tr className="group hover:bg-blue-50/40 transition-colors duration-150 ease-in-out">
+        <tr
+            onClick={onView}
+            className="group hover:bg-blue-50/40 transition-colors duration-150 ease-in-out cursor-pointer"
+        >
             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
                 {tournament.name}
             </td>
@@ -169,13 +212,16 @@ const TournamentRow: React.FC<{
             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
-                        onClick={onEdit}
-                        className="px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors font-medium"
+                        onClick={handleDownloadPDF}
+                        disabled={exporting || rosterCount === 0}
+                        className="px-3 py-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                        title={rosterCount === 0 ? 'No athletes in roster' : 'Download roster PDF'}
                     >
-                        Edit
+                        <FileDown className="w-4 h-4" />
+                        {exporting ? 'Exporting...' : 'PDF'}
                     </button>
                     <button
-                        onClick={onDelete}
+                        onClick={handleDelete}
                         className="px-3 py-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors font-medium"
                     >
                         Delete

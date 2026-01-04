@@ -32,6 +32,18 @@ export const athleteRepository = {
     return stmt.all() as Athlete[];
   },
 
+  findByIds: (ids: number[]): Athlete[] => {
+    if (ids.length === 0) return [];
+    // Validate all IDs are numbers to prevent SQL injection
+    const validIds = ids.filter(id => typeof id === 'number' && !isNaN(id) && id > 0);
+    if (validIds.length === 0) return [];
+
+    const db = getDatabase();
+    const placeholders = validIds.map(() => '?').join(',');
+    const stmt = db.prepare(`SELECT * FROM athletes WHERE id IN (${placeholders})`);
+    return stmt.all(...validIds) as Athlete[];
+  },
+
   update: (athlete: Athlete): boolean => {
     const db = getDatabase();
     const stmt = db.prepare(`

@@ -11,10 +11,11 @@ export default defineConfig({
                 ...builtinModules.map(m => `node:${m}`),
                 'better-sqlite3',
                 'electron',
+                'pdfkit', // PDFKit needs to be external to access font files
             ],
         },
     },
     optimizeDeps: {
-        exclude: ['better-sqlite3'],
+        exclude: ['better-sqlite3', 'pdfkit'],
     },
 });

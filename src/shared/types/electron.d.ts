@@ -52,6 +52,12 @@ export interface IElectronAPI {
         update: (data: Club & { id: number }) => Promise<boolean>;
         delete: (id: number) => Promise<boolean>;
     };
+    export: {
+        generateRosterPDF: (
+            tournamentId: number,
+            options?: { includeColumns?: string[] }
+        ) => Promise<{ success: boolean; filePath?: string; error?: string }>;
+    };
 }
 
 declare global {

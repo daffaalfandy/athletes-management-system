@@ -5,7 +5,7 @@ import { useRulesetStore } from '../settings/useRulesetStore';
 import { useAthleteStore } from '../athletes/useAthleteStore';
 import { AgeCategory, WeightClass, Athlete } from '../../../shared/schemas';
 import { calculateAgeCategory } from '../../../shared/judo/calculateAgeCategory';
-import { AlertTriangle, X, Plus, Trash2, Calendar, MapPin, BookOpen } from 'lucide-react';
+import { AlertTriangle, X, Plus, Trash2, Calendar, MapPin, BookOpen, FileDown } from 'lucide-react';
 
 interface TournamentDetailProps {
     tournamentId: string | null; // 'new' or numeric ID as string
@@ -32,6 +32,7 @@ export const TournamentDetail: React.FC<TournamentDetailProps> = ({ tournamentId
 
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
         loadRulesets();
@@ -179,6 +180,38 @@ export const TournamentDetail: React.FC<TournamentDetailProps> = ({ tournamentId
         }
     };
 
+    const handleExportPDF = async () => {
+        if (isNew || !tournamentId) {
+            alert('Please save the tournament first before exporting');
+            return;
+        }
+
+        setExporting(true);
+        try {
+            const result = await window.api.export.generateRosterPDF(parseInt(tournamentId), {
+                includeColumns: [] // Can be extended to allow user selection
+            });
+
+            if (result.success) {
+                alert(`PDF exported successfully to:\n${result.filePath}`);
+            } else {
+                // Sanitize error message for user display
+                const userMessage = result.error?.includes('not found')
+                    ? 'Tournament or roster data not found'
+                    : result.error?.includes('No athletes')
+                        ? 'No athletes in roster. Please add athletes before exporting.'
+                        : 'Failed to generate PDF. Please try again.';
+                alert(userMessage);
+                console.error('Export error:', result.error);
+            }
+        } catch (error) {
+            console.error('Failed to export PDF:', error);
+            alert('An unexpected error occurred while exporting. Please try again.');
+        } finally {
+            setExporting(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -201,6 +234,16 @@ export const TournamentDetail: React.FC<TournamentDetailProps> = ({ tournamentId
                         ← Back to Tournaments
                     </button>
                     <div className="flex gap-3">
+                        {!isNew && (
+                            <button
+                                onClick={handleExportPDF}
+                                disabled={exporting}
+                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 font-medium text-sm shadow-sm flex items-center gap-2"
+                            >
+                                <FileDown className="w-4 h-4" />
+                                {exporting ? 'Exporting...' : 'Export PDF'}
+                            </button>
+                        )}
                         <button
                             onClick={onBack}
                             className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-medium text-sm"
@@ -591,8 +634,8 @@ const RosterSection: React.FC<{
 
                                             return (
                                                 <div key={athlete.id} className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${hasWarnings
-                                                        ? 'bg-amber-50 border-amber-200'
-                                                        : 'bg-slate-50 border-slate-200'
+                                                    ? 'bg-amber-50 border-amber-200'
+                                                    : 'bg-slate-50 border-slate-200'
                                                     }`}>
                                                     <div className="flex-1">
                                                         <div className="text-sm font-medium text-slate-900">{athlete.name}</div>

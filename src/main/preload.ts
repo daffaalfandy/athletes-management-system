@@ -53,6 +53,9 @@ const api: IElectronAPI = {
         update: (data) => ipcRenderer.invoke('clubs:update', data),
         delete: (id) => ipcRenderer.invoke('clubs:delete', id),
     },
+    export: {
+        generateRosterPDF: (tournamentId, options) => ipcRenderer.invoke('export:generateRosterPDF', tournamentId, options),
+    },
 };
 
 contextBridge.exposeInMainWorld('api', api);
