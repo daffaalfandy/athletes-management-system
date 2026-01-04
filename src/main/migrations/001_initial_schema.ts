@@ -111,5 +111,25 @@ export const initialSchemaMigration: Migration = {
             
             CREATE INDEX IF NOT EXISTS idx_tournament_rosters_tournament ON tournament_rosters(tournament_id);
         `);
+
+        // App Settings Table - Key-Value store for system-wide configuration
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS app_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            );
+        `);
+
+        // Seed default branding settings
+        const settingsCount = db.prepare('SELECT COUNT(*) as count FROM app_settings').get() as { count: number };
+        if (settingsCount.count === 0) {
+            const insertSetting = db.prepare(`
+                INSERT INTO app_settings (key, value)
+                VALUES (@key, @value)
+            `);
+
+            insertSetting.run({ key: 'kabupaten_name', value: 'Kabupaten Bantul' });
+            insertSetting.run({ key: 'kabupaten_logo_path', value: '' });
+        }
     }
 };

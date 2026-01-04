@@ -38,7 +38,7 @@ export const FileService = {
 
     async ensureVaultDirectories() {
         const vaultPath = this.getVaultPath();
-        const subdirs = ['profiles', 'certificates', 'medals', 'clubs'];
+        const subdirs = ['profiles', 'certificates', 'medals', 'clubs', 'branding'];
 
         try {
             if (!fs.existsSync(vaultPath)) {
@@ -57,7 +57,7 @@ export const FileService = {
         }
     },
 
-    async copyToVault(sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs', recordId: number): Promise<string> {
+    async copyToVault(sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs' | 'branding', recordId: number | string): Promise<string> {
         try {
             await this.ensureVaultDirectories();
 
@@ -65,6 +65,19 @@ export const FileService = {
             const fileName = `${recordId}${ext}`;
             const relativePath = path.join(type, fileName); // relative path for DB
             const absoluteDestPath = path.join(this.getVaultPath(), relativePath);
+
+            // For branding, delete any existing logo first (singleton replacement)
+            if (type === 'branding') {
+                const brandingDir = path.join(this.getVaultPath(), 'branding');
+                if (fs.existsSync(brandingDir)) {
+                    const existingFiles = await fs.promises.readdir(brandingDir);
+                    for (const file of existingFiles) {
+                        if (file.startsWith('logo.')) {
+                            await fs.promises.unlink(path.join(brandingDir, file));
+                        }
+                    }
+                }
+            }
 
             await fs.promises.copyFile(sourcePath, absoluteDestPath);
 
@@ -142,7 +155,7 @@ export const setupFileHandlers = () => {
         return await FileService.selectImageFile();
     });
 
-    ipcMain.handle('files:uploadToVault', async (_: any, sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs', recordId: number) => {
+    ipcMain.handle('files:uploadToVault', async (_: any, sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs' | 'branding', recordId: number | string) => {
         const isValid = await FileService.validateFileSize(sourcePath);
         if (!isValid) {
             throw new Error('File validation failed: File too large (max 1MB)');

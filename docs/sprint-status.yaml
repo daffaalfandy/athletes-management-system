@@ -109,10 +109,14 @@ epics:
 
   - id: "E7"
     title: "Institutional Branding & Polish"
-    status: "to_do"
+    status: "in_progress"
     stories:
       - id: "E7.S1"
         title: "Regency & Club Branding"
+        status: "done"
+
+      - id: "E7.S2"
+        title: "Executive Dashboard "
         status: "to_do"
 
   - id: "E8"

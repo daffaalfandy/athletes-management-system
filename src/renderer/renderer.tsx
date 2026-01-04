@@ -9,6 +9,7 @@ import { AthleteList } from './features/athletes/AthleteList';
 import { SettingsPage } from './features/settings/SettingsPage';
 import { TournamentList } from './features/tournaments/TournamentList';
 import { TournamentDetail } from './features/tournaments/TournamentDetail';
+import { useSettingsStore } from './features/settings/useSettingsStore';
 
 import { Athlete } from '../shared/schemas';
 
@@ -20,6 +21,8 @@ function App() {
     const [tournamentId, setTournamentId] = useState<string | null>(null);
 
     const { athletes, loadAthletes, addAthlete, updateAthlete, error } = useAthleteStore();
+    const { kabupatanName, kabupatanLogoPath, loadSettings } = useSettingsStore();
+    const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
     const activeAthlete = useMemo(() =>
         editingId ? athletes.find(a => a.id === editingId) : undefined
@@ -28,10 +31,19 @@ function App() {
     useEffect(() => {
         const init = async () => {
             await loadAthletes();
+            await loadSettings();
             setIsReady(true);
         };
         init();
-    }, [loadAthletes]);
+    }, [loadAthletes, loadSettings]);
+
+    useEffect(() => {
+        if (kabupatanLogoPath) {
+            setLogoUrl(`dossier://${kabupatanLogoPath}`);
+        } else {
+            setLogoUrl(null);
+        }
+    }, [kabupatanLogoPath]);
 
     const handleFormSubmit = async (data: any) => {
         if (editingId) {
@@ -78,7 +90,7 @@ function App() {
                 <div className="p-6">
                     <div className="flex items-center gap-3 text-white mb-8">
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg">J</div>
-                        <span className="font-bold text-lg tracking-wide">JUDO PRO AMS</span>
+                        <span className="font-bold text-lg tracking-wide">JUDOKA DEPOT</span>
                     </div>
 
                     <nav className="space-y-1">
@@ -117,12 +129,20 @@ function App() {
 
                 <div className="mt-auto p-6 border-t border-slate-800">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-slate-700 flex items-center justify-center font-medium text-xs">
-                            KB
+                        <div className="w-8 h-8 rounded bg-slate-700 flex items-center justify-center font-medium text-xs overflow-hidden">
+                            {logoUrl ? (
+                                <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                            ) : (
+                                'KB'
+                            )}
                         </div>
                         <div>
-                            <div className="text-xs font-bold text-white tracking-wider uppercase">Kabupaten</div>
-                            <div className="text-[10px] font-bold text-white tracking-wider uppercase">Bogor</div>
+                            <div className="text-xs font-bold text-white tracking-wider uppercase">
+                                {kabupatanName.split(' ')[0]}
+                            </div>
+                            <div className="text-[10px] font-bold text-white tracking-wider uppercase">
+                                {kabupatanName.split(' ').slice(1).join(' ') || '\u00A0'}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -99,6 +99,18 @@ CREATE TABLE IF NOT EXISTS tournament_rosters (
 
 CREATE INDEX IF NOT EXISTS idx_tournament_rosters_tournament ON tournament_rosters(tournament_id);
 
+-- App Settings Table - Key-Value store for system-wide configuration
+CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+);
+
+-- Insert default branding settings
+INSERT OR IGNORE INTO app_settings (key, value) VALUES
+('kabupaten_name', 'Kabupaten Bogor'),
+('kabupaten_logo_path', '');
+
+
 INSERT OR IGNORE INTO athletes (name, birthDate, gender, weight, rank, clubId, profile_photo_path, birth_place, region, address, phone, email, parent_guardian, parent_phone, createdAt, updatedAt) VALUES
 ('Kenji Yamamoto', '1995-01-01', 'male', 73.5, 'Black (DAN 1)', 1, NULL, 'Tokyo', 'Kanto', '123 Sakura Street, Tokyo', '+81-3-1234-5678', 'kenji.yamamoto@example.com', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('Maria Rodriguez', '2002-01-01', 'female', 63.0, 'Blue', 2, NULL, 'Madrid', 'Community of Madrid', '456 Gran Via, Madrid', '+34-91-234-5678', 'maria.rodriguez@example.com', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

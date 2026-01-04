@@ -37,6 +37,11 @@ const api: IElectronAPI = {
         getImagePath: (relativePath) => ipcRenderer.invoke('files:getImagePath', relativePath),
         downloadVaultFile: (relativePath, defaultName) => ipcRenderer.invoke('files:downloadVaultFile', relativePath, defaultName),
     },
+    settings: {
+        get: (key) => ipcRenderer.invoke('settings:get', key),
+        set: (key, value) => ipcRenderer.invoke('settings:set', key, value),
+        getAll: () => ipcRenderer.invoke('settings:getAll'),
+    },
     tournaments: {
         create: (data) => ipcRenderer.invoke('tournaments:create', data),
         getAll: () => ipcRenderer.invoke('tournaments:getAll'),

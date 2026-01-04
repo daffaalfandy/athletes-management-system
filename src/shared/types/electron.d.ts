@@ -32,9 +32,14 @@ export interface IElectronAPI {
     };
     files: {
         selectImage: () => Promise<string | null>;
-        uploadToVault: (sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs', recordId: number) => Promise<string>;
+        uploadToVault: (sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs' | 'branding', recordId: number | string) => Promise<string>;
         getImagePath: (relativePath: string) => Promise<string>;
         downloadVaultFile: (relativePath: string, defaultName?: string) => Promise<boolean>;
+    };
+    settings: {
+        get: (key: string) => Promise<string | null>;
+        set: (key: string, value: string) => Promise<boolean>;
+        getAll: () => Promise<Record<string, string>>;
     };
     tournaments: {
         create: (data: Tournament) => Promise<Tournament>;

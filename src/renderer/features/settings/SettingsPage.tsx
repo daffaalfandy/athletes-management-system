@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Save, AlertCircle, CheckCircle, Loader2, Upload, Database, Settings2, Building2 } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle, Loader2, Upload, Database, Settings2, Building2, Palette } from 'lucide-react';
 import { RulesetList } from './RulesetList';
 import { RulesetEditor } from './RulesetEditor';
 import { ClubList } from './ClubList';
 import { ClubForm } from './ClubForm';
+import { BrandingSettings } from './BrandingSettings';
 import { Ruleset, Club } from '../../../shared/schemas';
 
-type SettingsTab = 'rulesets' | 'database' | 'clubs';
+type SettingsTab = 'rulesets' | 'database' | 'clubs' | 'branding';
 
 export const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState<SettingsTab>('rulesets');
@@ -113,6 +114,13 @@ export const SettingsPage = () => {
                     Club Management
                 </button>
                 <button
+                    onClick={() => setActiveTab('branding')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'branding' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    <Palette size={18} />
+                    Branding
+                </button>
+                <button
                     onClick={() => setActiveTab('database')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'database' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                 >
@@ -145,6 +153,12 @@ export const SettingsPage = () => {
                         ) : (
                             <ClubList onEdit={handleEditClub} onAdd={handleNewClub} />
                         )}
+                    </div>
+                )}
+
+                {activeTab === 'branding' && (
+                    <div className="animate-in fade-in duration-300">
+                        <BrandingSettings />
                     </div>
                 )}
 

@@ -14,6 +14,7 @@ import { setupFileHandlers } from './services/FileService';
 import { setupTournamentHandlers } from './services/tournamentService';
 import { setupClubHandlers } from './services/clubService';
 import { setupExportHandlers } from './services/ExportService';
+import { setupSettingsHandlers } from './ipc/settings';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -82,6 +83,7 @@ app.whenReady().then(() => {
     setupTournamentHandlers();
     setupClubHandlers();
     setupExportHandlers();
+    setupSettingsHandlers();
 
     createWindow();
 });
