@@ -67,6 +67,40 @@ export function setupExportHandlers() {
             };
         }
     });
+
+    // Story 6.2: Athlete Summary PDF Handler
+    ipcMain.handle('export:generateAthleteSummaryPDF', async (event, athleteIds: number[]) => {
+        try {
+            // Validate input
+            if (!Array.isArray(athleteIds) || athleteIds.length === 0) {
+                return { success: false, error: 'No athletes selected' };
+            }
+
+            // Show save dialog
+            const result = await dialog.showSaveDialog({
+                title: 'Save Athlete Summary PDF',
+                defaultPath: getDefaultSummaryFilename(),
+                filters: [
+                    { name: 'PDF Files', extensions: ['pdf'] }
+                ]
+            });
+
+            if (result.canceled || !result.filePath) {
+                return { success: false, error: 'Save cancelled by user' };
+            }
+
+            // Generate PDF
+            const filePath = await generateAthleteSummaryPDF(athleteIds, result.filePath);
+
+            return { success: true, filePath };
+        } catch (error) {
+            console.error('Error generating athlete summary PDF:', error);
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error occurred'
+            };
+        }
+    });
 }
 
 async function getDefaultFilename(tournamentId: number): Promise<string> {
@@ -85,6 +119,12 @@ async function getDefaultFilename(tournamentId: number): Promise<string> {
         console.error('Error generating default filename:', error);
         return 'Roster.pdf';
     }
+}
+
+// Story 6.2: Generate default filename for athlete summary
+function getDefaultSummaryFilename(): string {
+    const date = new Date().toISOString().split('T')[0];
+    return `Athlete_Summary_${date}.pdf`;
 }
 
 async function generateRosterPDF(
@@ -444,4 +484,280 @@ function renderAthleteTable(
     });
 
     doc.y = currentY + 10;
+}
+
+// Story 6.2: Generate Athlete Summary PDF
+async function generateAthleteSummaryPDF(
+    athleteIds: number[],
+    savePath: string
+): Promise<string> {
+    // Validate input
+    if (!Array.isArray(athleteIds) || athleteIds.length === 0) {
+        throw new Error('No athletes selected');
+    }
+
+    // Fetch athletes
+    const athletes = athleteRepository.findByIds(athleteIds);
+    if (athletes.length === 0) {
+        throw new Error('No athletes found for given IDs');
+    }
+
+    // Fetch clubs for club name lookup
+    const clubIds = [...new Set(athletes.map(a => a.clubId).filter(id => id !== null && id !== undefined))] as number[];
+    const clubs = clubIds.length > 0 ? clubIds.map(id => clubRepository.getById(id)).filter(c => c !== undefined) as Club[] : [];
+    const clubMap = new Map<number, Club>();
+    clubs.forEach(club => {
+        if (club.id) clubMap.set(club.id, club);
+    });
+
+    // Get active ruleset for age category calculation
+    const db = getDatabase();
+    const activeRuleset = db.prepare('SELECT * FROM rulesets WHERE is_active = 1').get() as Ruleset | undefined;
+
+    // Parse categories - handle both string and already-parsed cases
+    let categories: AgeCategory[] = [];
+    if (activeRuleset?.categories) {
+        if (typeof activeRuleset.categories === 'string') {
+            try {
+                categories = JSON.parse(activeRuleset.categories);
+            } catch (error) {
+                console.error('Failed to parse ruleset categories:', error);
+                categories = [];
+            }
+        } else {
+            // Already parsed (e.g., from ORM)
+            categories = activeRuleset.categories as unknown as AgeCategory[];
+        }
+    }
+
+    // Enhance athlete data with computed fields
+    interface EnhancedAthlete extends Athlete {
+        clubName: string;
+        ageCategory: string;
+        weightClass: string;
+    }
+
+    const currentYear = new Date().getFullYear();
+    const enhancedAthletes: EnhancedAthlete[] = athletes.map(athlete => {
+        // Calculate club name
+        const clubName = athlete.clubId ? (clubMap.get(athlete.clubId)?.name || 'Unknown Club') : 'Unattached';
+
+        // Calculate age category
+        const birthYear = new Date(athlete.birthDate).getFullYear();
+        const age = currentYear - birthYear;
+        const athleteGender = athlete.gender === 'male' ? 'M' : 'F';
+        const ageCat = categories.find(cat => {
+            const genderMatch = cat.gender === 'MIXED' || cat.gender === athleteGender;
+            const ageMatch = age >= cat.min_age && age <= cat.max_age;
+            return genderMatch && ageMatch;
+        });
+        const ageCategory = ageCat?.name || 'Unclassified';
+
+        // Calculate weight class
+        const WEIGHT_DIVISIONS = {
+            male: ['-60kg', '-66kg', '-73kg', '-81kg', '-90kg', '-100kg', '+100kg'],
+            female: ['-48kg', '-52kg', '-57kg', '-63kg', '-70kg', '-78kg', '+78kg'],
+        };
+        let weightClass = 'Unclassified';
+        if (athlete.weight > 0) {
+            const divisions = WEIGHT_DIVISIONS[athlete.gender];
+            for (const division of divisions) {
+                if (division.startsWith('+')) {
+                    const threshold = parseInt(division.substring(1).replace('kg', ''));
+                    if (athlete.weight > threshold) {
+                        weightClass = division;
+                        break;
+                    }
+                } else {
+                    const limit = parseInt(division.substring(1).replace('kg', ''));
+                    if (athlete.weight <= limit) {
+                        weightClass = division;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return {
+            ...athlete,
+            clubName,
+            ageCategory,
+            weightClass
+        };
+    });
+
+    // Generate PDF
+    await createSummaryPDF(enhancedAthletes, savePath);
+
+    return savePath;
+}
+
+// Story 6.2: Create Summary PDF
+async function createSummaryPDF(
+    athletes: Array<Athlete & { clubName: string; ageCategory: string; weightClass: string }>,
+    savePath: string
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        try {
+            // Create PDF document in landscape mode
+            const doc = new PDFDocument({
+                size: 'A4',
+                layout: 'landscape',
+                margins: { top: 36, bottom: 36, left: 36, right: 36 }
+            });
+
+            // Pipe to file
+            const stream = fs.createWriteStream(savePath);
+            doc.pipe(stream);
+
+            // Add metadata
+            doc.info.Title = 'Athlete Pool Summary';
+            doc.info.Author = 'Judo Command Center';
+            doc.info.Subject = 'Athlete Summary';
+
+            // Render header
+            const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+            doc.fontSize(18)
+                .font('Helvetica-Bold')
+                .text('Athlete Pool Summary', { align: 'center' });
+
+            doc.moveDown(0.5);
+
+            doc.fontSize(10)
+                .font('Helvetica')
+                .text(`Generated: ${new Date().toLocaleDateString()}`, { align: 'center' });
+
+            doc.moveDown(1);
+
+            // Separator line
+            doc.moveTo(doc.page.margins.left, doc.y)
+                .lineTo(doc.page.width - doc.page.margins.right, doc.y)
+                .stroke();
+
+            doc.moveDown(1);
+
+            // Define columns for summary table
+            const columns = [
+                { key: 'name', label: 'Name', width: 85 },
+                { key: 'birthDate', label: 'Birth Date', width: 60 },
+                { key: 'birth_place', label: 'Birth Place', width: 70 },
+                { key: 'region', label: 'Region', width: 55 },
+                { key: 'gender', label: 'Gender', width: 40 },
+                { key: 'ageCategory', label: 'Age Cat.', width: 55 },
+                { key: 'weight', label: 'Weight', width: 45 },
+                { key: 'weightClass', label: 'Class', width: 45 },
+                { key: 'rank', label: 'Rank', width: 55 },
+                { key: 'clubName', label: 'Club', width: 70 },
+                { key: 'phone', label: 'Phone', width: 70 },
+                { key: 'email', label: 'Email', width: 85 },
+                { key: 'parent_guardian', label: 'Parent', width: 70 },
+                { key: 'parent_phone', label: 'Parent Phone', width: 70 }
+            ];
+
+            const startX = doc.page.margins.left;
+            const rowHeight = 18;
+
+            // Calculate total width and adjust if needed
+            const totalWidth = columns.reduce((sum, col) => sum + col.width, 0);
+            const scale = totalWidth > pageWidth ? pageWidth / totalWidth : 1;
+
+            // Render table header
+            let currentY = doc.y;
+            doc.fontSize(7).font('Helvetica-Bold');
+
+            let currentX = startX;
+            columns.forEach(col => {
+                const colWidth = col.width * scale;
+                doc.rect(currentX, currentY, colWidth, rowHeight)
+                    .fillAndStroke('#e0e0e0', '#000000');
+
+                doc.fillColor('#000000')
+                    .text(col.label, currentX + 3, currentY + 4, {
+                        width: colWidth - 6,
+                        height: rowHeight - 8,
+                        ellipsis: true
+                    });
+
+                currentX += colWidth;
+            });
+
+            // Render data rows
+            doc.font('Helvetica').fontSize(6);
+            currentY += rowHeight;
+
+            athletes.forEach((athlete, rowIndex) => {
+                // Check if we need a new page
+                if (currentY + rowHeight > doc.page.height - doc.page.margins.bottom) {
+                    doc.addPage();
+                    currentY = doc.page.margins.top;
+
+                    // Re-render header on new page
+                    doc.fontSize(7).font('Helvetica-Bold');
+                    currentX = startX;
+                    columns.forEach(col => {
+                        const colWidth = col.width * scale;
+                        doc.rect(currentX, currentY, colWidth, rowHeight)
+                            .fillAndStroke('#e0e0e0', '#000000');
+
+                        doc.fillColor('#000000')
+                            .text(col.label, currentX + 3, currentY + 4, {
+                                width: colWidth - 6,
+                                height: rowHeight - 8,
+                                ellipsis: true
+                            });
+
+                        currentX += colWidth;
+                    });
+
+                    doc.font('Helvetica').fontSize(6);
+                    currentY += rowHeight;
+                }
+
+                const fillColor = rowIndex % 2 === 0 ? '#ffffff' : '#f5f5f5';
+                currentX = startX;
+
+                columns.forEach(col => {
+                    const colWidth = col.width * scale;
+
+                    // Draw cell background
+                    doc.rect(currentX, currentY, colWidth, rowHeight)
+                        .fillAndStroke(fillColor, '#cccccc');
+
+                    // Get cell value
+                    let value = '';
+                    if (col.key === 'gender') {
+                        value = athlete.gender === 'male' ? 'M' : 'F';
+                    } else if (col.key === 'weight') {
+                        value = athlete.weight.toString();
+                    } else if (col.key === 'birthDate') {
+                        value = athlete.birthDate ? new Date(athlete.birthDate).toISOString().split('T')[0] : '';
+                    } else {
+                        const athleteRecord = athlete as unknown as Record<string, unknown>;
+                        const cellValue = athleteRecord[col.key];
+                        value = cellValue != null ? String(cellValue) : '';
+                    }
+
+                    // Draw cell text
+                    doc.fillColor('#000000')
+                        .text(value, currentX + 3, currentY + 4, {
+                            width: colWidth - 6,
+                            height: rowHeight - 8,
+                            ellipsis: true
+                        });
+
+                    currentX += colWidth;
+                });
+
+                currentY += rowHeight;
+            });
+
+            // Finalize PDF
+            doc.end();
+
+            stream.on('finish', () => resolve());
+            stream.on('error', (error) => reject(error));
+        } catch (error) {
+            reject(error);
+        }
+    });
 }

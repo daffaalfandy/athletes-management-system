@@ -57,6 +57,9 @@ export interface IElectronAPI {
             tournamentId: number,
             options?: { includeColumns?: string[] }
         ) => Promise<{ success: boolean; filePath?: string; error?: string }>;
+        generateAthleteSummaryPDF: (
+            athleteIds: number[]
+        ) => Promise<{ success: boolean; filePath?: string; error?: string }>;
     };
 }
 

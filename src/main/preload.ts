@@ -55,6 +55,7 @@ const api: IElectronAPI = {
     },
     export: {
         generateRosterPDF: (tournamentId, options) => ipcRenderer.invoke('export:generateRosterPDF', tournamentId, options),
+        generateAthleteSummaryPDF: (athleteIds) => ipcRenderer.invoke('export:generateAthleteSummaryPDF', athleteIds),
     },
 };
 

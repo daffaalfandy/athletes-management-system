@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Search, User, Trash2, Filter, ChevronUp, ChevronDown, Calendar, FileCheck, FileX, Clipboard, AlertTriangle } from 'lucide-react';
+import { Search, User, Trash2, Filter, ChevronUp, ChevronDown, Calendar, FileCheck, FileX, Clipboard, AlertTriangle, FileDown } from 'lucide-react';
 import { useAthleteStore } from './useAthleteStore';
 
 import { BeltBadge } from '../../components/BeltBadge';
@@ -70,6 +70,11 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const [weightClassFilter, setWeightClassFilter] = useState<string[]>([]);
     const [rankFilter, setRankFilter] = useState<string[]>([]); // Changed to array for multi-select
     const [clubFilter, setClubFilter] = useState<string[]>([]); // Changed to array for multi-select
+
+    // Story 6.2: Selection state for PDF export
+    const [selectedAthleteIds, setSelectedAthleteIds] = useState<Set<number>>(new Set());
+    const [isExporting, setIsExporting] = useState(false);
+
 
 
 
@@ -180,6 +185,25 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         });
     }, [athletes, searchTerm, sortConfig, enhanceAthlete, genderFilter, ageCategoryFilter, weightClassFilter, rankFilter, clubFilter]);
 
+    // Story 6.2: Clear stale selections when filters change
+    useEffect(() => {
+        if (selectedAthleteIds.size > 0) {
+            const validIds = new Set(
+                filteredAthletes
+                    .map(a => a.id)
+                    .filter((id): id is number => id !== undefined)
+            );
+            const hasStaleSelections = Array.from(selectedAthleteIds).some(id => !validIds.has(id));
+            if (hasStaleSelections) {
+                // Remove IDs that are no longer in filtered list
+                const updatedIds = new Set(
+                    Array.from(selectedAthleteIds).filter(id => validIds.has(id))
+                );
+                setSelectedAthleteIds(updatedIds);
+            }
+        }
+    }, [filteredAthletes, selectedAthleteIds]);
+
     // Derive unique clubs for filter dropdown - show all clubs, not just assigned ones
     const availableClubs = useMemo(() => {
         const clubNames = clubs.map(c => c.name);
@@ -278,6 +302,57 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         ageCategoryFilter.length > 0 || weightClassFilter.length > 0 ||
         rankFilter.length > 0 || clubFilter.length > 0;
 
+    // Story 6.2: Selection handlers
+    const handleToggleAthlete = (id: number) => {
+        setSelectedAthleteIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+
+    const handleSelectAll = () => {
+        if (selectedAthleteIds.size === filteredAthletes.length) {
+            // If all are selected, deselect all
+            setSelectedAthleteIds(new Set());
+        } else {
+            // Select all filtered athletes
+            const allIds = new Set(filteredAthletes.map(a => a.id).filter((id): id is number => id !== undefined));
+            setSelectedAthleteIds(allIds);
+        }
+    };
+
+    const handleExportPDF = async () => {
+        if (selectedAthleteIds.size === 0) return;
+
+        setIsExporting(true);
+        try {
+            // Get ordered athlete IDs from filtered list
+            const orderedIds = filteredAthletes
+                .filter(a => a.id !== undefined && selectedAthleteIds.has(a.id))
+                .map(a => a.id as number);
+
+            const result = await window.api.export.generateAthleteSummaryPDF(orderedIds);
+
+            if (result.success) {
+                alert(`PDF exported successfully!\n\nSaved to: ${result.filePath}`);
+                // Clear selection after successful export
+                setSelectedAthleteIds(new Set());
+            } else {
+                alert(`Export failed: ${result.error}`);
+            }
+        } catch (error) {
+            alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+
 
 
     return (
@@ -353,6 +428,23 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                             <Filter className="w-4 h-4 mr-2" />
                             Showing {filteredAthletes.length} of {athletes.length}
                         </div>
+
+                        {/* Story 6.2: Selection Count and Export Button */}
+                        {selectedAthleteIds.size > 0 && (
+                            <>
+                                <div className="flex items-center text-blue-600 font-semibold">
+                                    {selectedAthleteIds.size} selected
+                                </div>
+                                <button
+                                    onClick={handleExportPDF}
+                                    disabled={isExporting}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg shadow-sm transition-all"
+                                >
+                                    <FileDown className="w-4 h-4" />
+                                    {isExporting ? 'Exporting...' : 'Export Selected Athletes'}
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -450,9 +542,20 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                 <table className="min-w-full divide-y divide-slate-100">
                     <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm ring-1 ring-slate-900/5">
                         <tr>
+                            {/* Story 6.2: Checkbox Column Header */}
+                            <th scope="col" className="px-3 pl-4 py-3 text-center w-12">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedAthleteIds.size > 0 && selectedAthleteIds.size === filteredAthletes.length}
+                                    onChange={handleSelectAll}
+                                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                                    title="Select All"
+                                    aria-label="Select all athletes"
+                                />
+                            </th>
                             <th
                                 scope="col"
-                                className="px-3 pl-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors"
+                                className="px-3 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors"
                                 onClick={() => handleSort('name')}
                             >
                                 <div className="flex items-center">
@@ -503,8 +606,18 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                                     onClick={() => handleEdit(athlete)}
                                     className="group hover:bg-blue-50/40 transition-colors duration-150 ease-in-out cursor-pointer"
                                 >
+                                    {/* Story 6.2: Checkbox Column */}
+                                    <td className="px-3 pl-4 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                                        <input
+                                            type="checkbox"
+                                            checked={athlete.id !== undefined && selectedAthleteIds.has(athlete.id)}
+                                            onChange={() => athlete.id !== undefined && handleToggleAthlete(athlete.id)}
+                                            className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+                                            aria-label={`Select ${athlete.name}`}
+                                        />
+                                    </td>
                                     {/* Identity Column */}
-                                    <td className="px-3 pl-4 py-2.5 whitespace-nowrap">
+                                    <td className="px-3 py-2.5 whitespace-nowrap">
                                         <div className="flex items-center">
                                             {/* Initials Avatar */}
                                             <div className="flex-shrink-0 h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 overflow-hidden">
@@ -591,7 +704,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
 
                         {filteredAthletes.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                                <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
                                     <p className="text-sm">No athletes found matching "{searchTerm}"</p>
                                 </td>
                             </tr>
