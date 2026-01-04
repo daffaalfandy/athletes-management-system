@@ -25,6 +25,9 @@ export const initialSchemaMigration: Migration = {
             parent_guardian TEXT,
             parent_phone TEXT,
             
+            -- Activity Status (Story 7.2)
+            activity_status TEXT DEFAULT 'Constant' CHECK(activity_status IN ('Constant', 'Intermittent', 'Dormant')),
+            
             createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
             updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
             CONSTRAINT uq_athlete_name_dob UNIQUE (name, birthDate)
@@ -34,6 +37,7 @@ export const initialSchemaMigration: Migration = {
           CREATE INDEX IF NOT EXISTS idx_athletes_birth_place ON athletes(birth_place);
           CREATE INDEX IF NOT EXISTS idx_athletes_region ON athletes(region);
           CREATE INDEX IF NOT EXISTS idx_athletes_clubId ON athletes(clubId);
+          CREATE INDEX IF NOT EXISTS idx_athletes_activity_status ON athletes(activity_status);
         `);
 
         // Clubs Table

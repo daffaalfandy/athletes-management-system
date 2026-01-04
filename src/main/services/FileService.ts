@@ -158,7 +158,7 @@ export const setupFileHandlers = () => {
     ipcMain.handle('files:uploadToVault', async (_: any, sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs' | 'branding', recordId: number | string) => {
         const isValid = await FileService.validateFileSize(sourcePath);
         if (!isValid) {
-            throw new Error('File validation failed: File too large (max 1MB)');
+            throw new Error('File is too large (max 1MB)');
         }
         return await FileService.copyToVault(sourcePath, type, recordId);
     });

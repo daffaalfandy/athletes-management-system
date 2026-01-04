@@ -11,6 +11,9 @@ const api: IElectronAPI = {
         update: (data) => ipcRenderer.invoke('athletes:update', data),
         delete: (id) => ipcRenderer.invoke('athletes:delete', id),
     },
+    athlete: {
+        getStatistics: () => ipcRenderer.invoke('athlete:getStatistics'),
+    },
     history: {
         addPromotion: (data) => ipcRenderer.invoke('history:addPromotion', data),
         getPromotions: (athleteId) => ipcRenderer.invoke('history:getPromotions', athleteId),
@@ -18,6 +21,8 @@ const api: IElectronAPI = {
         addMedal: (data) => ipcRenderer.invoke('history:addMedal', data),
         getMedals: (athleteId) => ipcRenderer.invoke('history:getMedals', athleteId),
         deleteMedal: (id) => ipcRenderer.invoke('history:deleteMedal', id),
+        getMedalCountsByYear: (year?: number) => ipcRenderer.invoke('history:getMedalCountsByYear', year),
+        getAvailableMedalYears: () => ipcRenderer.invoke('history:getAvailableMedalYears'),
     },
     system: {
         backupDatabase: () => ipcRenderer.invoke('system:backupDatabase'),

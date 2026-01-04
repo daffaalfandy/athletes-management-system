@@ -22,4 +22,13 @@ export function setupAthleteHandlers() {
         const validatedId = z.number().parse(id);
         return athleteRepository.delete(validatedId);
     });
+
+    ipcMain.handle('athlete:getStatistics', async () => {
+        try {
+            const stats = athleteRepository.getStatistics();
+            return { success: true, data: stats };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
 }

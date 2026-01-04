@@ -65,7 +65,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             // Update local state
             set({ kabupatanLogoPath: relativePath, isLoading: false });
         } catch (err: any) {
-            const errorMsg = err?.message || 'Failed to upload logo';
+            let errorMsg = err?.message || 'Failed to upload logo';
+            if (errorMsg.includes('Error: ')) {
+                errorMsg = errorMsg.split('Error: ').pop() || errorMsg;
+            }
             set({ error: errorMsg, isLoading: false });
             console.error('[SettingsStore] Upload failed:', err);
             throw err;

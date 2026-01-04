@@ -79,4 +79,22 @@ export function setupHistoryHandlers() {
 
         return !!deleted;
     });
+
+    ipcMain.handle('history:getMedalCountsByYear', async (_, year?: number) => {
+        try {
+            const counts = historyRepository.getMedalCountsByYear(year);
+            return { success: true, data: counts };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
+
+    ipcMain.handle('history:getAvailableMedalYears', async () => {
+        try {
+            const years = historyRepository.getAvailableMedalYears();
+            return { success: true, data: years };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
 }

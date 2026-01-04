@@ -67,5 +67,45 @@ export const historyRepository = {
     updateMedalProof: (id: number, path: string): void => {
         const db = getDatabase();
         db.prepare('UPDATE medals SET proof_image_path = ? WHERE id = ?').run(path, id);
+    },
+
+    getMedalCountsByYear: (year?: number): {
+        gold: number;
+        silver: number;
+        bronze: number;
+    } => {
+        const db = getDatabase();
+
+        let query = `
+            SELECT 
+                SUM(CASE WHEN medal = 'Gold' THEN 1 ELSE 0 END) as gold,
+                SUM(CASE WHEN medal = 'Silver' THEN 1 ELSE 0 END) as silver,
+                SUM(CASE WHEN medal = 'Bronze' THEN 1 ELSE 0 END) as bronze
+            FROM medals
+        `;
+
+        if (year) {
+            query += ` WHERE substr(date, 1, 4) = '${year}'`;
+        }
+
+        const result = db.prepare(query).get() as { gold: number | null; silver: number | null; bronze: number | null };
+
+        return {
+            gold: result.gold || 0,
+            silver: result.silver || 0,
+            bronze: result.bronze || 0,
+        };
+    },
+
+    getAvailableMedalYears: (): number[] => {
+        const db = getDatabase();
+
+        const years = db.prepare(`
+            SELECT DISTINCT substr(date, 1, 4) as year 
+            FROM medals 
+            ORDER BY year DESC
+        `).all() as { year: string }[];
+
+        return years.map(y => parseInt(y.year, 10)).filter(y => !isNaN(y));
     }
 };

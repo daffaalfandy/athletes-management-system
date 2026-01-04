@@ -55,7 +55,11 @@ export const BrandingSettings = () => {
             await uploadLogo(filePath);
             setStatus({ type: 'success', message: 'Logo uploaded successfully!' });
         } catch (err: any) {
-            const errorMsg = err?.message || 'Failed to upload logo';
+            let errorMsg = err?.message || 'Failed to upload logo';
+            // Clean up IPC error messages to be more user-friendly
+            if (errorMsg.includes('Error: ')) {
+                errorMsg = errorMsg.split('Error: ').pop() || errorMsg;
+            }
             setStatus({ type: 'error', message: errorMsg });
         }
     };
@@ -125,18 +129,11 @@ export const BrandingSettings = () => {
                 {/* Status Messages */}
                 {status && (
                     <div className={`p-4 rounded-lg flex items-center gap-3 text-sm font-medium ${status.type === 'success'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                            : 'bg-red-50 text-red-700 border border-red-100'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                        : 'bg-red-50 text-red-700 border border-red-100'
                         }`}>
                         {status.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
                         {status.message}
-                    </div>
-                )}
-
-                {error && (
-                    <div className="p-4 rounded-lg flex items-center gap-3 text-sm font-medium bg-red-50 text-red-700 border border-red-100">
-                        <AlertCircle size={20} />
-                        {error}
                     </div>
                 )}
             </div>

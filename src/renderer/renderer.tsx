@@ -10,12 +10,13 @@ import { SettingsPage } from './features/settings/SettingsPage';
 import { TournamentList } from './features/tournaments/TournamentList';
 import { TournamentDetail } from './features/tournaments/TournamentDetail';
 import { useSettingsStore } from './features/settings/useSettingsStore';
+import { Dashboard } from './features/dashboard/Dashboard';
 
 import { Athlete } from '../shared/schemas';
 
 function App() {
     const [isReady, setIsReady] = useState(false);
-    const [activeView, setActiveView] = useState<'dashboard' | 'athletes' | 'tournaments' | 'tournament-detail' | 'reports' | 'settings'>('athletes');
+    const [activeView, setActiveView] = useState<'dashboard' | 'athletes' | 'tournaments' | 'tournament-detail' | 'reports' | 'settings'>('dashboard');
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [tournamentId, setTournamentId] = useState<string | null>(null);
@@ -129,9 +130,9 @@ function App() {
 
                 <div className="mt-auto p-6 border-t border-slate-800">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-slate-700 flex items-center justify-center font-medium text-xs overflow-hidden">
+                        <div className="w-8 h-8 rounded bg-slate-900 flex items-center justify-center font-medium text-xs overflow-hidden p-1">
                             {logoUrl ? (
-                                <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                                <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
                             ) : (
                                 'KB'
                             )}
@@ -215,7 +216,17 @@ function App() {
                         />
                     )}
                     {activeView === 'settings' && <SettingsPage />}
-                    {(activeView === 'dashboard' || activeView === 'reports') && (
+                    {activeView === 'dashboard' && (
+                        <Dashboard
+                            onNavigate={(view) => {
+                                setActiveView(view);
+                                if (view === 'athletes') {
+                                    handleNewAthlete();
+                                }
+                            }}
+                        />
+                    )}
+                    {activeView === 'reports' && (
                         <div className="flex flex-col items-center justify-center h-full text-slate-400">
                             <div className="text-lg font-medium">Coming Soon</div>
                             <div className="text-sm">This module is under development</div>

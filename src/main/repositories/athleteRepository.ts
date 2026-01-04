@@ -7,8 +7,8 @@ export const athleteRepository = {
   create: (athlete: Athlete): Athlete => {
     const db = getDatabase();
     const stmt = db.prepare(`
-      INSERT INTO athletes (name, birthDate, gender, weight, rank, clubId, profile_photo_path, birth_place, region, address, phone, email, parent_guardian, parent_phone)
-      VALUES (@name, @birthDate, @gender, @weight, @rank, @clubId, @profile_photo_path, @birth_place, @region, @address, @phone, @email, @parent_guardian, @parent_phone)
+      INSERT INTO athletes (name, birthDate, gender, weight, rank, clubId, profile_photo_path, birth_place, region, address, phone, email, parent_guardian, parent_phone, activity_status)
+      VALUES (@name, @birthDate, @gender, @weight, @rank, @clubId, @profile_photo_path, @birth_place, @region, @address, @phone, @email, @parent_guardian, @parent_phone, @activity_status)
     `);
     const safeAthlete = {
       ...athlete,
@@ -21,6 +21,7 @@ export const athleteRepository = {
       email: athlete.email || '',
       parent_guardian: athlete.parent_guardian || '',
       parent_phone: athlete.parent_phone || '',
+      activity_status: athlete.activity_status || 'Constant',
     };
     const info = stmt.run(safeAthlete);
     return { ...athlete, id: Number(info.lastInsertRowid) };
@@ -62,6 +63,7 @@ export const athleteRepository = {
           email = @email,
           parent_guardian = @parent_guardian,
           parent_phone = @parent_phone,
+          activity_status = @activity_status,
           updatedAt = CURRENT_TIMESTAMP
       WHERE id = @id
     `);
@@ -76,6 +78,7 @@ export const athleteRepository = {
       email: athlete.email || '',
       parent_guardian: athlete.parent_guardian || '',
       parent_phone: athlete.parent_phone || '',
+      activity_status: athlete.activity_status || 'Constant',
     };
     const info = stmt.run(safeAthlete);
     return info.changes > 0;
@@ -86,5 +89,41 @@ export const athleteRepository = {
     const stmt = db.prepare('DELETE FROM athletes WHERE id = ?');
     const info = stmt.run(id);
     return info.changes > 0;
+  },
+
+  getStatistics: (): {
+    totalPool: number;
+    competitivePool: number;
+    maleCount: number;
+    femaleCount: number;
+  } => {
+    const db = getDatabase();
+
+    const totalPool = db.prepare('SELECT COUNT(*) as count FROM athletes').get() as { count: number };
+
+    const competitivePool = db.prepare(`
+      SELECT COUNT(*) as count 
+      FROM athletes 
+      WHERE activity_status IN ('Constant', 'Intermittent')
+    `).get() as { count: number };
+
+    const maleCount = db.prepare(`
+      SELECT COUNT(*) as count 
+      FROM athletes 
+      WHERE gender = 'male'
+    `).get() as { count: number };
+
+    const femaleCount = db.prepare(`
+      SELECT COUNT(*) as count 
+      FROM athletes 
+      WHERE gender = 'female'
+    `).get() as { count: number };
+
+    return {
+      totalPool: totalPool.count,
+      competitivePool: competitivePool.count,
+      maleCount: maleCount.count,
+      femaleCount: femaleCount.count,
+    };
   }
 };

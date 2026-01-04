@@ -129,8 +129,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                 referenceYear // Use selected reference year
             ),
             clubName: athlete.clubId ? (clubs.find(c => c.id === athlete.clubId)?.name || 'Unknown Club') : 'Unattached',
-            // TODO: Real status logic based on attendance
-            status: ActivityStatus.Constant,
+            status: (athlete.activity_status as ActivityStatus) || ActivityStatus.Constant,
             isVerified: true
         };
     }, [activeRuleset, referenceYear, clubs]);

@@ -65,6 +65,7 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
             parent_guardian: '',
             parent_phone: '',
             profile_photo_path: '',
+            activity_status: 'Constant',
         },
     });
 
@@ -431,6 +432,12 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                                     ...clubs.map(club => ({ value: club.id, label: club.name }))
                                 ])}
 
+                                {renderField('activity_status', 'Activity Status', 'text', [
+                                    { value: 'Constant', label: 'Constant - Regular Training' },
+                                    { value: 'Intermittent', label: 'Intermittent - Occasional' },
+                                    { value: 'Dormant', label: 'Dormant - Inactive' }
+                                ])}
+
                                 {/* Detailed Information Section */}
                                 <div className="space-y-4 pt-6 border-t border-slate-200">
                                     <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider pb-2">
@@ -455,18 +462,19 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                                             {renderField('email', 'Email', 'email')}
                                         </div>
 
-                                        {/* Parent/Guardian Info - Show for athletes under 18 */}
-                                        {isMinor && (
-                                            <>
-                                                <h5 className="text-xs font-bold text-slate-600 uppercase tracking-wider mt-4 pt-4 border-t border-slate-100">
-                                                    Parent/Guardian Information
-                                                </h5>
-                                                <div className={initialData ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4"}>
-                                                    {renderField('parent_guardian', 'Parent/Guardian Name', 'text')}
-                                                    {renderField('parent_phone', 'Parent/Guardian Phone', 'tel')}
-                                                </div>
-                                            </>
-                                        )}
+                                        {/* Parent/Guardian Info - Always available for editing */}
+                                        <h5 className="text-xs font-bold text-slate-600 uppercase tracking-wider mt-4 pt-4 border-t border-slate-100">
+                                            Parent/Guardian Information
+                                            {!initialData && !isMinor && (
+                                                <span className="ml-2 text-[10px] font-normal text-slate-400 normal-case tracking-normal">
+                                                    (Optional - recommended for minors)
+                                                </span>
+                                            )}
+                                        </h5>
+                                        <div className={initialData ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4"}>
+                                            {renderField('parent_guardian', 'Parent/Guardian Name', 'text')}
+                                            {renderField('parent_phone', 'Parent/Guardian Phone', 'tel')}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

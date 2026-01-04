@@ -24,6 +24,9 @@ export const AthleteSchema = z.object({
     email: z.string().trim().email('Invalid email format').max(255, 'Email is too long').nullable().optional().or(z.literal('')),
     parent_guardian: z.string().max(200, 'Name is too long').nullable().optional().or(z.literal('')),
     parent_phone: z.string().regex(/^[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*\d[\d\s\-\+\(\)]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').nullable().optional().or(z.literal('')),
+
+    // Activity Status (Story 7.2)
+    activity_status: z.enum(['Constant', 'Intermittent', 'Dormant']).default('Constant'),
 });
 
 export type Athlete = z.infer<typeof AthleteSchema>;

@@ -10,6 +10,18 @@ export interface IElectronAPI {
         update: (data: unknown) => Promise<boolean>;
         delete: (id: number) => Promise<boolean>;
     };
+    athlete: {
+        getStatistics: () => Promise<{
+            success: boolean;
+            data?: {
+                totalPool: number;
+                competitivePool: number;
+                maleCount: number;
+                femaleCount: number;
+            };
+            error?: string;
+        }>;
+    };
     history: {
         addPromotion: (data: unknown) => Promise<Promotion>;
         getPromotions: (athleteId: number) => Promise<Promotion[]>;
@@ -17,6 +29,20 @@ export interface IElectronAPI {
         addMedal: (data: unknown) => Promise<Medal>;
         getMedals: (athleteId: number) => Promise<Medal[]>;
         deleteMedal: (id: number) => Promise<boolean>;
+        getMedalCountsByYear: (year?: number) => Promise<{
+            success: boolean;
+            data?: {
+                gold: number;
+                silver: number;
+                bronze: number;
+            };
+            error?: string;
+        }>;
+        getAvailableMedalYears: () => Promise<{
+            success: boolean;
+            data?: number[];
+            error?: string;
+        }>;
     };
     system: {
         backupDatabase: () => Promise<{ success: boolean; data?: string; error?: string }>;
