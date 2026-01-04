@@ -132,3 +132,20 @@ export type Club = z.infer<typeof ClubSchema>;
 export const ClubUpdateSchema = ClubSchema.extend({
     id: z.number(),
 });
+
+// Tournament History Schema
+export const TournamentHistorySchema = z.object({
+    id: z.number().optional(),
+    athlete_id: z.number(),
+    tournament_id: z.number().nullable().optional(),
+    tournament_name: z.string().min(1, 'Tournament name is required'),
+    tournament_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+    tournament_location: z.string().optional(),
+    weight_class: z.string().optional(),
+    age_category: z.string().optional(),
+    is_auto_generated: z.boolean().optional(),
+    created_at: z.string().optional(),
+});
+
+export type TournamentHistory = z.infer<typeof TournamentHistorySchema>;
+

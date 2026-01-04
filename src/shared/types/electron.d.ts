@@ -1,6 +1,6 @@
 // Shared type definitions for IPC communication
 
-import { Athlete, Promotion, Medal, Ruleset, Tournament, TournamentRosterEntry, Club } from '../schemas';
+import { Athlete, Promotion, Medal, Ruleset, Tournament, TournamentRosterEntry, Club, TournamentHistory } from '../schemas';
 
 export interface IElectronAPI {
     ping: () => Promise<string>;
@@ -91,6 +91,12 @@ export interface IElectronAPI {
         generateAthleteSummaryPDF: (
             athleteIds: number[]
         ) => Promise<{ success: boolean; filePath?: string; error?: string }>;
+    };
+    tournamentHistory: {
+        getByAthlete: (athleteId: number) => Promise<{ success: boolean; data?: TournamentHistory[]; error?: string }>;
+        addManual: (data: Omit<TournamentHistory, 'id' | 'is_auto_generated' | 'created_at'>) => Promise<{ success: boolean; data?: TournamentHistory; error?: string }>;
+        update: (id: number, data: Partial<Omit<TournamentHistory, 'id' | 'athlete_id' | 'is_auto_generated' | 'created_at'>>) => Promise<{ success: boolean; data?: boolean; error?: string }>;
+        delete: (id: number) => Promise<{ success: boolean; data?: boolean; error?: string }>;
     };
 }
 

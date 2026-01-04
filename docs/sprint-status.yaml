@@ -121,11 +121,11 @@ epics:
 
   - id: "E8"
     title: "Advanced Competition History & Analytics"
-    status: "to_do"
+    status: "in_progress"
     stories:
       - id: "E8.S1"
         title: "Automated Tournament History"
-        status: "to_do"
+        status: "done"
       - id: "E8.S2"
         title: "Integrated Medal Records"
         status: "to_do"

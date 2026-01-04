@@ -116,6 +116,28 @@ export const initialSchemaMigration: Migration = {
             CREATE INDEX IF NOT EXISTS idx_tournament_rosters_tournament ON tournament_rosters(tournament_id);
         `);
 
+        // Tournament History Table
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS tournament_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                athlete_id INTEGER NOT NULL,
+                tournament_id INTEGER,
+                tournament_name TEXT NOT NULL,
+                tournament_date TEXT NOT NULL,
+                tournament_location TEXT,
+                weight_class TEXT,
+                age_category TEXT,
+                is_auto_generated INTEGER DEFAULT 0,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (athlete_id) REFERENCES athletes(id) ON DELETE CASCADE,
+                FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE
+            );
+            
+            CREATE INDEX IF NOT EXISTS idx_tournament_history_athlete ON tournament_history(athlete_id);
+            CREATE INDEX IF NOT EXISTS idx_tournament_history_tournament ON tournament_history(tournament_id);
+            CREATE INDEX IF NOT EXISTS idx_tournament_history_date ON tournament_history(tournament_date);
+        `);
+
         // App Settings Table - Key-Value store for system-wide configuration
         db.exec(`
             CREATE TABLE IF NOT EXISTS app_settings (

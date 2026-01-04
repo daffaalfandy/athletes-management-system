@@ -67,6 +67,12 @@ const api: IElectronAPI = {
         generateRosterPDF: (tournamentId, options) => ipcRenderer.invoke('export:generateRosterPDF', tournamentId, options),
         generateAthleteSummaryPDF: (athleteIds) => ipcRenderer.invoke('export:generateAthleteSummaryPDF', athleteIds),
     },
+    tournamentHistory: {
+        getByAthlete: (athleteId) => ipcRenderer.invoke('tournamentHistory:getByAthlete', athleteId),
+        addManual: (data) => ipcRenderer.invoke('tournamentHistory:addManual', data),
+        update: (id, data) => ipcRenderer.invoke('tournamentHistory:update', id, data),
+        delete: (id) => ipcRenderer.invoke('tournamentHistory:delete', id),
+    },
 };
 
 contextBridge.exposeInMainWorld('api', api);

@@ -9,6 +9,7 @@ import { useRulesetStore } from '../settings/useRulesetStore';
 import { useClubStore } from '../settings/useClubStore';
 import { Timeline } from './history/Timeline';
 import { MedalList } from './history/MedalList';
+import { TournamentHistoryTimeline } from './TournamentHistoryTimeline';
 import { useAthleteStore } from './useAthleteStore';
 import { BeltBadge } from '../../components/BeltBadge';
 
@@ -499,6 +500,9 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                                 <Timeline athleteId={initialData.id} />
                                 <div className="border-t border-slate-100 pt-8">
                                     <MedalList athleteId={initialData.id} />
+                                </div>
+                                <div className="border-t border-slate-100 pt-8">
+                                    <TournamentHistoryTimeline athleteId={initialData.id} />
                                 </div>
                             </>
                         )}
