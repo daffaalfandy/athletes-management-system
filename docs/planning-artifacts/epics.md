@@ -27,10 +27,8 @@ This document provides the complete epic and story breakdown for athletes-manage
 - **FR12:** System can manage local file paths to ensure document attachments and photos are retrievable.
 - **FR13:** Coach can preview and view full-sized scans of certificates directly within the application.
 - **FR14:** Coach can flag athlete profiles as "Verified" once their physical paperwork matches the digital records.
-- **FR15:** Coach can export a selected tournament roster to a pre-formatted Excel registration sheet.
 - **FR16:** Coach can generate a printable PDF "Hardfile" (Roster Sheet) for physical submission.
 - **FR17:** System can produce a PDF summary of all athlete list data for offline study.
-- **FR18:** Coach can export the complete athlete roster to CSV for external data analysis.
 - **FR19:** Technical Sensei can create and store custom Age Category templates (e.g., U-18, Senior).
 - **FR20:** Technical Sensei can define and store custom Weight Class thresholds.
 - **FR21:** Technical Sensei can configure the logical order of technical ranks (e.g., White to Black belt).
@@ -77,10 +75,8 @@ FR11: Epic 4 - Digital Dossier (Document Management)
 FR12: Epic 4 - Digital Dossier (Document Management)
 FR13: Epic 4 - Digital Dossier (Document Management)
 FR14: Epic 4 - Digital Dossier (Document Management)
-FR15: Epic 6 - Export Factory (Excel & PDF)
 FR16: Epic 6 - Export Factory (Excel & PDF)
 FR17: Epic 6 - Export Factory (Excel & PDF)
-FR18: Epic 6 - Export Factory (Excel & PDF)
 FR19: Epic 3 - Rulesets & Dynamic Eligibility
 FR20: Epic 3 - Rulesets & Dynamic Eligibility
 FR21: Epic 3 - Rulesets & Dynamic Eligibility
@@ -114,9 +110,9 @@ Securely manage and preview scanned technical certifications.
 Filter the pool, manage tournaments/clubs, and assemble tournament-ready rosters.
 **FRs covered:** FR6, FR8, FR9, FR10 + (Club/Tournament Logic)
 
-### Epic 6: Export Factory (Excel & PDF)
+### Epic 6: Export Factory (PDF & Data)
 Produce the "Hardfiles" required for tournament registration.
-**FRs covered:** FR15, FR16, FR17, FR18
+**FRs covered:** FR16, FR17
 
 ### Epic 7: Institutional Branding & Polish
 Personalize the app and finalize the user experience.
@@ -471,24 +467,11 @@ So that I can track where my athletes belong and filter by club.
 
 ---
 
-## Epic 6: Export Factory (Excel & PDF)
+## Epic 6: Export Factory (PDF & Data)
 
 Goal: Produce the "Hardfiles" required for tournament registration.
 
-### Story E6.S1: Excel Registration Export
-
-As a coach,
-I want to export my *Active Tournament's* roster to a pre-formatted Excel sheet,
-So that I can submit it to the committee.
-
-**Acceptance Criteria:**
-
-**Given** the Active Tournament has a roster
-**When** the coach clicks "Export to Excel"
-**Then** the system should generate an .xlsx file
-**And** the data should be mapped to the standard federation/provincial format.
-
-### Story E6.S2: PDF Roster Printout
+### Story E6.S1: PDF Roster Printout
 
 As a coach,
 I want to generate a printable PDF of the tournament roster,
@@ -498,22 +481,13 @@ So that I have a physical "Hardfile" for submission.
 
 **Given** the Active Tournament has a roster
 **When** the coach clicks "Print Roster"
-**Then** a PDF should be generated containing all mandatory athlete data
+**Then** a PDF should be generated containing all mandatory athlete data (Name, Gender, etc.)
+**And** the PDF must include the **Tournament Name**, **Date**, and **Location** in the header
+**And** the roster must be **grouped by Age Category (Ruleset)** and then by **Weight Class**
+**And** clear headers should separate each category/class group
 **And** the layout should be professional and include the Kabupaten/Club logos.
 
-### Story E6.S3: CSV Data Export
-
-As a coach,
-I want to export the entire athlete pool to CSV,
-So that I can perform external analysis in Excel.
-
-**Acceptance Criteria:**
-
-**Given** the athlete list
-**When** the coach clicks "Export All to CSV"
-**Then** a CSV file containing all athlete fields should be downloaded.
-
-### Story E6.S4: PDF Archive Summary
+### Story E6.S2: PDF Archive Summary
 
 As a coach,
 I want to generate a full summary PDF of my entire athlete pool,

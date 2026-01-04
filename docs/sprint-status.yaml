@@ -95,19 +95,15 @@ epics:
         status: "done"
 
   - id: "E6"
-    title: "Export Factory (Excel & PDF)"
+    title: "Export Factory (PDF & Data)"
     status: "to_do"
     stories:
+
       - id: "E6.S1"
-        title: "Excel Registration Export"
-        status: "to_do"
-      - id: "E6.S2"
         title: "PDF Roster Printout"
         status: "to_do"
-      - id: "E6.S3"
-        title: "CSV Data Export"
-        status: "to_do"
-      - id: "E6.S4"
+
+      - id: "E6.S2"
         title: "PDF Archive Summary"
         status: "to_do"
 
