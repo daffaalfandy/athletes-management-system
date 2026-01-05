@@ -40,10 +40,14 @@ export const historyRepository = {
     addMedal: (medal: Medal): Medal => {
         const db = getDatabase();
         const stmt = db.prepare(`
-            INSERT INTO medals (athleteId, tournament, date, medal, category, proof_image_path)
-            VALUES (@athleteId, @tournament, @date, @medal, @category, @proof_image_path)
+            INSERT INTO medals (athleteId, tournament_id, tournament, date, medal, category, proof_image_path)
+            VALUES (@athleteId, @tournament_id, @tournament, @date, @medal, @category, @proof_image_path)
         `);
-        const info = stmt.run({ ...medal, proof_image_path: medal.proof_image_path || null });
+        const info = stmt.run({
+            ...medal,
+            tournament_id: medal.tournament_id || null,
+            proof_image_path: medal.proof_image_path || null
+        });
         return { ...medal, id: Number(info.lastInsertRowid) };
     },
 

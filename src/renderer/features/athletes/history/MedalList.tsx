@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Award, Calendar, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Plus, Award, Calendar, Image as ImageIcon, Trash2, Link2 } from 'lucide-react';
 import { useAthleteStore } from '../useAthleteStore';
+import { useTournamentHistoryStore } from '../useTournamentHistoryStore';
 import { MedalSchema, Medal } from '../../../../shared/schemas';
 
 import { ProofPreview } from '../../../components/ProofPreview';
@@ -13,9 +14,11 @@ interface MedalListProps {
 
 export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
     const { activeMedals, addMedal, deleteMedal, historyLoading, error } = useAthleteStore();
+    const { history, loadHistory } = useTournamentHistoryStore();
     const [isAdding, setIsAdding] = useState(false);
     const [viewingProof, setViewingProof] = useState<{ title: string, date: string, imagePath?: string } | null>(null);
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
+    const [selectedTournamentId, setSelectedTournamentId] = useState<number | null>(null);
 
     const sortedMedals = React.useMemo(() => {
         return [...activeMedals].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -25,9 +28,10 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
         register,
         handleSubmit,
         reset,
+        setValue,
         formState: { errors },
     } = useForm({
-        resolver: zodResolver(MedalSchema.omit({ id: true })),
+        resolver: zodResolver(MedalSchema.omit({ id: true, tournament_id: true })),
         defaultValues: {
             athleteId,
             tournament: '',
@@ -36,6 +40,11 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
             category: '',
         },
     });
+
+    // Load tournament history when component mounts
+    useEffect(() => {
+        loadHistory(athleteId);
+    }, [athleteId, loadHistory]);
 
     if (historyLoading && activeMedals.length === 0) {
         return (
@@ -55,11 +64,34 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
         );
     }
 
+    const handleTournamentSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const tournamentId = e.target.value ? parseInt(e.target.value) : null;
+        setSelectedTournamentId(tournamentId);
+
+        if (tournamentId) {
+            const tournament = history.find(th => th.id === tournamentId);
+            if (tournament) {
+                setValue('tournament', tournament.tournament_name);
+                setValue('date', tournament.tournament_date);
+            }
+        } else {
+            // Manual entry - clear fields
+            setValue('tournament', '');
+            setValue('date', new Date().toISOString().split('T')[0]);
+        }
+    };
+
     const onAddMedal = async (data: Omit<Medal, 'id'>) => {
         try {
-            await addMedal({ ...data, athleteId, tempFilePath: selectedFile || undefined });
+            await addMedal({
+                ...data,
+                athleteId,
+                tournament_id: selectedTournamentId,
+                tempFilePath: selectedFile || undefined
+            });
             reset({ athleteId, tournament: '', date: new Date().toISOString().split('T')[0], medal: 'Gold', category: '' });
             setSelectedFile(null);
+            setSelectedTournamentId(null);
             setIsAdding(false);
         } catch (error: any) {
             console.error("Failed to add medal", error);
@@ -118,6 +150,25 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
 
             {isAdding && (
                 <form onSubmit={handleSubmit(onAddMedal)} className="bg-slate-50 p-4 rounded-lg border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="mb-4">
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">
+                            Link to Tournament (Optional)
+                        </label>
+                        <select
+                            value={selectedTournamentId || ''}
+                            onChange={handleTournamentSelect}
+                            className="block w-full px-3 py-2 rounded-md border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                        >
+                            <option value="">Manual Entry (Type tournament name below)</option>
+                            {history.map(th => (
+                                <option key={th.id} value={th.id}>
+                                    {th.tournament_name} - {th.tournament_date}
+                                </option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-slate-500 mt-1">Select a tournament from history or enter manually</p>
+                    </div>
+
                     <div className="grid grid-cols-1 gap-4 mb-4">
                         <div>
                             <label className="block text-xs font-semibold text-slate-600 mb-1">Tournament Name</label>
@@ -192,7 +243,15 @@ export const MedalList: React.FC<MedalListProps> = ({ athleteId }) => {
                             <Award className="w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate">{medal.tournament}</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-slate-900 truncate">{medal.tournament}</p>
+                                {medal.tournament_id && (
+                                    <div className="flex items-center gap-1 text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded flex-shrink-0">
+                                        <Link2 size={10} />
+                                        <span>Linked</span>
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex items-center text-xs text-slate-500 mt-0.5">
                                 <span className="font-medium mr-2">{medal.medal}</span>
                                 {medal.category && (

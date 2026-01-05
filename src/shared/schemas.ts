@@ -49,6 +49,7 @@ export type Promotion = z.infer<typeof PromotionSchema>;
 export const MedalSchema = z.object({
     id: z.number().optional(),
     athleteId: z.number(),
+    tournament_id: z.number().nullable().optional(), // Link to tournament history
     tournament: z.string().min(1, 'Tournament name is required'),
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
     medal: z.enum(['Gold', 'Silver', 'Bronze']),

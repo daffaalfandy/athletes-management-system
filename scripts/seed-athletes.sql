@@ -67,17 +67,20 @@ CREATE TABLE IF NOT EXISTS promotions (
 CREATE TABLE IF NOT EXISTS medals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     athleteId INTEGER NOT NULL,
+    tournament_id INTEGER,
     tournament TEXT NOT NULL,
     date TEXT NOT NULL,
     medal TEXT NOT NULL,
     category TEXT,
     proof_image_path TEXT,
     createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (athleteId) REFERENCES athletes(id) ON DELETE CASCADE
+    FOREIGN KEY (athleteId) REFERENCES athletes(id) ON DELETE CASCADE,
+    FOREIGN KEY (tournament_id) REFERENCES tournament_history(id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_promotions_athleteId ON promotions(athleteId);
 CREATE INDEX IF NOT EXISTS idx_medals_athleteId ON medals(athleteId);
+CREATE INDEX IF NOT EXISTS idx_medals_tournament_id ON medals(tournament_id);
 
 CREATE TABLE IF NOT EXISTS tournaments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
