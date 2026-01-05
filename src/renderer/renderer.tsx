@@ -16,7 +16,7 @@ import { Athlete } from '../shared/schemas';
 
 function App() {
     const [isReady, setIsReady] = useState(false);
-    const [activeView, setActiveView] = useState<'dashboard' | 'athletes' | 'tournaments' | 'tournament-detail' | 'reports' | 'settings'>('dashboard');
+    const [activeView, setActiveView] = useState<'dashboard' | 'athletes' | 'tournaments' | 'tournament-detail' | 'settings'>('dashboard');
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [tournamentId, setTournamentId] = useState<string | null>(null);
@@ -113,12 +113,7 @@ function App() {
                             active={activeView === 'tournaments' || activeView === 'tournament-detail'}
                             onClick={() => setActiveView('tournaments')}
                         />
-                        <NavItem
-                            icon={<FileText size={20} />}
-                            label="Reports"
-                            active={activeView === 'reports'}
-                            onClick={() => setActiveView('reports')}
-                        />
+
                         <NavItem
                             icon={<Settings size={20} />}
                             label="Settings"
@@ -160,7 +155,7 @@ function App() {
                             {activeView === 'tournament-detail' && 'Tournament Details'}
                             {activeView === 'settings' && 'System Settings'}
                             {activeView === 'dashboard' && 'Dashboard'}
-                            {activeView === 'reports' && 'Reports'}
+
                         </h1>
                     </div>
 
@@ -226,12 +221,7 @@ function App() {
                             }}
                         />
                     )}
-                    {activeView === 'reports' && (
-                        <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                            <div className="text-lg font-medium">Coming Soon</div>
-                            <div className="text-sm">This module is under development</div>
-                        </div>
-                    )}
+
                 </div>
             </main>
 
