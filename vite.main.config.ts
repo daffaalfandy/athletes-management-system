@@ -13,6 +13,9 @@ export default defineConfig({
                 'electron',
                 'pdfkit', // PDFKit needs to be external to access font files
             ],
+            output: {
+                format: 'cjs', // Ensure CommonJS output
+            },
         },
     },
     optimizeDeps: {

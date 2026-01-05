@@ -19,6 +19,10 @@ export function initializeDatabase(): Database.Database {
 
         db = new Database(dbPath);
 
+        if (!db) {
+            throw new Error('Failed to create database instance');
+        }
+
         // Enable WAL mode for better concurrency
         db.pragma('journal_mode = WAL');
 
