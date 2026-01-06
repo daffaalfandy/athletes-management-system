@@ -73,6 +73,9 @@ const api: IElectronAPI = {
         update: (id, data) => ipcRenderer.invoke('tournamentHistory:update', id, data),
         delete: (id) => ipcRenderer.invoke('tournamentHistory:delete', id),
     },
+    app: {
+        getVersion: () => ipcRenderer.invoke('app:getVersion'),
+    },
 };
 
 contextBridge.exposeInMainWorld('api', api);

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Save, AlertCircle, CheckCircle, Loader2, Upload, Database, Settings2, Building2, Palette } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, AlertCircle, CheckCircle, Loader2, Upload, Database, Settings2, Building2, Palette, Info } from 'lucide-react';
 import { RulesetList } from './RulesetList';
 import { RulesetEditor } from './RulesetEditor';
 import { ClubList } from './ClubList';
@@ -21,7 +21,14 @@ export const SettingsPage = () => {
     const [isRestoring, setIsRestoring] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+    // App version
+    const [appVersion, setAppVersion] = useState<string>('');
+
     const isLoading = isBackingUp || isRestoring;
+
+    useEffect(() => {
+        window.api.app.getVersion().then(setAppVersion);
+    }, []);
 
     const handleBackup = async () => {
         setIsBackingUp(true);
@@ -207,6 +214,24 @@ export const SettingsPage = () => {
                                 {status.message}
                             </div>
                         )}
+
+                        {/* About Section */}
+                        <div className="mt-8 pt-6 border-t border-slate-200">
+                            <div className="flex items-center gap-3 text-slate-500 mb-3">
+                                <Info size={18} />
+                                <div>
+                                    <span className="font-medium text-slate-700">Judo Command Center</span>
+                                    <span className="mx-2">•</span>
+                                    <span>Version {appVersion || '...'}</span>
+                                </div>
+                            </div>
+                            <p className="text-xs text-slate-400 ml-7">
+                                © {new Date().getFullYear()} Daffa Alfandy. All rights reserved.
+                            </p>
+                            <p className="text-xs text-slate-400 ml-7 mt-1">
+                                Built with ❤️ for Judo athletes and coaches.
+                            </p>
+                        </div>
                     </div>
                 )}
             </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LayoutDashboard, Users, FileText, Plus, X, Settings, Trophy } from 'lucide-react';
 import '../index.css';
+import logo from './assets/logo.png';
 
 import { AthleteForm } from './features/athletes/AthleteForm';
 import { useAthleteStore } from './features/athletes/useAthleteStore';
@@ -90,7 +91,7 @@ function App() {
             <aside className="w-64 bg-[#0f172a] text-slate-300 flex flex-col flex-shrink-0 transition-all duration-300">
                 <div className="p-6">
                     <div className="flex items-center gap-3 text-white mb-8">
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg">J</div>
+                        <img src={logo} className="w-8 h-8 rounded-lg" alt="Judo Command Center" />
                         <span className="font-bold text-lg tracking-wide">JUDOKA DEPOT</span>
                     </div>
 

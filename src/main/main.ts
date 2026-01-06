@@ -78,6 +78,7 @@ app.whenReady().then(() => {
 
     // Setup IPC handlers
     ipcMain.handle('ping', () => 'pong');
+    ipcMain.handle('app:getVersion', () => app.getVersion());
     setupAthleteHandlers();
     setupHistoryHandlers();
     setupBackupHandlers();
@@ -88,6 +89,7 @@ app.whenReady().then(() => {
     setupExportHandlers();
     setupSettingsHandlers();
     setupTournamentHistoryHandlers();
+
 
     createWindow();
 });

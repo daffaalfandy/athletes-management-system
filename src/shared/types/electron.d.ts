@@ -98,6 +98,9 @@ export interface IElectronAPI {
         update: (id: number, data: Partial<Omit<TournamentHistory, 'id' | 'athlete_id' | 'is_auto_generated' | 'created_at'>>) => Promise<{ success: boolean; data?: boolean; error?: string }>;
         delete: (id: number) => Promise<{ success: boolean; data?: boolean; error?: string }>;
     };
+    app: {
+        getVersion: () => Promise<string>;
+    };
 }
 
 declare global {

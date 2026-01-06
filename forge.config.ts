@@ -28,6 +28,8 @@ function copyDirSync(src: string, dest: string) {
 const config: ForgeConfig = {
   packagerConfig: {
     asar: false,
+    // Icon path without extension - Electron picks .ico (Windows), .icns (macOS), or .png (Linux)
+    icon: 'resources/icon',
   },
   rebuildConfig: {
     // Rebuild native modules for the target platform
