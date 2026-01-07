@@ -573,3 +573,126 @@ So that the data is interconnected and verifiable.
 **When** the coach selects the "Tournament" field
 **Then** they should see a dropdown of the tournaments the athlete has participated in (from history)
 **And** they should also have the option to type a manual tournament name if it's not in the system.
+
+---
+
+## Epic 9: Application Refinement & Extended Features
+
+Goal: Address bugs, enhance existing features, and add localization based on user feedback.
+
+### Story E9.S1: Windows Attachment Bug Fix
+
+As a Windows user,
+I want file uploads to work reliably without path errors,
+So that I can store certificates and photos.
+
+**Acceptance Criteria:**
+
+**Given** the application is running on Windows
+**When** a user uploads a file (Certificate, Photo)
+**Then** the system should correctly handle Windows file paths (backslashes/escaping)
+**And** the file should be copied to the local vault successfully.
+
+### Story E9.S2: Enhanced Belt System (Kyu/Dan)
+
+As a technical sensei,
+I want to use "Belt" terminology with specific Kyu/Dan grades,
+So that it matches official grading systems.
+
+**Acceptance Criteria:**
+
+**Given** any display of "Rank"
+**Then** it should be renamed to "Belt" throughout the UI
+**And** the system should support detailed mapping:
+  - **White** (Kyu 6)
+  - **Yellow** (Kyu 5)
+  - **Orange** (Kyu 4)
+  - **Green** (Kyu 3)
+  - **Blue** (Kyu 2)
+  - **Brown** (Kyu 1)
+  - **Black** (Dan 1-10)
+**And** sorting mechanisms should use this hierarchy (High Dan -> Low Kyu).
+
+### Story E9.S3: Refined Weight Classes (Pa/Pi)
+
+As a coach,
+I want filter options to match the specific Pa (Male) and Pi (Female) weight classes,
+So that roster selection is accurate.
+
+**Acceptance Criteria:**
+
+**Given** the Weight Filter dropdown
+**Then** the options should be strictly grouped by Gender:
+- **Male (Pa):** -50kg, -55kg, -60kg, -66kg, -73kg, -81kg, +81kg, -90kg, -100kg, +100kg
+- **Female (Pi):** -40kg, -44kg, -48kg, -52kg, -57kg, -63kg, +63kg, -70kg, -78kg, +78kg
+**And** labels should clearly indicate "Kg" and gender.
+
+### Story E9.S4: Extended Athlete Profile & Official Documents
+
+As a coach,
+I want to record comprehensive details and upload official government documents,
+So that the athlete profile is a complete legal record.
+
+**Acceptance Criteria:**
+
+**Given** the Athlete Form
+**When** the coach inputs data
+**Then** they should be able to record: **First Date Joined Judo**, **School Name**, **NISN**, and **NIK**
+**And** the system should automatically generate a "Nomor Anggota" (Member ID) for the athlete
+**When** the coach manages documents
+**Then** they should be able to upload specific files: **KK (Kartu Keluarga)**, **KTP / KIA Athlete**, and **Akta Lahir**
+**And** these documents should be securely stored in the local vault.
+
+### Story E9.S5: Advanced Athlete Sorting
+
+As a coach,
+I want the athlete list to be sorted by activity status by default,
+So that active members appear first.
+
+**Acceptance Criteria:**
+
+**Given** the Athlete List
+**Then** the default sort order must be: **Active Athletes** (Top) -> **Intermittent** -> **Dormant** (Bottom).
+
+### Story E9.S6: Comprehensive Backup (ZIP)
+
+As a user,
+I want my backup to include the database AND all attached files,
+So that I have a full restore point.
+
+**Acceptance Criteria:**
+
+**Given** the Export Database function
+**When** triggered
+**Then** it should create a **ZIP file** containing the `sqlite` db and the `attachments/` folder
+**And** the file should be named with a timestamp (e.g., `backup-YMD.zip`)
+**And** allow for an Import/Restore action that unzips and overwrites existing data/files with a confirmation warning.
+
+### Story E9.S8: School-Based Roster Export
+
+As a coach,
+I want to toggle a "School Based" option when exporting rosters,
+So that necessary academic data is included for student tournaments.
+
+**Acceptance Criteria:**
+
+**Given** the Roster Export options (PDF/Excel)
+**When** the coach views the export dialog
+**Then** a checkbox "School Based Tournament" should be available
+**When** this option is **Checked**
+**Then** the generated document must include **School Name**, **NISN**, and **NIK** columns for every athlete
+**When** this option is **Unchecked**
+**Then** those columns should be hidden to keep the layout clean.
+
+### Story E9.S7: Language Localization (Bahasa Indonesia)
+
+As a user,
+I want to switch the application interface to Bahasa Indonesia,
+So that it is easier for all coaches to use.
+
+**Acceptance Criteria:**
+
+**Given** the Settings menu
+**When** the user selects "Language"
+**Then** they should be able to toggle between "English" and "Bahasa Indonesia"
+**And** all UI labels, buttons, and messages should instantly reflect the selected language.
