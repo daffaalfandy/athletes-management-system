@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { LayoutDashboard, Users, FileText, Plus, X, Settings, Trophy } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Plus, X, Settings, Trophy, RefreshCw } from 'lucide-react';
 import '../index.css';
 import logo from './assets/logo.png';
 
@@ -23,7 +23,7 @@ function App() {
     const [tournamentId, setTournamentId] = useState<string | null>(null);
 
     const { athletes, loadAthletes, addAthlete, updateAthlete, error } = useAthleteStore();
-    const { kabupatanName, kabupatanLogoPath, loadSettings } = useSettingsStore();
+    const { kabupatanName, kabupatanLogoPath, logoVersion, loadSettings } = useSettingsStore();
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
     const activeAthlete = useMemo(() =>
@@ -41,11 +41,12 @@ function App() {
 
     useEffect(() => {
         if (kabupatanLogoPath) {
-            setLogoUrl(`dossier://${kabupatanLogoPath}`);
+            // Add cache-busting timestamp to force reload when logo is replaced
+            setLogoUrl(`dossier://${kabupatanLogoPath}?t=${logoVersion}`);
         } else {
             setLogoUrl(null);
         }
-    }, [kabupatanLogoPath]);
+    }, [kabupatanLogoPath, logoVersion]);
 
     const handleFormSubmit = async (data: any) => {
         if (editingId) {
@@ -161,6 +162,16 @@ function App() {
                     </div>
 
                     <div className="flex items-center gap-6">
+                        {/* Reload Button */}
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            title="Reload Page"
+                        >
+                            <RefreshCw size={16} />
+                            <span className="text-sm font-medium">Reload</span>
+                        </button>
+
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pool Health</span>
                             <div className="flex items-center gap-1.5">

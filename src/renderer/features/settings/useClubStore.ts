@@ -3,6 +3,7 @@ import { Club } from '../../../shared/schemas';
 
 interface ClubState {
     clubs: Club[];
+    clubsVersion: number;
     loading: boolean;
     error: string | null;
 
@@ -14,6 +15,7 @@ interface ClubState {
 
 export const useClubStore = create<ClubState>((set, get) => ({
     clubs: [],
+    clubsVersion: Date.now(),
     loading: false,
     error: null,
 
@@ -30,7 +32,10 @@ export const useClubStore = create<ClubState>((set, get) => ({
     addClub: async (data) => {
         try {
             const newClub = await window.api.clubs.create(data);
-            set((state) => ({ clubs: [newClub, ...state.clubs] }));
+            set((state) => ({
+                clubs: [newClub, ...state.clubs],
+                clubsVersion: Date.now()
+            }));
             return newClub;
         } catch (err: unknown) {
             set({ error: (err as Error).message });
@@ -43,6 +48,7 @@ export const useClubStore = create<ClubState>((set, get) => ({
             await window.api.clubs.update(data as Club & { id: number });
             set((state) => ({
                 clubs: state.clubs.map((c) => (c.id === data.id ? data : c)),
+                clubsVersion: Date.now()
             }));
         } catch (err: unknown) {
             set({ error: (err as Error).message });
@@ -55,6 +61,7 @@ export const useClubStore = create<ClubState>((set, get) => ({
             await window.api.clubs.delete(id);
             set((state) => ({
                 clubs: state.clubs.filter((c) => c.id !== id),
+                clubsVersion: Date.now()
             }));
         } catch (err: unknown) {
             set({ error: (err as Error).message });

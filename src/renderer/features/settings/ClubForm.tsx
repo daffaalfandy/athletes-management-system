@@ -22,6 +22,7 @@ export const ClubForm: React.FC<ClubFormProps> = ({ club, onBack }) => {
     const [tempLogoPath, setTempLogoPath] = useState<string>('');
     const [tempLogoDataUrl, setTempLogoDataUrl] = useState<string>('');
     const [uploading, setUploading] = useState(false);
+    const [logoUploadTimestamp, setLogoUploadTimestamp] = useState<number>(Date.now());
 
     // Convert temp file path to data URL for preview
     useEffect(() => {
@@ -55,7 +56,14 @@ export const ClubForm: React.FC<ClubFormProps> = ({ club, onBack }) => {
         setUploading(true);
         try {
             const vaultPath = await window.api.files.uploadToVault(filePath, 'clubs', formData.id);
-            setFormData({ ...formData, logo_path: vaultPath });
+            const updatedData = { ...formData, logo_path: vaultPath };
+            setFormData(updatedData);
+
+            // Save to database immediately
+            await updateClub(updatedData as Club & { id: number });
+
+            // Update timestamp to force preview refresh
+            setLogoUploadTimestamp(Date.now());
         } catch (error: any) {
             const message = error.message || String(error);
             if (message.includes('File too large')) {
@@ -101,7 +109,7 @@ export const ClubForm: React.FC<ClubFormProps> = ({ club, onBack }) => {
     };
 
     const logoPreviewPath = formData.logo_path
-        ? `dossier://${formData.logo_path}`
+        ? `dossier://${formData.logo_path}?t=${logoUploadTimestamp}`
         : tempLogoDataUrl
             ? tempLogoDataUrl
             : null;

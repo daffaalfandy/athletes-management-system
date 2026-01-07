@@ -621,7 +621,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                                             {/* Initials Avatar */}
                                             <div className="flex-shrink-0 h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 overflow-hidden">
                                                 {athlete.profile_photo_path ? (
-                                                    <img src={`dossier://${athlete.profile_photo_path}`} alt={athlete.name} className="h-full w-full object-cover" />
+                                                    <img src={`dossier://${athlete.profile_photo_path}?t=${Date.now()}`} alt={athlete.name} className="h-full w-full object-cover" />
                                                 ) : (
                                                     athlete.name.split(' ').map(n => n[0]).join('').substring(0, 2)
                                                 )}

@@ -163,7 +163,8 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
             const validatedData = AthleteSchema.parse(payload);
             await onSubmit(validatedData);
 
-            // Force reload or update UI? onSubmit usually refreshes.
+            // Update timestamp to force photo refresh
+            setPhotoUploadTimestamp(Date.now());
         } catch (error: any) {
             console.error("Upload failed", error);
             const message = error.message || String(error);
@@ -177,18 +178,20 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
 
     // Helper to get image src
     const [photoSrc, setPhotoSrc] = useState<string | null>(null);
+    const [photoUploadTimestamp, setPhotoUploadTimestamp] = useState<number>(Date.now());
+
     useEffect(() => {
         const loadPhoto = async () => {
             const path = watch('profile_photo_path');
             if (path) {
-                // Use custom protocol for secure loading
-                setPhotoSrc(`dossier://${path}`);
+                // Use custom protocol for secure loading with cache-busting timestamp
+                setPhotoSrc(`dossier://${path}?t=${photoUploadTimestamp}`);
             } else {
                 setPhotoSrc(null);
             }
         };
         loadPhoto();
-    }, [watch('profile_photo_path')]);
+    }, [watch('profile_photo_path'), photoUploadTimestamp]);
 
     const renderField = (name: keyof Athlete, label: string, type: string = 'text', options?: any[]) => {
         const isEditing = editingField === name;

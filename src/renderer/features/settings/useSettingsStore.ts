@@ -3,6 +3,7 @@ import { create } from 'zustand';
 interface SettingsState {
     kabupatanName: string;
     kabupatanLogoPath: string;
+    logoVersion: number;
     isLoading: boolean;
     error: string | null;
 
@@ -15,6 +16,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>((set, get) => ({
     kabupatanName: 'Kabupaten Bogor',
     kabupatanLogoPath: '',
+    logoVersion: Date.now(),
     isLoading: false,
     error: null,
 
@@ -42,7 +44,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             if (key === 'kabupaten_name') {
                 set({ kabupatanName: value });
             } else if (key === 'kabupaten_logo_path') {
-                set({ kabupatanLogoPath: value });
+                set({ kabupatanLogoPath: value, logoVersion: Date.now() });
             }
 
             set({ isLoading: false });
@@ -62,8 +64,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             // Update the setting in the database
             await window.api.settings.set('kabupaten_logo_path', relativePath);
 
-            // Update local state
-            set({ kabupatanLogoPath: relativePath, isLoading: false });
+            // Update local state with new timestamp version
+            set({ kabupatanLogoPath: relativePath, logoVersion: Date.now(), isLoading: false });
         } catch (err: any) {
             let errorMsg = err?.message || 'Failed to upload logo';
             if (errorMsg.includes('Error: ')) {

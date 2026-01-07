@@ -6,6 +6,7 @@ export const BrandingSettings = () => {
     const { kabupatanName, kabupatanLogoPath, isLoading, error, updateSetting, uploadLogo, loadSettings } = useSettingsStore();
     const [localName, setLocalName] = useState(kabupatanName);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [logoUploadTimestamp, setLogoUploadTimestamp] = useState<number>(Date.now());
     const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -22,14 +23,15 @@ export const BrandingSettings = () => {
             if (kabupatanLogoPath) {
                 try {
                     const absolutePath = await window.api.files.getImagePath(kabupatanLogoPath);
-                    setLogoPreview(`dossier://${kabupatanLogoPath}`);
+                    // Add cache-busting timestamp to force reload when logo is replaced
+                    setLogoPreview(`dossier://${kabupatanLogoPath}?t=${logoUploadTimestamp}`);
                 } catch (err) {
                     console.error('Failed to load logo preview:', err);
                 }
             }
         };
         loadLogoPreview();
-    }, [kabupatanLogoPath]);
+    }, [kabupatanLogoPath, logoUploadTimestamp]);
 
     const handleSaveName = async () => {
         if (localName.trim() === kabupatanName) return;
@@ -53,6 +55,7 @@ export const BrandingSettings = () => {
             if (!filePath) return;
 
             await uploadLogo(filePath);
+            setLogoUploadTimestamp(Date.now()); // Update timestamp to force refresh
             setStatus({ type: 'success', message: 'Logo uploaded successfully!' });
         } catch (err: any) {
             let errorMsg = err?.message || 'Failed to upload logo';

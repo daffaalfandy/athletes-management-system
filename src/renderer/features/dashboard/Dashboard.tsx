@@ -9,7 +9,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-    const { kabupatanName, kabupatanLogoPath } = useSettingsStore();
+    const { kabupatanName, kabupatanLogoPath, logoVersion } = useSettingsStore();
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [statistics, setStatistics] = useState({
         totalPool: 0,
@@ -21,11 +21,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
     useEffect(() => {
         if (kabupatanLogoPath) {
-            setLogoUrl(`dossier://${kabupatanLogoPath}`);
+            // Add cache-busting timestamp to force reload when logo is replaced
+            setLogoUrl(`dossier://${kabupatanLogoPath}?t=${logoVersion}`);
         } else {
             setLogoUrl(null);
         }
-    }, [kabupatanLogoPath]);
+    }, [kabupatanLogoPath, logoVersion]);
 
     useEffect(() => {
         const loadStatistics = async () => {

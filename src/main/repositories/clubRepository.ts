@@ -1,5 +1,6 @@
 import { getDatabase } from '../db';
 import { Club } from '../../shared/schemas';
+import { FileService } from '../services/FileService';
 
 export const clubRepository = {
     getAll: (): Club[] => {
@@ -33,6 +34,11 @@ export const clubRepository = {
 
     update: (id: number, data: Club): boolean => {
         const db = getDatabase();
+
+        // Get old logo path before updating
+        const old = db.prepare('SELECT logo_path FROM clubs WHERE id = ?').get(id) as { logo_path: string | null } | undefined;
+        const oldLogoPath = old?.logo_path || null;
+
         const stmt = db.prepare(`
             UPDATE clubs 
             SET name = @name, 
@@ -53,17 +59,35 @@ export const clubRepository = {
             contact_email: data.contact_email || null,
             location: data.location || null,
         });
+
+        // Queue cleanup of old logo if it was replaced with a different one
+        if (info.changes > 0 && oldLogoPath && data.logo_path && oldLogoPath !== data.logo_path) {
+            FileService.queueFileCleanup(oldLogoPath);
+        }
+
         return info.changes > 0;
     },
 
     delete: (id: number): boolean => {
         const db = getDatabase();
+
         // Check if any athletes are assigned to this club
         const athleteCount = db.prepare('SELECT COUNT(*) as count FROM athletes WHERE clubId = ?').get(id) as { count: number };
         if (athleteCount.count > 0) {
             throw new Error(`Cannot delete club: ${athleteCount.count} athlete(s) are assigned to this club`);
         }
+
+        // Get club data to find associated files before deletion
+        const club = db.prepare('SELECT logo_path FROM clubs WHERE id = ?').get(id) as { logo_path: string | null } | undefined;
+
+        // Delete the database record
         const info = db.prepare('DELETE FROM clubs WHERE id = ?').run(id);
+
+        // Queue cleanup of logo if deletion was successful
+        if (info.changes > 0) {
+            FileService.queueFileCleanup(club?.logo_path);
+        }
+
         return info.changes > 0;
     },
 };

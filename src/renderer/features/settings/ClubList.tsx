@@ -9,7 +9,7 @@ interface ClubListProps {
 }
 
 export const ClubList: React.FC<ClubListProps> = ({ onEdit, onAdd }) => {
-    const { clubs, loading, loadClubs, deleteClub } = useClubStore();
+    const { clubs, clubsVersion, loading, loadClubs, deleteClub } = useClubStore();
 
     useEffect(() => {
         loadClubs();
@@ -59,7 +59,7 @@ export const ClubList: React.FC<ClubListProps> = ({ onEdit, onAdd }) => {
                                 <div className="flex items-start gap-3 flex-1">
                                     {club.logo_path ? (
                                         <img
-                                            src={`dossier://${club.logo_path}`}
+                                            src={`dossier://${club.logo_path}?t=${clubsVersion}`}
                                             alt={club.name}
                                             className="w-12 h-12 rounded-lg object-cover border border-slate-200"
                                         />

@@ -59,7 +59,9 @@ app.whenReady().then(() => {
     protocol.handle('dossier', (request) => {
         const url = request.url.replace('dossier://', '');
         const vaultPath = path.join(app.getPath('userData'), 'dossier');
-        const filePath = path.join(vaultPath, decodeURIComponent(url));
+        // Normalize separator: Windows paths may have backslashes, but URLs require forward slashes
+        const decodedPath = decodeURIComponent(url).replace(/\\/g, '/');
+        const filePath = path.join(vaultPath, decodedPath);
         return net.fetch('file://' + filePath);
     });
 

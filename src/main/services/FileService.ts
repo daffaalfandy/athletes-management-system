@@ -5,6 +5,25 @@ import * as path from 'path';
 
 const VAULT_DIR_NAME = 'dossier';
 
+/**
+ * Normalize a file path to use forward slashes (cross-platform URL-safe paths).
+ * This ensures paths stored in the database work correctly in dossier:// URLs
+ * on both Windows and Unix-based systems.
+ */
+function normalizeToForwardSlashes(filePath: string): string {
+    if (!filePath || filePath.trim() === '') {
+        console.error('[FileService] normalizeToForwardSlashes: Empty path provided');
+        throw new Error('File path cannot be empty');
+    }
+    // Performance optimization: skip regex if no backslashes present
+    if (!filePath.includes('\\')) {
+        return filePath;
+    }
+    const normalized = filePath.replace(/\\/g, '/');
+    console.debug(`[FileService] Path normalized: "${filePath}" -> "${normalized}"`);
+    return normalized;
+}
+
 export const FileService = {
     async selectImageFile(): Promise<string | null> {
         const result = await dialog.showOpenDialog({
@@ -81,7 +100,8 @@ export const FileService = {
 
             await fs.promises.copyFile(sourcePath, absoluteDestPath);
 
-            return relativePath;
+            // Normalize to forward slashes for cross-platform URL compatibility
+            return normalizeToForwardSlashes(relativePath);
         } catch (error) {
             console.error('[FileService] Error copying file to vault:', error);
             throw new Error('Failed to save file to vault');
@@ -105,8 +125,9 @@ export const FileService = {
     async downloadFile(relativePath: string, defaultName?: string): Promise<boolean> {
         try {
             const vaultPath = this.getVaultPath();
-            // Prevent directory traversal
-            const safeRelative = path.normalize(relativePath).replace(/^(\.\.[\/\\])+/, '');
+            // Normalize and prevent directory traversal
+            const normalized = normalizeToForwardSlashes(relativePath);
+            const safeRelative = path.normalize(normalized).replace(/^(\.\.[\/\\])+/, '');
             const sourcePath = path.join(vaultPath, safeRelative);
 
             if (!fs.existsSync(sourcePath)) {
@@ -132,7 +153,9 @@ export const FileService = {
     async deleteFile(relativePath: string): Promise<boolean> {
         try {
             const vaultPath = this.getVaultPath();
-            const safeRelative = path.normalize(relativePath).replace(/^(\.\.[\/\\])+/, '');
+            // Normalize and prevent directory traversal
+            const normalized = normalizeToForwardSlashes(relativePath);
+            const safeRelative = path.normalize(normalized).replace(/^(\.\.[\/\\])+/, '');
             const targetPath = path.join(vaultPath, safeRelative);
 
             if (fs.existsSync(targetPath)) {
@@ -145,6 +168,33 @@ export const FileService = {
             // Don't throw for deletion errors, just return false
             return false;
         }
+    },
+
+    /**
+     * Queue a file for cleanup in the next event loop tick.
+     * This is safe to call from synchronous code (like repository methods)
+     * and won't block database operations.
+     */
+    queueFileCleanup(relativePath: string | null | undefined): void {
+        if (!relativePath) return;
+
+        // Use setImmediate to defer deletion to avoid blocking sync operations
+        setImmediate(async () => {
+            try {
+                const vaultPath = this.getVaultPath();
+                const normalized = normalizeToForwardSlashes(relativePath);
+                const safeRelative = path.normalize(normalized).replace(/^(\.\.[\\/])+/, '');
+                const targetPath = path.join(vaultPath, safeRelative);
+
+                if (fs.existsSync(targetPath)) {
+                    await fs.promises.unlink(targetPath);
+                    console.log(`[FileService] Cleaned up old file: ${relativePath}`);
+                }
+            } catch (error) {
+                console.error(`[FileService] Failed to cleanup file ${relativePath}:`, error);
+                // Silent fail - cleanup is best-effort
+            }
+        });
     }
 };
 

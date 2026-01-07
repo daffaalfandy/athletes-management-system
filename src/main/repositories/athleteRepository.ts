@@ -1,5 +1,6 @@
 import { getDatabase } from '../db';
 import { Athlete } from '../../shared/schemas';
+import { FileService } from '../services/FileService';
 
 export const athleteRepository = {
 
@@ -47,6 +48,11 @@ export const athleteRepository = {
 
   update: (athlete: Athlete): boolean => {
     const db = getDatabase();
+
+    // Get old profile photo path before updating
+    const old = db.prepare('SELECT profile_photo_path FROM athletes WHERE id = ?').get(athlete.id) as { profile_photo_path: string | null } | undefined;
+    const oldPhotoPath = old?.profile_photo_path || null;
+
     const stmt = db.prepare(`
       UPDATE athletes
       SET name = @name,
@@ -81,13 +87,30 @@ export const athleteRepository = {
       activity_status: athlete.activity_status || 'Constant',
     };
     const info = stmt.run(safeAthlete);
+
+    // Queue cleanup of old photo if it was replaced with a different one
+    if (info.changes > 0 && oldPhotoPath && athlete.profile_photo_path && oldPhotoPath !== athlete.profile_photo_path) {
+      FileService.queueFileCleanup(oldPhotoPath);
+    }
+
     return info.changes > 0;
   },
 
   delete: (id: number): boolean => {
     const db = getDatabase();
+
+    // Get athlete data to find associated files before deletion
+    const athlete = db.prepare('SELECT profile_photo_path FROM athletes WHERE id = ?').get(id) as { profile_photo_path: string | null } | undefined;
+
+    // Delete the database record
     const stmt = db.prepare('DELETE FROM athletes WHERE id = ?');
     const info = stmt.run(id);
+
+    // Queue cleanup of profile photo if deletion was successful
+    if (info.changes > 0) {
+      FileService.queueFileCleanup(athlete?.profile_photo_path);
+    }
+
     return info.changes > 0;
   },
 

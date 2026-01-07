@@ -1,5 +1,6 @@
 import { getDatabase } from '../db';
 import { Promotion, Medal } from '../../shared/schemas';
+import { FileService } from '../services/FileService';
 
 export const historyRepository = {
 
@@ -34,7 +35,12 @@ export const historyRepository = {
     deletePromotion: (id: number): Promotion | undefined => {
         const db = getDatabase();
         const stmt = db.prepare('DELETE FROM promotions WHERE id = ? RETURNING *');
-        return stmt.get(id) as Promotion | undefined;
+        const deleted = stmt.get(id) as Promotion | undefined;
+
+        // Queue cleanup of proof image
+        FileService.queueFileCleanup(deleted?.proof_image_path);
+
+        return deleted;
     },
 
     addMedal: (medal: Medal): Medal => {
@@ -60,17 +66,40 @@ export const historyRepository = {
     deleteMedal: (id: number): Medal | undefined => {
         const db = getDatabase();
         const stmt = db.prepare('DELETE FROM medals WHERE id = ? RETURNING *');
-        return stmt.get(id) as Medal | undefined;
+        const deleted = stmt.get(id) as Medal | undefined;
+
+        // Queue cleanup of proof image
+        FileService.queueFileCleanup(deleted?.proof_image_path);
+
+        return deleted;
     },
 
     updatePromotionProof: (id: number, path: string): void => {
         const db = getDatabase();
+
+        // Get old proof path before updating
+        const old = db.prepare('SELECT proof_image_path FROM promotions WHERE id = ?').get(id) as { proof_image_path: string | null } | undefined;
+
         db.prepare('UPDATE promotions SET proof_image_path = ? WHERE id = ?').run(path, id);
+
+        // Queue cleanup of old proof if it was replaced
+        if (old?.proof_image_path && old.proof_image_path !== path) {
+            FileService.queueFileCleanup(old.proof_image_path);
+        }
     },
 
     updateMedalProof: (id: number, path: string): void => {
         const db = getDatabase();
+
+        // Get old proof path before updating
+        const old = db.prepare('SELECT proof_image_path FROM medals WHERE id = ?').get(id) as { proof_image_path: string | null } | undefined;
+
         db.prepare('UPDATE medals SET proof_image_path = ? WHERE id = ?').run(path, id);
+
+        // Queue cleanup of old proof if it was replaced
+        if (old?.proof_image_path && old.proof_image_path !== path) {
+            FileService.queueFileCleanup(old.proof_image_path);
+        }
     },
 
     getMedalCountsByYear: (year?: number): {
