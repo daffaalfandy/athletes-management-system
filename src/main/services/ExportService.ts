@@ -380,7 +380,7 @@ function renderAthleteTable(
         { key: 'birthDate', label: 'Birth Date', width: 80 },
         { key: 'gender', label: 'Gender', width: 50 },
         { key: 'weight', label: 'Weight (kg)', width: 70 },
-        { key: 'rank', label: 'Rank', width: 60 }
+        { key: 'rank', label: 'Belt', width: 60 }
     ];
 
     const optionalColumns: { [key: string]: { label: string; width: number } } = {
@@ -646,7 +646,7 @@ async function createSummaryPDF(
                 { key: 'ageCategory', label: 'Age Cat.', width: 55 },
                 { key: 'weight', label: 'Weight', width: 45 },
                 { key: 'weightClass', label: 'Class', width: 45 },
-                { key: 'rank', label: 'Rank', width: 55 },
+                { key: 'rank', label: 'Belt', width: 55 },
                 { key: 'clubName', label: 'Club', width: 70 },
                 { key: 'phone', label: 'Phone', width: 70 },
                 { key: 'email', label: 'Email', width: 85 },

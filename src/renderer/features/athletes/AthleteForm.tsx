@@ -315,7 +315,7 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                 {name === 'rank' && (
                     <div className="mt-2 text-[9px] text-slate-400 font-medium bg-white/50 p-1.5 rounded border border-slate-100 flex items-center gap-1.5">
                         <Info size={10} className="text-blue-400" />
-                        Updated via History tab
+                        Updated via Belt Promotion in History tab
                     </div>
                 )}
             </div>
@@ -428,7 +428,7 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
 
                                 <div className="grid grid-cols-2 gap-4">
                                     {renderField('weight', 'Weight (kg)', 'number')}
-                                    {renderField('rank', 'Current Rank', 'text', Object.values(Rank).map(r => ({ value: r, label: r })))}
+                                    {renderField('rank', 'Current Belt', 'text', Object.values(Rank).map(r => ({ value: r, label: r })))}
                                 </div>
 
                                 {renderField('clubId', 'Club', 'text', [

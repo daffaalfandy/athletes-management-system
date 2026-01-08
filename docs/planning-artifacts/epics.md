@@ -611,7 +611,6 @@ So that it matches official grading systems.
   - **Blue** (Kyu 2)
   - **Brown** (Kyu 1)
   - **Black** (Dan 1-10)
-**And** sorting mechanisms should use this hierarchy (High Dan -> Low Kyu).
 
 ### Story E9.S3: Refined Weight Classes (Pa/Pi)
 

@@ -31,6 +31,9 @@ const RANK_ORDER: Record<string, number> = {
     [Rank.Dan5]: 11,
     [Rank.Dan6]: 12,
     [Rank.Dan7]: 13,
+    [Rank.Dan8]: 14,
+    [Rank.Dan9]: 15,
+    [Rank.Dan10]: 16,
 };
 
 const STATUS_ORDER: Record<string, number> = {
@@ -471,7 +474,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
 
                     {/* Rank Filter */}
                     <MultiSelectDropdown
-                        label="Rank"
+                        label="Belt"
                         options={Object.values(Rank)}
                         selectedOptions={rankFilter}
                         onToggle={toggleRank}
@@ -513,7 +516,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                         )}
                         {rankFilter.length > 0 && (
                             <span className="px-2 py-1 bg-white border border-blue-200 rounded text-xs text-slate-700">
-                                Rank: <strong>{rankFilter.join(', ')}</strong>
+                                Belt: <strong>{rankFilter.join(', ')}</strong>
                             </span>
                         )}
                         {clubFilter.length > 0 && (
@@ -568,7 +571,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                                 onClick={() => handleSort('rank')}
                             >
                                 <div className="flex items-center">
-                                    Rank
+                                    Belt
                                     {renderSortIcon('rank')}
                                 </div>
                             </th>

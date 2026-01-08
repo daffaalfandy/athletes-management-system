@@ -97,7 +97,7 @@ export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
             />
 
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-slate-800">Rank History</h3>
+                <h3 className="text-lg font-semibold text-slate-800">Belt Promotion History</h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
                     className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
@@ -111,7 +111,7 @@ export const Timeline: React.FC<TimelineProps> = ({ athleteId }) => {
                 <form onSubmit={handleSubmit(onAddPromotion)} className="bg-slate-50 p-4 rounded-lg border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-1">New Rank</label>
+                            <label className="block text-xs font-semibold text-slate-600 mb-1">New Belt</label>
                             <select
                                 {...register('rank')}
                                 className="block w-full px-3 py-2 rounded-md border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
