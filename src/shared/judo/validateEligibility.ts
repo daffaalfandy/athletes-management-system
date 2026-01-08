@@ -18,10 +18,10 @@ export interface EligibilityConflict {
     details?: string;
 }
 
-// Story 5.1: Weight Class Divisions (Placeholder - same as AthleteList)
+// Story 9.3: Refined Weight Class Divisions (Pa/Pi)
 const WEIGHT_DIVISIONS = {
-    male: ['-60kg', '-66kg', '-73kg', '-81kg', '-90kg', '-100kg', '+100kg'],
-    female: ['-48kg', '-52kg', '-57kg', '-63kg', '-70kg', '-78kg', '+78kg'],
+    male: ['-50kg', '-55kg', '-60kg', '-66kg', '-73kg', '-81kg', '+81kg', '-90kg', '-100kg', '+100kg'],
+    female: ['-40kg', '-44kg', '-48kg', '-52kg', '-57kg', '-63kg', '+63kg', '-70kg', '-78kg', '+78kg'],
 };
 
 /**

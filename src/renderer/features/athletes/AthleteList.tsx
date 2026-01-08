@@ -42,10 +42,10 @@ const STATUS_ORDER: Record<string, number> = {
     [ActivityStatus.Dormant]: 3,
 };
 
-// Story 5.1: Weight Class Divisions (Placeholder - will be replaced by ruleset-based logic in Story 5.3)
+// Story 9.3: Refined Weight Class Divisions (Pa/Pi)
 const WEIGHT_DIVISIONS = {
-    male: ['-60kg', '-66kg', '-73kg', '-81kg', '-90kg', '-100kg', '+100kg'],
-    female: ['-48kg', '-52kg', '-57kg', '-63kg', '-70kg', '-78kg', '+78kg'],
+    male: ['-50kg', '-55kg', '-60kg', '-66kg', '-73kg', '-81kg', '+81kg', '-90kg', '-100kg', '+100kg'],
+    female: ['-40kg', '-44kg', '-48kg', '-52kg', '-57kg', '-63kg', '+63kg', '-70kg', '-78kg', '+78kg'],
 };
 
 export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
@@ -147,7 +147,40 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                 // Story 5.1: New roster filters
                 const matchesGender = genderFilter === 'all' || athlete.gender === genderFilter;
                 const matchesAgeCategory = ageCategoryFilter.length === 0 || ageCategoryFilter.includes(athlete.ageCategory);
-                const matchesWeightClass = weightClassFilter.length === 0 || weightClassFilter.includes(athlete.weightClass);
+
+                // Story 9.3: Range-based weight class filtering
+                const matchesWeightClass = weightClassFilter.length === 0 || weightClassFilter.some(selectedClass => {
+                    // Remove Pa/Pi label to get raw weight class
+                    const rawClass = selectedClass.replace(/ \((Pa|Pi)\)/g, '');
+                    const divisions = WEIGHT_DIVISIONS[athlete.gender];
+                    const classIndex = divisions.indexOf(rawClass);
+
+                    if (classIndex === -1) return false;
+
+                    // Calculate range for this weight class
+                    if (rawClass.startsWith('+')) {
+                        // Upper limit: e.g., +100kg means > 100
+                        const threshold = parseInt(rawClass.substring(1).replace('kg', ''));
+                        return athlete.weight > threshold;
+                    } else {
+                        // Upper bound: e.g., -55kg means <= 55
+                        const max = parseInt(rawClass.substring(1).replace('kg', ''));
+
+                        // Find minimum from previous class
+                        let min = 0;
+                        if (classIndex > 0) {
+                            const prevClass = divisions[classIndex - 1];
+                            if (prevClass.startsWith('+')) {
+                                min = parseInt(prevClass.substring(1).replace('kg', ''));
+                            } else {
+                                min = parseInt(prevClass.substring(1).replace('kg', ''));
+                            }
+                        }
+
+                        return athlete.weight > min && athlete.weight <= max;
+                    }
+                });
+
                 const matchesRank = rankFilter.length === 0 || rankFilter.includes(athlete.rank); // Multi-select
                 const matchesClub = clubFilter.length === 0 || clubFilter.includes(athlete.clubName); // Multi-select
 
@@ -224,13 +257,17 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         return Array.from(categories).sort();
     }, [activeRuleset]);
 
-    // Story 5.1: Get available weight classes based on current gender filter
+    // Story 9.3: Get available weight classes with Pa/Pi labels
     const availableWeightClasses = useMemo(() => {
         if (genderFilter === 'all') {
-            // Show both male and female divisions when "all" is selected
-            return [...WEIGHT_DIVISIONS.male, ...WEIGHT_DIVISIONS.female].sort();
+            // Show both male and female divisions with labels when "all" is selected
+            const maleClasses = WEIGHT_DIVISIONS.male.map(wc => `${wc} (Pa)`);
+            const femaleClasses = WEIGHT_DIVISIONS.female.map(wc => `${wc} (Pi)`);
+            return [...maleClasses, ...femaleClasses];
         }
-        return WEIGHT_DIVISIONS[genderFilter];
+        // Add gender label to weight classes
+        const label = genderFilter === 'male' ? 'Pa' : 'Pi';
+        return WEIGHT_DIVISIONS[genderFilter].map(wc => `${wc} (${label})`);
     }, [genderFilter]);
 
     const handleSort = (key: SortColumn) => {
@@ -267,6 +304,28 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         setClubFilter([]);
     };
 
+    // Story 9.3: Handle gender filter change with weight class sync
+    const handleGenderFilterChange = (newGender: 'all' | 'male' | 'female') => {
+        setGenderFilter(newGender);
+
+        // Clear weight class selections when changing gender
+        // This prevents showing Pa classes when Female is selected, etc.
+        if (weightClassFilter.length > 0) {
+            if (newGender === 'all') {
+                // Keep selections when switching to 'all'
+                return;
+            }
+
+            // Filter out incompatible weight classes
+            const targetLabel = newGender === 'male' ? '(Pa)' : '(Pi)';
+            const compatibleSelections = weightClassFilter.filter(wc => wc.includes(targetLabel));
+
+            if (compatibleSelections.length !== weightClassFilter.length) {
+                setWeightClassFilter(compatibleSelections);
+            }
+        }
+    };
+
     const toggleAgeCategory = (category: string) => {
         setAgeCategoryFilter(prev =>
             prev.includes(category)
@@ -275,12 +334,29 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
         );
     };
 
+    // Story 9.3: Auto-sync gender filter when weight class is selected
     const toggleWeightClass = (weightClass: string) => {
-        setWeightClassFilter(prev =>
-            prev.includes(weightClass)
-                ? prev.filter(w => w !== weightClass)
-                : [...prev, weightClass]
-        );
+        // Extract gender from label
+        const isPa = weightClass.includes('(Pa)');
+        const isPi = weightClass.includes('(Pi)');
+
+        // Auto-sync gender filter
+        if (isPa && genderFilter !== 'male') {
+            setGenderFilter('male');
+            // Clear incompatible weight class selections
+            setWeightClassFilter([weightClass]);
+        } else if (isPi && genderFilter !== 'female') {
+            setGenderFilter('female');
+            // Clear incompatible weight class selections
+            setWeightClassFilter([weightClass]);
+        } else {
+            // Normal toggle behavior
+            setWeightClassFilter(prev =>
+                prev.includes(weightClass)
+                    ? prev.filter(w => w !== weightClass)
+                    : [...prev, weightClass]
+            );
+        }
     };
 
     const toggleRank = (rank: string) => {
@@ -380,7 +456,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                     {/* Story 5.1: Gender Filter Toggle - Larger Buttons */}
                     <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden shadow-sm bg-slate-50">
                         <button
-                            onClick={() => setGenderFilter('all')}
+                            onClick={() => handleGenderFilterChange('all')}
                             className={`px-4 py-2.5 text-sm font-medium transition-all ${genderFilter === 'all'
                                 ? 'bg-blue-500 text-white'
                                 : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
@@ -389,7 +465,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                             All
                         </button>
                         <button
-                            onClick={() => setGenderFilter('male')}
+                            onClick={() => handleGenderFilterChange('male')}
                             className={`px-4 py-2.5 text-sm font-medium transition-all border-l border-slate-200 ${genderFilter === 'male'
                                 ? 'bg-blue-500 text-white'
                                 : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
@@ -398,7 +474,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                             Male
                         </button>
                         <button
-                            onClick={() => setGenderFilter('female')}
+                            onClick={() => handleGenderFilterChange('female')}
                             className={`px-4 py-2.5 text-sm font-medium transition-all border-l border-slate-200 ${genderFilter === 'female'
                                 ? 'bg-blue-500 text-white'
                                 : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
