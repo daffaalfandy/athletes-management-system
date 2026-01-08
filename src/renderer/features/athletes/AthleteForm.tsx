@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { User, History as HistoryIcon, Save, Info, Edit2, X as CloseIcon, Check, Calendar } from 'lucide-react';
+import { User, History as HistoryIcon, Save, Info, Edit2, X as CloseIcon, Check, Calendar, Upload, FileText, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { AthleteSchema, Athlete } from '../../../shared/schemas';
 import { Rank } from '../../../shared/types/domain';
 import { calculateAgeCategory } from '../../../shared/judo/calculateAgeCategory';
@@ -19,6 +19,68 @@ interface AthleteFormProps {
 }
 
 type TabType = 'profile' | 'history';
+
+// Document Card Component
+interface DocumentCardProps {
+    label: string;
+    documentPath: string | null | undefined;
+    onUpload: () => Promise<void>;
+    onDelete: () => Promise<void>;
+}
+
+const DocumentCard: React.FC<DocumentCardProps> = ({ label, documentPath, onUpload, onDelete }) => {
+    const isPDF = documentPath?.toLowerCase().endsWith('.pdf');
+    const fileName = documentPath ? documentPath.split('/').pop() : null;
+
+    return (
+        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/30 hover:bg-white hover:border-slate-300 transition-all">
+            <div className="flex items-center justify-between mb-2">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</label>
+                {documentPath && (
+                    <div className="flex gap-1">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (documentPath) {
+                                    window.open(`dossier://${documentPath}`, '_blank');
+                                }
+                            }}
+                            className="p-1 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            title="Preview document"
+                        >
+                            {isPDF ? <FileText size={14} /> : <ImageIcon size={14} />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onDelete}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            title="Delete document"
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {documentPath ? (
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-600 font-medium truncate">{fileName}</span>
+                    <span className="text-[9px] text-slate-400 uppercase">{isPDF ? 'PDF' : 'Image'}</span>
+                </div>
+            ) : (
+                <button
+                    type="button"
+                    onClick={onUpload}
+                    className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border-2 border-dashed border-slate-300 text-slate-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/30 transition-all"
+                >
+                    <Upload size={16} />
+                    <span className="text-xs font-medium">Upload Document</span>
+                </button>
+            )}
+        </div>
+    );
+};
+
 
 export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData }) => {
     const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -481,6 +543,169 @@ export const AthleteForm: React.FC<AthleteFormProps> = ({ onSubmit, initialData 
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Judo Membership & School Information Section */}
+                                <div className="space-y-4 pt-6 border-t border-slate-200">
+                                    <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider pb-2">
+                                        Judo Membership & School Information
+                                        {!initialData && (
+                                            <span className="ml-2 text-[10px] font-normal text-slate-400 normal-case tracking-normal">
+                                                (Optional)
+                                            </span>
+                                        )}
+                                    </h4>
+
+                                    <div className={initialData ? "grid grid-cols-1 gap-4" : "space-y-4"}>
+                                        {/* Member ID - Read-only badge */}
+                                        {initialData?.member_id && (
+                                            <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/30">
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Member ID</label>
+                                                <span className="inline-flex items-center px-3 py-1.5 rounded-md bg-emerald-100 border border-emerald-200 text-emerald-700 text-sm font-bold shadow-sm">
+                                                    {initialData.member_id}
+                                                </span>
+                                                <p className="text-[9px] text-slate-400 mt-1.5">Auto-generated on creation</p>
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {renderField('first_joined_date', 'First Date Joined Judo', 'date')}
+                                            {renderField('school_name', 'School Name', 'text')}
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {renderField('nisn', 'NISN (15 digits)', 'text')}
+                                            {renderField('nik', 'NIK (16 digits)', 'text')}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Official Documents Section */}
+                                {initialData?.id && (
+                                    <div className="space-y-4 pt-6 border-t border-slate-200">
+                                        <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider pb-2">
+                                            Official Documents
+                                            <span className="ml-2 text-[10px] font-normal text-slate-400 normal-case tracking-normal">
+                                                (Optional - for tournament registration)
+                                            </span>
+                                        </h4>
+
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {/* KK Document */}
+                                            <DocumentCard
+                                                label="KK (Kartu Keluarga / Family Card)"
+                                                documentPath={watch('kk_document_path')}
+                                                onUpload={async () => {
+                                                    try {
+                                                        const filePath = await window.api.files.selectDocument();
+                                                        if (!filePath || !initialData?.id) return;
+
+                                                        const vaultPath = await window.api.files.uploadDocument(filePath, initialData.id, 'kk');
+                                                        const currentValues = getValues();
+                                                        const validatedData = AthleteSchema.parse({ ...currentValues, kk_document_path: vaultPath });
+                                                        await onSubmit(validatedData);
+                                                    } catch (error: any) {
+                                                        const message = error.message || String(error);
+                                                        if (message.includes('too large')) {
+                                                            alert('File is too large. Maximum size is 1MB.');
+                                                        } else {
+                                                            alert('Failed to upload document. Please try again.');
+                                                        }
+                                                    }
+                                                }}
+                                                onDelete={async () => {
+                                                    if (!confirm('Delete this document?')) return;
+                                                    try {
+                                                        const docPath = watch('kk_document_path');
+                                                        if (docPath) {
+                                                            await window.api.files.deleteDocument(docPath);
+                                                        }
+                                                        const currentValues = getValues();
+                                                        const validatedData = AthleteSchema.parse({ ...currentValues, kk_document_path: null });
+                                                        await onSubmit(validatedData);
+                                                    } catch (error) {
+                                                        alert('Failed to delete document.');
+                                                    }
+                                                }}
+                                            />
+
+                                            {/* KTP/KIA Document */}
+                                            <DocumentCard
+                                                label="KTP/KIA (Athlete ID Card)"
+                                                documentPath={watch('ktp_kia_document_path')}
+                                                onUpload={async () => {
+                                                    try {
+                                                        const filePath = await window.api.files.selectDocument();
+                                                        if (!filePath || !initialData?.id) return;
+
+                                                        const vaultPath = await window.api.files.uploadDocument(filePath, initialData.id, 'ktp_kia');
+                                                        const currentValues = getValues();
+                                                        const validatedData = AthleteSchema.parse({ ...currentValues, ktp_kia_document_path: vaultPath });
+                                                        await onSubmit(validatedData);
+                                                    } catch (error: any) {
+                                                        const message = error.message || String(error);
+                                                        if (message.includes('too large')) {
+                                                            alert('File is too large. Maximum size is 1MB.');
+                                                        } else {
+                                                            alert('Failed to upload document. Please try again.');
+                                                        }
+                                                    }
+                                                }}
+                                                onDelete={async () => {
+                                                    if (!confirm('Delete this document?')) return;
+                                                    try {
+                                                        const docPath = watch('ktp_kia_document_path');
+                                                        if (docPath) {
+                                                            await window.api.files.deleteDocument(docPath);
+                                                        }
+                                                        const currentValues = getValues();
+                                                        const validatedData = AthleteSchema.parse({ ...currentValues, ktp_kia_document_path: null });
+                                                        await onSubmit(validatedData);
+                                                    } catch (error) {
+                                                        alert('Failed to delete document.');
+                                                    }
+                                                }}
+                                            />
+
+                                            {/* Birth Certificate Document */}
+                                            <DocumentCard
+                                                label="Akta Lahir (Birth Certificate)"
+                                                documentPath={watch('birth_cert_document_path')}
+                                                onUpload={async () => {
+                                                    try {
+                                                        const filePath = await window.api.files.selectDocument();
+                                                        if (!filePath || !initialData?.id) return;
+
+                                                        const vaultPath = await window.api.files.uploadDocument(filePath, initialData.id, 'birth_cert');
+                                                        const currentValues = getValues();
+                                                        const validatedData = AthleteSchema.parse({ ...currentValues, birth_cert_document_path: vaultPath });
+                                                        await onSubmit(validatedData);
+                                                    } catch (error: any) {
+                                                        const message = error.message || String(error);
+                                                        if (message.includes('too large')) {
+                                                            alert('File is too large. Maximum size is 1MB.');
+                                                        } else {
+                                                            alert('Failed to upload document. Please try again.');
+                                                        }
+                                                    }
+                                                }}
+                                                onDelete={async () => {
+                                                    if (!confirm('Delete this document?')) return;
+                                                    try {
+                                                        const docPath = watch('birth_cert_document_path');
+                                                        if (docPath) {
+                                                            await window.api.files.deleteDocument(docPath);
+                                                        }
+                                                        const currentValues = getValues();
+                                                        const validatedData = AthleteSchema.parse({ ...currentValues, birth_cert_document_path: null });
+                                                        await onSubmit(validatedData);
+                                                    } catch (error) {
+                                                        alert('Failed to delete document.');
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {!initialData && (

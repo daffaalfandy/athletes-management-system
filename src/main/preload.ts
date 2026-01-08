@@ -38,7 +38,10 @@ const api: IElectronAPI = {
     },
     files: {
         selectImage: () => ipcRenderer.invoke('files:selectImage'),
+        selectDocument: () => ipcRenderer.invoke('files:selectDocument'),
         uploadToVault: (sourcePath, type, recordId) => ipcRenderer.invoke('files:uploadToVault', sourcePath, type, recordId),
+        uploadDocument: (sourcePath, recordId, fileName) => ipcRenderer.invoke('files:uploadDocument', sourcePath, recordId, fileName),
+        deleteDocument: (relativePath) => ipcRenderer.invoke('files:deleteDocument', relativePath),
         getImagePath: (relativePath) => ipcRenderer.invoke('files:getImagePath', relativePath),
         downloadVaultFile: (relativePath, defaultName) => ipcRenderer.invoke('files:downloadVaultFile', relativePath, defaultName),
     },

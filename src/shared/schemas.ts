@@ -20,13 +20,35 @@ export const AthleteSchema = z.object({
     birth_place: z.string().min(2, 'Birth place must be at least 2 characters').max(100, 'Birth place is too long').nullable().optional().or(z.literal('')),
     region: z.string().min(2, 'Region must be at least 2 characters').max(100, 'Region is too long').nullable().optional().or(z.literal('')),
     address: z.string().max(500, 'Address is too long').nullable().optional().or(z.literal('')),
-    phone: z.string().regex(/^[\d\s\-+()]*\d[\d\s\-+()]*\d[\d\s\-+()]*\d[\d\s\-+()]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').nullable().optional().or(z.literal('')),
+    phone: z.string().regex(/^[\d\s\-+()]*\d[\d\s\-+()]*\d[\d\s\-+()]*\d[\d\s\-+()] *$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').nullable().optional().or(z.literal('')),
     email: z.string().trim().email('Invalid email format').max(255, 'Email is too long').nullable().optional().or(z.literal('')),
     parent_guardian: z.string().max(200, 'Name is too long').nullable().optional().or(z.literal('')),
     parent_phone: z.string().regex(/^[\d\s\-+()]*\d[\d\s\-+()]*\d[\d\s\-+()]*\d[\d\s\-+()]*$/, 'Phone must contain at least 3 digits').max(50, 'Phone number is too long').nullable().optional().or(z.literal('')),
 
     // Activity Status (Story 7.2)
     activity_status: z.enum(['Constant', 'Intermittent', 'Dormant']).default('Constant'),
+
+    // Extended Profile Fields (Story 9.4)
+    member_id: z.string().nullable().optional(), // Auto-generated, read-only (nullable for existing athletes)
+    first_joined_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').nullable().optional().or(z.literal('')),
+    school_name: z.string().max(200, 'School name is too long').nullable().optional().or(z.literal('')),
+    nisn: z.union([
+        z.string().regex(/^\d{15}$/, 'NISN must be exactly 15 digits'),
+        z.literal(''),
+        z.null(),
+        z.undefined()
+    ]).optional(),
+    nik: z.union([
+        z.string().regex(/^\d{16}$/, 'NIK must be exactly 16 digits'),
+        z.literal(''),
+        z.null(),
+        z.undefined()
+    ]).optional(),
+
+    // Official Document Paths (Story 9.4)
+    kk_document_path: z.union([z.string(), z.null(), z.undefined()]).optional(),
+    ktp_kia_document_path: z.union([z.string(), z.null(), z.undefined()]).optional(),
+    birth_cert_document_path: z.union([z.string(), z.null(), z.undefined()]).optional(),
 });
 
 export type Athlete = z.infer<typeof AthleteSchema>;

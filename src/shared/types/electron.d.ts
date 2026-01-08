@@ -58,7 +58,10 @@ export interface IElectronAPI {
     };
     files: {
         selectImage: () => Promise<string | null>;
+        selectDocument: () => Promise<string | null>;
         uploadToVault: (sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs' | 'branding', recordId: number | string) => Promise<string>;
+        uploadDocument: (sourcePath: string, recordId: number, fileName: string) => Promise<string>;
+        deleteDocument: (relativePath: string) => Promise<boolean>;
         getImagePath: (relativePath: string) => Promise<string>;
         downloadVaultFile: (relativePath: string, defaultName?: string) => Promise<boolean>;
     };

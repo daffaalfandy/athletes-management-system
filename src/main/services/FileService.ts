@@ -40,6 +40,23 @@ export const FileService = {
         return result.filePaths[0];
     },
 
+    async selectDocumentFile(): Promise<string | null> {
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [
+                { name: 'Documents', extensions: ['jpg', 'jpeg', 'png', 'webp', 'pdf'] },
+                { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp'] },
+                { name: 'PDF', extensions: ['pdf'] }
+            ]
+        });
+
+        if (result.canceled || result.filePaths.length === 0) {
+            return null;
+        }
+
+        return result.filePaths[0];
+    },
+
     async validateFileSize(filePath: string): Promise<boolean> {
         try {
             const stats = await fs.promises.stat(filePath);
@@ -57,7 +74,7 @@ export const FileService = {
 
     async ensureVaultDirectories() {
         const vaultPath = this.getVaultPath();
-        const subdirs = ['profiles', 'certificates', 'medals', 'clubs', 'branding'];
+        const subdirs = ['profiles', 'certificates', 'medals', 'clubs', 'branding', 'documents'];
 
         try {
             if (!fs.existsSync(vaultPath)) {
@@ -76,14 +93,32 @@ export const FileService = {
         }
     },
 
-    async copyToVault(sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs' | 'branding', recordId: number | string): Promise<string> {
+    async copyToVault(sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs' | 'branding' | 'documents', recordId: number | string, fileName?: string): Promise<string> {
         try {
             await this.ensureVaultDirectories();
 
             const ext = path.extname(sourcePath).toLowerCase();
-            const fileName = `${recordId}${ext}`;
-            const relativePath = path.join(type, fileName); // relative path for DB
-            const absoluteDestPath = path.join(this.getVaultPath(), relativePath);
+
+            let relativePath: string;
+            let absoluteDestPath: string;
+
+            // For documents, use custom fileName and create athlete-specific subdirectory
+            if (type === 'documents') {
+                const docFileName = fileName ? `${fileName}${ext}` : `${recordId}${ext}`;
+                const athleteDocDir = path.join(this.getVaultPath(), 'documents', String(recordId));
+
+                // Ensure athlete's document directory exists
+                if (!fs.existsSync(athleteDocDir)) {
+                    await fs.promises.mkdir(athleteDocDir, { recursive: true });
+                }
+
+                relativePath = path.join('documents', String(recordId), docFileName);
+                absoluteDestPath = path.join(this.getVaultPath(), relativePath);
+            } else {
+                const defaultFileName = `${recordId}${ext}`;
+                relativePath = path.join(type, defaultFileName);
+                absoluteDestPath = path.join(this.getVaultPath(), relativePath);
+            }
 
             // For branding, delete any existing logo first (singleton replacement)
             if (type === 'branding') {
@@ -205,12 +240,28 @@ export const setupFileHandlers = () => {
         return await FileService.selectImageFile();
     });
 
+    ipcMain.handle('files:selectDocument', async () => {
+        return await FileService.selectDocumentFile();
+    });
+
     ipcMain.handle('files:uploadToVault', async (_: any, sourcePath: string, type: 'profiles' | 'certificates' | 'medals' | 'clubs' | 'branding', recordId: number | string) => {
         const isValid = await FileService.validateFileSize(sourcePath);
         if (!isValid) {
             throw new Error('File is too large (max 1MB)');
         }
         return await FileService.copyToVault(sourcePath, type, recordId);
+    });
+
+    ipcMain.handle('files:uploadDocument', async (_: any, sourcePath: string, recordId: number, fileName: string) => {
+        const isValid = await FileService.validateFileSize(sourcePath);
+        if (!isValid) {
+            throw new Error('File is too large (max 1MB)');
+        }
+        return await FileService.copyToVault(sourcePath, 'documents', recordId, fileName);
+    });
+
+    ipcMain.handle('files:deleteDocument', async (_: any, relativePath: string) => {
+        return await FileService.deleteFile(relativePath);
     });
 
     ipcMain.handle('files:getImagePath', async (_: any, relativePath: string) => {
