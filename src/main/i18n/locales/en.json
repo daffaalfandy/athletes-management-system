@@ -1,0 +1,278 @@
+{
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "add": "Add",
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "success": "Success",
+        "confirm": "Confirm",
+        "close": "Close",
+        "search": "Search",
+        "filter": "Filter",
+        "export": "Export",
+        "import": "Import",
+        "reset": "Reset",
+        "apply": "Apply",
+        "clear": "Clear",
+        "yes": "Yes",
+        "no": "No",
+        "actions": "Actions",
+        "status": "Status",
+        "name": "Name",
+        "date": "Date",
+        "total": "Total",
+        "active": "Active",
+        "inactive": "Inactive"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "athletes": "Athletes",
+        "tournaments": "Tournaments",
+        "settings": "Settings"
+    },
+    "dashboard": {
+        "title": "Command Center",
+        "subtitle": "Athlete Management System",
+        "totalPool": "Total Pool",
+        "totalPoolDesc": "All registered athletes",
+        "competitivePool": "Competitive Pool",
+        "competitivePoolDesc": "Constant + Intermittent",
+        "maleAthletes": "Male Athletes",
+        "maleAthletesDesc": "Total male athletes",
+        "femaleAthletes": "Female Athletes",
+        "femaleAthletesDesc": "Total female athletes",
+        "quickActions": "Quick Actions",
+        "addAthlete": "Add Athlete",
+        "manageTournaments": "Manage Tournaments",
+        "medallionSummary": "Medallion Summary",
+        "allTime": "All Time",
+        "gold": "Gold",
+        "silver": "Silver",
+        "bronze": "Bronze"
+    },
+    "athlete": {
+        "title": "Athletes",
+        "addNew": "Add New Athlete",
+        "editAthlete": "Edit Athlete",
+        "athleteProfile": "Athlete Profile",
+        "athleteList": "Athlete List",
+        "noAthletes": "No athletes found",
+        "searchPlaceholder": "Search by name...",
+        "form": {
+            "personalInfo": "Personal Information",
+            "name": "Name",
+            "namePlaceholder": "Enter full name",
+            "birthDate": "Birth Date",
+            "gender": "Gender",
+            "male": "Male",
+            "female": "Female",
+            "weight": "Weight (kg)",
+            "weightPlaceholder": "Enter weight",
+            "belt": "Belt",
+            "beltPlaceholder": "Select belt",
+            "club": "Club",
+            "clubPlaceholder": "Select club",
+            "trainingStatus": "Training Status",
+            "constant": "Constant",
+            "intermittent": "Intermittent",
+            "dormant": "Dormant",
+            "athletePhoto": "Athlete Photo",
+            "uploadPhoto": "Upload Photo",
+            "changePhoto": "Change Photo",
+            "removePhoto": "Remove Photo",
+            "medals": "Medals",
+            "addMedal": "Add Medal",
+            "promotions": "Belt Promotions",
+            "addPromotion": "Add Promotion",
+            "history": "Tournament History",
+            "notes": "Notes",
+            "notesPlaceholder": "Add notes about this athlete..."
+        },
+        "status": {
+            "constant": "Constant",
+            "intermittent": "Intermittent",
+            "dormant": "Dormant"
+        },
+        "belt": {
+            "white": "White",
+            "yellow": "Yellow",
+            "orange": "Orange",
+            "green": "Green",
+            "blue": "Blue",
+            "brown": "Brown",
+            "black": "Black"
+        },
+        "filters": {
+            "all": "All Athletes",
+            "gender": "Gender",
+            "belt": "Belt",
+            "status": "Training Status",
+            "club": "Club",
+            "ageCategory": "Age Category",
+            "weightClass": "Weight Class"
+        },
+        "columns": {
+            "name": "Name",
+            "gender": "Gender",
+            "age": "Age",
+            "belt": "Belt",
+            "weight": "Weight",
+            "club": "Club",
+            "status": "Status"
+        },
+        "messages": {
+            "saveSuccess": "Athlete saved successfully",
+            "saveError": "Failed to save athlete",
+            "deleteConfirm": "Are you sure you want to delete this athlete?",
+            "deleteSuccess": "Athlete deleted successfully",
+            "deleteError": "Failed to delete athlete"
+        }
+    },
+    "tournament": {
+        "title": "Tournaments",
+        "addNew": "Add New Tournament",
+        "editTournament": "Edit Tournament",
+        "tournamentDetail": "Tournament Detail",
+        "tournamentList": "Tournament List",
+        "noTournaments": "No tournaments found",
+        "roster": "Roster",
+        "rosterPrintout": "Roster Printout",
+        "archiveSummary": "Archive Summary",
+        "form": {
+            "name": "Tournament Name",
+            "namePlaceholder": "Enter tournament name",
+            "date": "Date",
+            "location": "Location",
+            "locationPlaceholder": "Enter location",
+            "type": "Type",
+            "status": "Status",
+            "upcoming": "Upcoming",
+            "ongoing": "Ongoing",
+            "completed": "Completed",
+            "cancelled": "Cancelled"
+        },
+        "roster": {
+            "title": "Tournament Roster",
+            "addAthlete": "Add Athlete to Roster",
+            "removeAthlete": "Remove from Roster",
+            "noAthletes": "No athletes in roster",
+            "ageCategory": "Age Category",
+            "weightClass": "Weight Class",
+            "conflicts": "Conflicts",
+            "noConflicts": "No conflicts detected"
+        },
+        "columns": {
+            "name": "Name",
+            "date": "Date",
+            "location": "Location",
+            "type": "Type",
+            "status": "Status",
+            "athleteCount": "Athletes"
+        },
+        "messages": {
+            "saveSuccess": "Tournament saved successfully",
+            "saveError": "Failed to save tournament",
+            "deleteConfirm": "Are you sure you want to delete this tournament?",
+            "deleteSuccess": "Tournament deleted successfully",
+            "deleteError": "Failed to delete tournament",
+            "exportSuccess": "Export completed successfully",
+            "exportError": "Failed to export"
+        }
+    },
+    "club": {
+        "title": "Clubs",
+        "addNew": "Add New Club",
+        "editClub": "Edit Club",
+        "noClubs": "No clubs found",
+        "form": {
+            "name": "Club Name",
+            "namePlaceholder": "Enter club name",
+            "address": "Address",
+            "addressPlaceholder": "Enter address",
+            "contactPerson": "Contact Person",
+            "contactPersonPlaceholder": "Enter contact person",
+            "phone": "Phone",
+            "phonePlaceholder": "Enter phone number"
+        },
+        "messages": {
+            "saveSuccess": "Club saved successfully",
+            "saveError": "Failed to save club",
+            "deleteConfirm": "Are you sure you want to delete this club?",
+            "deleteSuccess": "Club deleted successfully",
+            "deleteError": "Failed to delete club"
+        }
+    },
+    "settings": {
+        "title": "Settings",
+        "tabs": {
+            "branding": "Branding",
+            "rulesets": "Rulesets",
+            "clubs": "Clubs",
+            "system": "System"
+        },
+        "branding": {
+            "title": "Branding Settings",
+            "kabupatanName": "Kabupaten Name",
+            "kabupatanNamePlaceholder": "Enter kabupaten name",
+            "logo": "Logo",
+            "uploadLogo": "Upload Logo",
+            "changeLogo": "Change Logo",
+            "removeLogo": "Remove Logo",
+            "language": "Language",
+            "languageDesc": "Select your preferred language",
+            "english": "English",
+            "indonesian": "Bahasa Indonesia"
+        },
+        "rulesets": {
+            "title": "Judo Rulesets",
+            "addNew": "Add New Ruleset",
+            "editRuleset": "Edit Ruleset",
+            "noRulesets": "No rulesets found",
+            "ageCategories": "Age Categories",
+            "weightClasses": "Weight Classes"
+        },
+        "messages": {
+            "saveSuccess": "Settings saved successfully",
+            "saveError": "Failed to save settings",
+            "languageChanged": "Language changed successfully"
+        }
+    },
+    "pdf": {
+        "roster": {
+            "title": "Tournament Roster",
+            "generatedOn": "Generated on",
+            "tournament": "Tournament",
+            "date": "Date",
+            "location": "Location",
+            "columns": {
+                "no": "No",
+                "name": "Name",
+                "gender": "Gender",
+                "ageCategory": "Age Category",
+                "weightClass": "Weight Class",
+                "club": "Club"
+            }
+        },
+        "summary": {
+            "title": "Athlete Summary",
+            "generatedOn": "Generated on",
+            "totalAthletes": "Total Athletes",
+            "byGender": "By Gender",
+            "byStatus": "By Training Status",
+            "byBelt": "By Belt"
+        }
+    },
+    "validation": {
+        "required": "This field is required",
+        "invalidEmail": "Invalid email address",
+        "invalidPhone": "Invalid phone number",
+        "invalidDate": "Invalid date",
+        "minLength": "Minimum length is {min} characters",
+        "maxLength": "Maximum length is {max} characters",
+        "minValue": "Minimum value is {min}",
+        "maxValue": "Maximum value is {max}"
+    }
+}

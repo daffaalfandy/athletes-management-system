@@ -4,6 +4,7 @@ interface SettingsState {
     kabupatanName: string;
     kabupatanLogoPath: string;
     logoVersion: number;
+    language: 'en' | 'id';
     isLoading: boolean;
     error: string | null;
 
@@ -11,12 +12,14 @@ interface SettingsState {
     loadSettings: () => Promise<void>;
     updateSetting: (key: string, value: string) => Promise<void>;
     uploadLogo: (file: string) => Promise<void>;
+    setLanguage: (lang: 'en' | 'id') => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
     kabupatanName: 'Kabupaten Bogor',
     kabupatanLogoPath: '',
     logoVersion: Date.now(),
+    language: 'en',
     isLoading: false,
     error: null,
 
@@ -27,6 +30,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             set({
                 kabupatanName: settings.kabupaten_name || 'Kabupaten Bogor',
                 kabupatanLogoPath: settings.kabupaten_logo_path || '',
+                language: (settings.language as 'en' | 'id') || 'en',
                 isLoading: false
             });
         } catch (err) {
@@ -45,6 +49,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
                 set({ kabupatanName: value });
             } else if (key === 'kabupaten_logo_path') {
                 set({ kabupatanLogoPath: value, logoVersion: Date.now() });
+            } else if (key === 'language') {
+                set({ language: value as 'en' | 'id' });
             }
 
             set({ isLoading: false });
@@ -73,6 +79,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             }
             set({ error: errorMsg, isLoading: false });
             console.error('[SettingsStore] Upload failed:', err);
+            throw err;
+        }
+    },
+
+    setLanguage: async (lang: 'en' | 'id') => {
+        set({ isLoading: true, error: null });
+        try {
+            await window.api.settings.set('language', lang);
+            set({ language: lang, isLoading: false });
+        } catch (err) {
+            set({ error: 'Failed to change language', isLoading: false });
+            console.error('[SettingsStore] Language change failed:', err);
             throw err;
         }
     }

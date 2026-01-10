@@ -1,0 +1,278 @@
+{
+    "common": {
+        "save": "Simpan",
+        "cancel": "Batal",
+        "delete": "Hapus",
+        "edit": "Ubah",
+        "add": "Tambah",
+        "loading": "Memuat...",
+        "error": "Terjadi kesalahan",
+        "success": "Berhasil",
+        "confirm": "Konfirmasi",
+        "close": "Tutup",
+        "search": "Cari",
+        "filter": "Filter",
+        "export": "Ekspor",
+        "import": "Impor",
+        "reset": "Reset",
+        "apply": "Terapkan",
+        "clear": "Bersihkan",
+        "yes": "Ya",
+        "no": "Tidak",
+        "actions": "Aksi",
+        "status": "Status",
+        "name": "Nama",
+        "date": "Tanggal",
+        "total": "Total",
+        "active": "Aktif",
+        "inactive": "Tidak Aktif"
+    },
+    "nav": {
+        "dashboard": "Dasbor",
+        "athletes": "Atlet",
+        "tournaments": "Turnamen",
+        "settings": "Pengaturan"
+    },
+    "dashboard": {
+        "title": "Pusat Komando",
+        "subtitle": "Sistem Manajemen Atlet",
+        "totalPool": "Total Atlet",
+        "totalPoolDesc": "Semua atlet terdaftar",
+        "competitivePool": "Atlet Kompetitif",
+        "competitivePoolDesc": "Konstan + Intermiten",
+        "maleAthletes": "Atlet Putra",
+        "maleAthletesDesc": "Total atlet putra",
+        "femaleAthletes": "Atlet Putri",
+        "femaleAthletesDesc": "Total atlet putri",
+        "quickActions": "Aksi Cepat",
+        "addAthlete": "Tambah Atlet",
+        "manageTournaments": "Kelola Turnamen",
+        "medallionSummary": "Ringkasan Medali",
+        "allTime": "Sepanjang Masa",
+        "gold": "Emas",
+        "silver": "Perak",
+        "bronze": "Perunggu"
+    },
+    "athlete": {
+        "title": "Atlet",
+        "addNew": "Tambah Atlet Baru",
+        "editAthlete": "Ubah Atlet",
+        "athleteProfile": "Profil Atlet",
+        "athleteList": "Daftar Atlet",
+        "noAthletes": "Tidak ada atlet ditemukan",
+        "searchPlaceholder": "Cari berdasarkan nama...",
+        "form": {
+            "personalInfo": "Informasi Pribadi",
+            "name": "Nama",
+            "namePlaceholder": "Masukkan nama lengkap",
+            "birthDate": "Tanggal Lahir",
+            "gender": "Jenis Kelamin",
+            "male": "Putra",
+            "female": "Putri",
+            "weight": "Berat Badan (kg)",
+            "weightPlaceholder": "Masukkan berat badan",
+            "belt": "Sabuk",
+            "beltPlaceholder": "Pilih sabuk",
+            "club": "Klub",
+            "clubPlaceholder": "Pilih klub",
+            "trainingStatus": "Status Latihan",
+            "constant": "Konstan",
+            "intermittent": "Intermiten",
+            "dormant": "Tidak Aktif",
+            "athletePhoto": "Foto Atlet",
+            "uploadPhoto": "Unggah Foto",
+            "changePhoto": "Ganti Foto",
+            "removePhoto": "Hapus Foto",
+            "medals": "Medali",
+            "addMedal": "Tambah Medali",
+            "promotions": "Promosi Sabuk",
+            "addPromotion": "Tambah Promosi",
+            "history": "Riwayat Turnamen",
+            "notes": "Catatan",
+            "notesPlaceholder": "Tambahkan catatan tentang atlet ini..."
+        },
+        "status": {
+            "constant": "Konstan",
+            "intermittent": "Intermiten",
+            "dormant": "Tidak Aktif"
+        },
+        "belt": {
+            "white": "Putih",
+            "yellow": "Kuning",
+            "orange": "Oranye",
+            "green": "Hijau",
+            "blue": "Biru",
+            "brown": "Coklat",
+            "black": "Hitam"
+        },
+        "filters": {
+            "all": "Semua Atlet",
+            "gender": "Jenis Kelamin",
+            "belt": "Sabuk",
+            "status": "Status Latihan",
+            "club": "Klub",
+            "ageCategory": "Kategori Usia",
+            "weightClass": "Kelas Berat"
+        },
+        "columns": {
+            "name": "Nama",
+            "gender": "Jenis Kelamin",
+            "age": "Usia",
+            "belt": "Sabuk",
+            "weight": "Berat",
+            "club": "Klub",
+            "status": "Status"
+        },
+        "messages": {
+            "saveSuccess": "Atlet berhasil disimpan",
+            "saveError": "Gagal menyimpan atlet",
+            "deleteConfirm": "Apakah Anda yakin ingin menghapus atlet ini?",
+            "deleteSuccess": "Atlet berhasil dihapus",
+            "deleteError": "Gagal menghapus atlet"
+        }
+    },
+    "tournament": {
+        "title": "Turnamen",
+        "addNew": "Tambah Turnamen Baru",
+        "editTournament": "Ubah Turnamen",
+        "tournamentDetail": "Detail Turnamen",
+        "tournamentList": "Daftar Turnamen",
+        "noTournaments": "Tidak ada turnamen ditemukan",
+        "roster": "Daftar Peserta",
+        "rosterPrintout": "Cetak Daftar Peserta",
+        "archiveSummary": "Ringkasan Arsip",
+        "form": {
+            "name": "Nama Turnamen",
+            "namePlaceholder": "Masukkan nama turnamen",
+            "date": "Tanggal",
+            "location": "Lokasi",
+            "locationPlaceholder": "Masukkan lokasi",
+            "type": "Jenis",
+            "status": "Status",
+            "upcoming": "Akan Datang",
+            "ongoing": "Berlangsung",
+            "completed": "Selesai",
+            "cancelled": "Dibatalkan"
+        },
+        "roster": {
+            "title": "Daftar Peserta Turnamen",
+            "addAthlete": "Tambah Atlet ke Daftar",
+            "removeAthlete": "Hapus dari Daftar",
+            "noAthletes": "Tidak ada atlet dalam daftar",
+            "ageCategory": "Kategori Usia",
+            "weightClass": "Kelas Berat",
+            "conflicts": "Konflik",
+            "noConflicts": "Tidak ada konflik terdeteksi"
+        },
+        "columns": {
+            "name": "Nama",
+            "date": "Tanggal",
+            "location": "Lokasi",
+            "type": "Jenis",
+            "status": "Status",
+            "athleteCount": "Jumlah Atlet"
+        },
+        "messages": {
+            "saveSuccess": "Turnamen berhasil disimpan",
+            "saveError": "Gagal menyimpan turnamen",
+            "deleteConfirm": "Apakah Anda yakin ingin menghapus turnamen ini?",
+            "deleteSuccess": "Turnamen berhasil dihapus",
+            "deleteError": "Gagal menghapus turnamen",
+            "exportSuccess": "Ekspor berhasil diselesaikan",
+            "exportError": "Gagal mengekspor"
+        }
+    },
+    "club": {
+        "title": "Klub",
+        "addNew": "Tambah Klub Baru",
+        "editClub": "Ubah Klub",
+        "noClubs": "Tidak ada klub ditemukan",
+        "form": {
+            "name": "Nama Klub",
+            "namePlaceholder": "Masukkan nama klub",
+            "address": "Alamat",
+            "addressPlaceholder": "Masukkan alamat",
+            "contactPerson": "Kontak Person",
+            "contactPersonPlaceholder": "Masukkan kontak person",
+            "phone": "Telepon",
+            "phonePlaceholder": "Masukkan nomor telepon"
+        },
+        "messages": {
+            "saveSuccess": "Klub berhasil disimpan",
+            "saveError": "Gagal menyimpan klub",
+            "deleteConfirm": "Apakah Anda yakin ingin menghapus klub ini?",
+            "deleteSuccess": "Klub berhasil dihapus",
+            "deleteError": "Gagal menghapus klub"
+        }
+    },
+    "settings": {
+        "title": "Pengaturan",
+        "tabs": {
+            "branding": "Branding",
+            "rulesets": "Aturan",
+            "clubs": "Klub",
+            "system": "Sistem"
+        },
+        "branding": {
+            "title": "Pengaturan Branding",
+            "kabupatanName": "Nama Kabupaten",
+            "kabupatanNamePlaceholder": "Masukkan nama kabupaten",
+            "logo": "Logo",
+            "uploadLogo": "Unggah Logo",
+            "changeLogo": "Ganti Logo",
+            "removeLogo": "Hapus Logo",
+            "language": "Bahasa",
+            "languageDesc": "Pilih bahasa yang Anda inginkan",
+            "english": "English",
+            "indonesian": "Bahasa Indonesia"
+        },
+        "rulesets": {
+            "title": "Aturan Judo",
+            "addNew": "Tambah Aturan Baru",
+            "editRuleset": "Ubah Aturan",
+            "noRulesets": "Tidak ada aturan ditemukan",
+            "ageCategories": "Kategori Usia",
+            "weightClasses": "Kelas Berat"
+        },
+        "messages": {
+            "saveSuccess": "Pengaturan berhasil disimpan",
+            "saveError": "Gagal menyimpan pengaturan",
+            "languageChanged": "Bahasa berhasil diubah"
+        }
+    },
+    "pdf": {
+        "roster": {
+            "title": "Daftar Peserta Turnamen",
+            "generatedOn": "Dibuat pada",
+            "tournament": "Turnamen",
+            "date": "Tanggal",
+            "location": "Lokasi",
+            "columns": {
+                "no": "No",
+                "name": "Nama",
+                "gender": "Jenis Kelamin",
+                "ageCategory": "Kategori Usia",
+                "weightClass": "Kelas Berat",
+                "club": "Klub"
+            }
+        },
+        "summary": {
+            "title": "Ringkasan Atlet",
+            "generatedOn": "Dibuat pada",
+            "totalAthletes": "Total Atlet",
+            "byGender": "Berdasarkan Jenis Kelamin",
+            "byStatus": "Berdasarkan Status Latihan",
+            "byBelt": "Berdasarkan Sabuk"
+        }
+    },
+    "validation": {
+        "required": "Kolom ini wajib diisi",
+        "invalidEmail": "Alamat email tidak valid",
+        "invalidPhone": "Nomor telepon tidak valid",
+        "invalidDate": "Tanggal tidak valid",
+        "minLength": "Panjang minimum adalah {min} karakter",
+        "maxLength": "Panjang maksimum adalah {max} karakter",
+        "minValue": "Nilai minimum adalah {min}",
+        "maxValue": "Nilai maksimum adalah {max}"
+    }
+}

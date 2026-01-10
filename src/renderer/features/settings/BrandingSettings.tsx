@@ -3,7 +3,7 @@ import { Save, Upload, Loader2, CheckCircle, AlertCircle, Image as ImageIcon } f
 import { useSettingsStore } from './useSettingsStore';
 
 export const BrandingSettings = () => {
-    const { kabupatanName, kabupatanLogoPath, isLoading, error, updateSetting, uploadLogo, loadSettings } = useSettingsStore();
+    const { kabupatanName, kabupatanLogoPath, language, isLoading, error, updateSetting, uploadLogo, loadSettings, setLanguage } = useSettingsStore();
     const [localName, setLocalName] = useState(kabupatanName);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [logoUploadTimestamp, setLogoUploadTimestamp] = useState<number>(Date.now());
@@ -127,6 +127,33 @@ export const BrandingSettings = () => {
                             {logoPreview ? 'Replace Logo' : 'Upload Logo'}
                         </button>
                     </div>
+                </div>
+
+
+                {/* Language Selection */}
+                <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                        Language / Bahasa
+                    </label>
+                    <p className="text-xs text-slate-500 mb-3">
+                        Select your preferred language for the application interface
+                    </p>
+                    <select
+                        value={language}
+                        onChange={async (e) => {
+                            const newLang = e.target.value as 'en' | 'id';
+                            try {
+                                await setLanguage(newLang);
+                                setStatus({ type: 'success', message: 'Language changed successfully!' });
+                            } catch (err) {
+                                setStatus({ type: 'error', message: 'Failed to change language' });
+                            }
+                        }}
+                        className="w-full max-w-xs px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                        <option value="en">English</option>
+                        <option value="id">Bahasa Indonesia</option>
+                    </select>
                 </div>
 
                 {/* Status Messages */}
