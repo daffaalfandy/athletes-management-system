@@ -29,6 +29,8 @@
     "@electron/fuses": "^1.8.0",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/adm-zip": "^0.5.7",
+    "@types/archiver": "^7.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/electron-squirrel-startup": "^1.0.2",
     "@types/pdfkit": "^0.13.5",
@@ -50,6 +52,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "adm-zip": "^0.5.16",
+    "archiver": "^7.0.1",
     "better-sqlite3": "^12.5.0",
     "clsx": "^2.1.1",
     "electron-squirrel-startup": "^1.0.1",

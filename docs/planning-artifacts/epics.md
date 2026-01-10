@@ -667,6 +667,19 @@ So that I have a full restore point.
 **And** the file should be named with a timestamp (e.g., `backup-YMD.zip`)
 **And** allow for an Import/Restore action that unzips and overwrites existing data/files with a confirmation warning.
 
+### Story E9.S7: Language Localization (Bahasa Indonesia)
+
+As a user,
+I want to switch the application interface to Bahasa Indonesia,
+So that it is easier for all coaches to use.
+
+**Acceptance Criteria:**
+
+**Given** the Settings menu
+**When** the user selects "Language"
+**Then** they should be able to toggle between "English" and "Bahasa Indonesia"
+**And** all UI labels, buttons, and messages should instantly reflect the selected language.
+
 ### Story E9.S8: School-Based Roster Export
 
 As a coach,
@@ -682,16 +695,3 @@ So that necessary academic data is included for student tournaments.
 **Then** the generated document must include **School Name**, **NISN**, and **NIK** columns for every athlete
 **When** this option is **Unchecked**
 **Then** those columns should be hidden to keep the layout clean.
-
-### Story E9.S7: Language Localization (Bahasa Indonesia)
-
-As a user,
-I want to switch the application interface to Bahasa Indonesia,
-So that it is easier for all coaches to use.
-
-**Acceptance Criteria:**
-
-**Given** the Settings menu
-**When** the user selects "Language"
-**Then** they should be able to toggle between "English" and "Bahasa Indonesia"
-**And** all UI labels, buttons, and messages should instantly reflect the selected language.

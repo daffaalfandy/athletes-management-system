@@ -63,7 +63,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [referenceYear, setReferenceYear] = useState(currentYear);
     const [sortConfig, setSortConfig] = useState<{ key: SortColumn; direction: SortDirection }>({
-        key: 'name',
+        key: 'status',
         direction: 'asc',
     });
 
@@ -208,7 +208,7 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
                     break;
                 case 'status':
                     valA = STATUS_ORDER[a.status] || 0;
-                    valB = STATUS_ORDER[a.status] || 0;
+                    valB = STATUS_ORDER[b.status] || 0;
                     break;
                 default:
                     return 0;
@@ -216,6 +216,12 @@ export const AthleteList: React.FC<AthleteListProps> = ({ onEdit }) => {
 
             if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
             if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+
+            // Secondary sort by name when primary values are equal
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
             return 0;
         });
     }, [athletes, searchTerm, sortConfig, enhanceAthlete, genderFilter, ageCategoryFilter, weightClassFilter, rankFilter, clubFilter]);

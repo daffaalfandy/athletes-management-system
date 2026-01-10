@@ -56,8 +56,8 @@ export const SettingsPage = () => {
         try {
             const result = await window.api.system.restoreDatabase();
             if (result.success) {
-                setStatus({ type: 'success', message: 'Database restored successfully. Reloading...' });
-                setTimeout(() => window.location.reload(), 1500);
+                setStatus({ type: 'success', message: 'Backup restored successfully. Application will restart...' });
+                // App will restart automatically from the backend
             } else {
                 if (result.error === 'Cancelled by user') return;
                 setStatus({ type: 'error', message: result.error || 'Restore failed' });
@@ -173,14 +173,14 @@ export const SettingsPage = () => {
                     <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm animate-in fade-in duration-300">
                         <h3 className="text-lg font-bold text-slate-800 mb-2">Restore & Backup</h3>
                         <p className="text-slate-500 mb-8 max-w-2xl">
-                            Maintain your data integrity by performing regular backups. You can restore your data from a JSON backup file at any time.
+                            Maintain your data integrity by performing regular backups. Creates a ZIP archive containing your database and all attachments (photos, certificates, documents). You can restore from a backup file at any time.
                         </p>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="p-6 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
                                 <div>
                                     <h4 className="font-bold text-slate-700 mb-1">Export Data</h4>
-                                    <p className="text-xs text-slate-500 mb-4 text-balance">Create a snapshot of your entire database including athletes, match records, and settings.</p>
+                                    <p className="text-xs text-slate-500 mb-4 text-balance">Create a complete snapshot of your database and all attachments (photos, certificates, medals, documents).</p>
                                 </div>
                                 <button
                                     onClick={handleBackup}
@@ -195,7 +195,7 @@ export const SettingsPage = () => {
                             <div className="p-6 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between text-balance">
                                 <div>
                                     <h4 className="font-bold text-slate-700 mb-1">Import Data</h4>
-                                    <p className="text-xs text-slate-500 mb-4">Replace current data with a previous backup. This will permanently delete current records.</p>
+                                    <p className="text-xs text-slate-500 mb-4">Restore from a backup ZIP file. This will replace all current data and restart the application.</p>
                                 </div>
                                 <button
                                     onClick={handleRestore}
