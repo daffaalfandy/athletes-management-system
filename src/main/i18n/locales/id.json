@@ -180,6 +180,12 @@
             "deleteError": "Gagal menghapus turnamen",
             "exportSuccess": "Ekspor berhasil diselesaikan",
             "exportError": "Gagal mengekspor"
+        },
+        "export": {
+            "schoolBased": "Berbasis Sekolah",
+            "schoolBasedShort": "Sekolah",
+            "schoolBasedTooltip": "Sertakan kolom Nama Sekolah, NISN, dan NIK dalam ekspor PDF",
+            "schoolBasedAriaLabel": "Sertakan data sekolah dalam ekspor daftar peserta"
         }
     },
     "club": {

@@ -180,6 +180,12 @@
             "deleteError": "Failed to delete tournament",
             "exportSuccess": "Export completed successfully",
             "exportError": "Failed to export"
+        },
+        "export": {
+            "schoolBased": "School Based",
+            "schoolBasedShort": "School",
+            "schoolBasedTooltip": "Include School Name, NISN, and NIK columns in PDF export",
+            "schoolBasedAriaLabel": "Include school data in roster export"
         }
     },
     "club": {

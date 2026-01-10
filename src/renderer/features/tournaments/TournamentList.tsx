@@ -135,6 +135,7 @@ const TournamentRow: React.FC<{
 }> = ({ tournament, onView, onDelete }) => {
     const [rosterCount, setRosterCount] = useState<number | null>(null);
     const [exporting, setExporting] = useState(false);
+    const [isSchoolBased, setIsSchoolBased] = useState(false);
 
     useEffect(() => {
         const loadRosterCount = async () => {
@@ -158,8 +159,12 @@ const TournamentRow: React.FC<{
 
         setExporting(true);
         try {
+            const includeColumns = isSchoolBased
+                ? ['school_name', 'nisn', 'nik']
+                : [];
+
             const result = await window.api.export.generateRosterPDF(tournament.id!, {
-                includeColumns: []
+                includeColumns
             });
 
             if (result.success) {
@@ -210,7 +215,20 @@ const TournamentRow: React.FC<{
                 )}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
+                    <label className="flex items-center gap-1.5 text-xs text-slate-600 mr-1" title="Include School Name, NISN, NIK in PDF">
+                        <input
+                            type="checkbox"
+                            checked={isSchoolBased}
+                            onChange={(e) => {
+                                e.stopPropagation();
+                                setIsSchoolBased(e.target.checked);
+                            }}
+                            className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                            aria-label="Include school data in roster export"
+                        />
+                        School
+                    </label>
                     <button
                         onClick={handleDownloadPDF}
                         disabled={exporting || rosterCount === 0}

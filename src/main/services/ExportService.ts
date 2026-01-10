@@ -391,7 +391,12 @@ function renderAthleteTable(
         email: { label: 'Email', width: 120 },
         parent_guardian: { label: 'Parent/Guardian', width: 100 },
         parent_phone: { label: 'Parent Phone', width: 90 },
-        clubName: { label: 'Club', width: 100 }
+        clubName: { label: 'Club', width: 100 },
+        // Story E9.S8: School-based roster columns
+        // NOTE: Requires Story E9.S4 (Extended Athlete Profile) - school_name, nisn, nik fields
+        school_name: { label: 'School', width: 100 },
+        nisn: { label: 'NISN', width: 80 },
+        nik: { label: 'NIK', width: 90 }
     };
 
     // Build final column list

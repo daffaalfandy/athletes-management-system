@@ -33,6 +33,7 @@ export const TournamentDetail: React.FC<TournamentDetailProps> = ({ tournamentId
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [exporting, setExporting] = useState(false);
+    const [isSchoolBased, setIsSchoolBased] = useState(false);
 
     useEffect(() => {
         loadRulesets();
@@ -188,8 +189,12 @@ export const TournamentDetail: React.FC<TournamentDetailProps> = ({ tournamentId
 
         setExporting(true);
         try {
+            const includeColumns = isSchoolBased
+                ? ['school_name', 'nisn', 'nik']
+                : [];
+
             const result = await window.api.export.generateRosterPDF(parseInt(tournamentId), {
-                includeColumns: [] // Can be extended to allow user selection
+                includeColumns
             });
 
             if (result.success) {
@@ -234,6 +239,18 @@ export const TournamentDetail: React.FC<TournamentDetailProps> = ({ tournamentId
                         ← Back to Tournaments
                     </button>
                     <div className="flex gap-3">
+                        {!isNew && (
+                            <label className="flex items-center gap-2 text-sm text-slate-700 mr-2" title="Include School Name, NISN, and NIK columns in PDF export">
+                                <input
+                                    type="checkbox"
+                                    checked={isSchoolBased}
+                                    onChange={(e) => setIsSchoolBased(e.target.checked)}
+                                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                    aria-label="Include school data in roster export"
+                                />
+                                School Based
+                            </label>
+                        )}
                         {!isNew && (
                             <button
                                 onClick={handleExportPDF}
